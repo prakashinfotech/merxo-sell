@@ -1,0 +1,27 @@
+@import '../admin-shared.scss';
+
+.header-left { display: flex; align-items: center; gap: 12px; }
+.prod-cell, .cust-cell { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.prod-cell strong { color: var(--admin-ink); font-size: 0.85rem; font-weight: 700; }
+
+.seller-badge { @extend .category-pill; }
+
+.rating-badge {
+  background: #fef3c7; color: #b45309;
+  padding: 4px 12px; border-radius: 10px; font-weight: 800; font-size: 0.8rem;
+  display: inline-flex; align-items: center; gap: 4px;
+  border: 1px solid #fde68a;
+}
+
+.comment-preview {
+  max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 0.88rem; color: var(--admin-ink-2); font-weight: 500;
+}
+
+.date-text { font-weight: 700; color: var(--admin-muted); font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; }
+
+.premium-select-wrap { min-width: 180px; }
+.premium-select { @extend .search-box; input { padding-left: 12px; } width: 100%; }
+
+.admin-loading-state { @extend .loading-state; }
+.premium-spinner { @extend .loader; }

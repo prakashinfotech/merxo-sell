@@ -1,0 +1,282 @@
+@import '../admin-shared';
+
+// ── Summary strip ────────────────────────────────────────────────────────
+.banner-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+// ── Thumbnail column ─────────────────────────────────────────────────────
+.thumb-col { width: 80px; }
+
+.banner-thumb {
+  width: 72px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+
+  &--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--admin-line-soft);
+    color: var(--admin-muted);
+    font-size: 1.25rem;
+  }
+}
+
+// ── Banner table cell ────────────────────────────────────────────────────
+.banner-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.banner-title { font-weight: 600; color: var(--admin-ink); }
+
+.offer-tag-pill {
+  display: inline-block;
+  background: linear-gradient(135deg, #1a3a5e 0%, #122b46 100%);
+  color: #f59e0b;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 4px;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.ellipsis {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  font-size: 0.75rem;
+  color: var(--admin-muted);
+}
+
+// ── Slot pills ────────────────────────────────────────────────────────────
+.slot-pill {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-transform: capitalize;
+
+  &--hero     { background: #ede9fe; color: #7c3aed; border: 1px solid #ddd6fe; }
+  &--midleft  { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+  &--midright { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+  &--strip    { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; }
+}
+
+// ── Status pills ─────────────────────────────────────────────────────────
+.status-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &--active    { background: #dcfce7; color: #15803d; }
+  &--scheduled { background: #e0f2fe; color: #0284c7; }
+  &--paused    { background: #fef3c7; color: #d97706; }
+  &--cancelled { background: #fee2e2; color: #dc2626; }
+}
+
+// ── Order badge ──────────────────────────────────────────────────────────
+// ── Window label ─────────────────────────────────────────────────────────
+.window-label {
+  font-size: 0.78rem;
+  color: var(--admin-muted);
+  white-space: nowrap;
+}
+
+// ── Color input row ───────────────────────────────────────────────────────
+.color-row .color-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  input[type="color"] {
+    width: 36px;
+    height: 36px;
+    padding: 2px;
+    border-radius: 8px;
+    border: 1.5px solid var(--admin-line);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  input[type="text"] {
+    flex: 1;
+  }
+}
+
+.order-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--admin-muted);
+  background: var(--admin-line-soft);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+// ── Toggle action button ─────────────────────────────────────────────────
+.btn-action.toggle {
+  &:hover { background: #fef3c7; color: #d97706; }
+}
+
+// ── Form: preview image ──────────────────────────────────────────────────
+.preview-wrap { margin-top: 4px; }
+
+.banner-preview-img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--admin-line);
+}
+
+// ── title-icon variant ───────────────────────────────────────────────────
+.title-icon--banners {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  i { color: #fff; }
+}
+
+// ── Toolbar filter chips ─────────────────────────────────────────────────
+.section-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.toolbar-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 200px;
+  background: var(--admin-line-soft);
+  border-radius: 8px;
+  padding: 0 0.75rem;
+
+  i { color: var(--admin-muted); font-size: 0.875rem; }
+
+  input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+    color: var(--admin-ink);
+    outline: none;
+    &::placeholder { color: var(--admin-muted); }
+  }
+}
+
+.filter-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--admin-line-soft);
+  color: var(--admin-muted);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover { border-color: var(--admin-brand); color: var(--admin-brand); }
+
+  &.is-active {
+    background: var(--admin-brand-soft);
+    color: var(--admin-brand);
+    border-color: var(--admin-brand);
+  }
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+// ── Status toggle inside modal ───────────────────────────────────────────
+.status-toggle-col label:first-child { display: block; }
+
+// ── File upload field ────────────────────────────────────────────────────
+.upload-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  background: var(--admin-brand-soft);
+  color: var(--admin-brand);
+  border: 1.5px dashed var(--admin-brand);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+
+  &:hover { background: var(--admin-brand-soft); }
+
+  &.uploading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+}
+
+.upload-or {
+  font-size: 0.75rem;
+  color: var(--admin-muted);
+  flex-shrink: 0;
+}
+
+.upload-url-input {
+  flex: 1;
+  min-width: 0;
+  border: 1.5px solid var(--admin-line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  color: var(--admin-ink);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+
+  &:focus { border-color: var(--admin-brand); }
+  &::placeholder { color: var(--admin-muted); }
+}
+
+// ── Modal wide override ──────────────────────────────────────────────────
+.admin-modal--wide { max-width: 780px; }
+
+// ── Responsive ──────────────────────────────────────────────────────────
+@media (max-width: 600px) {
+  .banner-summary { grid-template-columns: repeat(2, 1fr); }
+  .section-toolbar { flex-direction: column; align-items: stretch; }
+  .filter-chips { gap: 4px; }
+}

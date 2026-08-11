@@ -1,0 +1,42 @@
+@if (drawer.open$ | async) {
+  <div class="cart-drawer-backdrop" (click)="drawer.close()"></div>
+  <aside class="cart-drawer" aria-label="Shopping cart">
+    <div class="cart-drawer__head">
+      <div>
+        <p class="cart-drawer__eyebrow">Added to cart</p>
+        <h2>Your Cart</h2>
+      </div>
+      <button class="cart-drawer__close" type="button" (click)="drawer.close()" aria-label="Close cart">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="cart-drawer__body">
+      @if ((cart.items$ | async)?.length) {
+        @for (item of cart.items$ | async; track item.cartItemId) {
+          <div class="drawer-item">
+            <img [src]="item.primaryImageUrl || 'assets/placeholder.png'" [alt]="item.productName">
+            <div class="drawer-item__copy">
+              <strong>{{ item.productName }}</strong>
+              @if (item.variantInfo) { <span>{{ item.variantInfo }}</span> }
+              <small>Qty {{ item.quantity }} · {{ item.unitPriceCAD | appCurrency:(currency.selectedCurrency$ | async) }}</small>
+            </div>
+          </div>
+        }
+      } @else {
+        <div class="cart-drawer__empty">Your cart is empty.</div>
+      }
+    </div>
+
+    <div class="cart-drawer__foot">
+      <div class="cart-drawer__total">
+        <span>Subtotal</span>
+        <strong>{{ (cart.total$ | async) | appCurrency:(currency.selectedCurrency$ | async) }}</strong>
+      </div>
+      <button class="btn-primary" type="button" [disabled]="!((cart.items$ | async)?.length)" (click)="checkout()">
+        Checkout
+      </button>
+      <button class="btn-secondary" type="button" (click)="viewCart()">View cart</button>
+    </div>
+  </aside>
+}

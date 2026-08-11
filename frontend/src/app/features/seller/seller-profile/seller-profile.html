@@ -1,0 +1,241 @@
+<div class="seller-profile-page">
+  <div class="dashboard-welcome mb-40">
+    <div class="welcome-text">
+      <h1 class="welcome-title">Store Profile <span class="title-badge">{{ store?.isVerified ? 'Verified Merchant' :
+          'Merchant' }}</span></h1>
+      <p class="welcome-subtitle">Manage your professional identity, store branding, and security settings.</p>
+    </div>
+    <div class="header-actions">
+      <div class="header-stats-mini">
+        <div class="mini-stat">
+          <span class="label">Status</span>
+          <span class="value" [class.text-success]="store?.isActive">{{ store?.isActive ? 'Online' : 'Offline' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-layout modern">
+
+    <!-- Left Sidebar: Store Presence -->
+    <aside class="store-sidebar">
+      <div class="store-hero-card">
+        <div class="store-visual">
+          <div class="visual-circle">
+            <i class="fas fa-store"></i>
+          </div>
+          @if (store?.isVerified) {
+          <div class="verified-badge" title="Verified Seller">
+            <i class="fas fa-check-double"></i>
+          </div>
+          }
+        </div>
+        <div class="store-meta">
+          <h2 class="store-name">{{ store?.storeName || 'My Boutique Store' }}</h2>
+          <p class="store-id">Merchant ID: #{{ store?.sellerId || '0000' }}</p>
+          <div class="store-tags">
+            <span class="tag-status" [class.active]="store?.isActive">
+              {{ store?.isActive ? 'Online' : 'Offline' }}
+            </span>
+            <span class="tag-date">Since {{ store?.createdAt | date:'MMM yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <button class="menu-item" [class.active]="activeTab === 'info'" (click)="activeTab = 'info'">
+          <div class="item-icon"><i class="fas fa-user-circle"></i></div>
+          <div class="item-label">
+            <span class="primary">Account Identity</span>
+            <span class="secondary">Personal details & contact</span>
+          </div>
+        </button>
+        <button class="menu-item" [class.active]="activeTab === 'store'" (click)="activeTab = 'store'">
+          <div class="item-icon"><i class="fas fa-magic"></i></div>
+          <div class="item-label">
+            <span class="primary">Store Branding</span>
+            <span class="secondary">Public appearance & SEO</span>
+          </div>
+        </button>
+        <button class="menu-item" [class.active]="activeTab === 'security'" (click)="activeTab = 'security'">
+          <div class="item-icon"><i class="fas fa-shield-alt"></i></div>
+          <div class="item-label">
+            <span class="primary">Security & Access</span>
+            <span class="secondary">Password & authentication</span>
+          </div>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="trust-box">
+          <i class="fas fa-lock"></i>
+          <p>Your business data is encrypted and secure.</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="profile-content">
+      @if (loading) {
+      <div class="premium-loader-box">
+        <div class="loader-ring"></div>
+        <p>Gathering your store data...</p>
+      </div>
+      } @else {
+
+      <!-- Tab: Account Identity -->
+      @if (activeTab === 'info') {
+      <div class="content-panel animate-slide-in">
+        <div class="panel-header">
+          <h2 class="panel-title">Account Identity</h2>
+          <p class="panel-desc">Manage your professional contact information and personal details.</p>
+        </div>
+
+        <form [formGroup]="profileForm" (ngSubmit)="updateProfile()" class="premium-form-grid">
+          <div class="form-row span-2">
+            <label class="form-label">Full Legal Name</label>
+            <div class="input-wrap">
+              <i class="fas fa-user"></i>
+              <input type="text" formControlName="fullName" placeholder="Legal full name">
+            </div>
+          </div>
+
+          <div class="form-row span-2">
+            <label class="form-label">Login Email (Read-only)</label>
+            <div class="input-wrap disabled">
+              <i class="fas fa-envelope"></i>
+              <input type="text" [value]="store?.ownerEmail" readonly placeholder="No login email found">
+            </div>
+            <p class="field-hint">This is your primary account identity and cannot be changed here.</p>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Phone Number</label>
+            <div class="input-wrap">
+              <i class="fas fa-phone"></i>
+              <input type="tel" formControlName="phone" placeholder="+1 (000) 000-0000">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Preferred Currency</label>
+            <div class="input-wrap">
+              <i class="fas fa-money-bill-wave"></i>
+              <select formControlName="preferredCurrency">
+                <option value="CAD">CAD - Canadian Dollar</option>
+                <option value="USD">USD - US Dollar</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row span-2 mt-20">
+            <button type="submit" class="btn-solid-brand" [disabled]="profileForm.invalid || submitting">
+              <i class="fas" [class.fa-save]="!submitting" [class.fa-spinner]="submitting"
+                [class.fa-spin]="submitting"></i>
+              {{ submitting ? 'Saving Changes...' : 'Synchronize Identity' }}
+            </button>
+          </div>
+        </form>
+      </div>
+      }
+
+      <!-- Tab: Store Branding -->
+      @if (activeTab === 'store') {
+      <div class="content-panel animate-slide-in">
+        <div class="panel-header">
+          <h2 class="panel-title">Store Branding</h2>
+          <p class="panel-desc">Customize how your brand is perceived by millions of shoppers.</p>
+        </div>
+
+        <form [formGroup]="storeForm" (ngSubmit)="updateStore()" class="premium-form-grid">
+          <div class="form-row span-2">
+            <label class="form-label">Business Store Name</label>
+            <div class="input-wrap accent">
+              <i class="fas fa-store"></i>
+              <input type="text" formControlName="storeName" placeholder="Brand Name">
+            </div>
+          </div>
+
+          <div class="form-row span-2">
+            <label class="form-label">Store Description / Story</label>
+            <div class="input-wrap area">
+              <textarea formControlName="storeDescription" rows="5"
+                placeholder="What makes your store unique?"></textarea>
+            </div>
+            <p class="field-hint">A compelling story increases conversion by up to 30%.</p>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Public Support Email</label>
+            <div class="input-wrap">
+              <i class="fas fa-envelope"></i>
+              <input type="email" formControlName="contactEmail" placeholder="support@brand.com">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Business Support Phone</label>
+            <div class="input-wrap">
+              <i class="fas fa-phone"></i>
+              <input type="tel" formControlName="phone" placeholder="Customer contact number">
+            </div>
+          </div>
+
+          <div class="form-row span-2 mt-20">
+            <button type="submit" class="btn-solid-brand" [disabled]="storeForm.invalid || submitting">
+              <i class="fas" [class.fa-store]="!submitting" [class.fa-spinner]="submitting"
+                [class.fa-spin]="submitting"></i>
+              {{ submitting ? 'Updating Brand...' : 'Publish Store Branding' }}
+            </button>
+          </div>
+        </form>
+      </div>
+      }
+
+      <!-- Tab: Security -->
+      @if (activeTab === 'security') {
+      <div class="content-panel animate-slide-in">
+        <div class="panel-header">
+          <h2 class="panel-title">Security & Access</h2>
+          <p class="panel-desc">Manage your cryptographic security and login credentials.</p>
+        </div>
+
+        <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()" class="premium-form-grid">
+          <div class="form-row span-2">
+            <label class="form-label">Current Identity Password</label>
+            <div class="input-wrap">
+              <i class="fas fa-lock"></i>
+              <input type="password" formControlName="currentPassword" placeholder="••••••••">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">New Security Password</label>
+            <div class="input-wrap">
+              <i class="fas fa-shield-alt"></i>
+              <input type="password" formControlName="newPassword" placeholder="8+ chars, upper, symbol">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Verify New Password</label>
+            <div class="input-wrap">
+              <i class="fas fa-check-double"></i>
+              <input type="password" formControlName="confirmPassword" placeholder="Repeat new password">
+            </div>
+          </div>
+
+          <div class="form-row span-2 mt-20">
+            <button type="submit" class="btn-solid-brand" [disabled]="passwordForm.invalid || submitting">
+              <i class="fas" [class.fa-lock]="!submitting" [class.fa-spinner]="submitting"
+                [class.fa-spin]="submitting"></i>
+              {{ submitting ? 'Securing Account...' : 'Update Security Credentials' }}
+            </button>
+          </div>
+        </form>
+      </div>
+      }
+      }
+    </main>
+  </div>
+</div>

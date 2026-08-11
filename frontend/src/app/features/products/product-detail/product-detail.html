@@ -1,0 +1,192 @@
+@if (loading) {
+<div class="detail-loading page-container">
+  <div class="skeleton skeleton--detail-image"></div>
+  <div class="detail-loading__text">
+    <div class="skeleton skeleton--line skeleton--title-lg"></div>
+    <div class="skeleton skeleton--line skeleton--price-lg"></div>
+    <div class="skeleton skeleton--line skeleton--meta"></div>
+    <div class="skeleton skeleton--line skeleton--meta"></div>
+  </div>
+</div>
+} @else if (error || !product) {
+<div class="page-container">
+  <div class="empty-state">
+    <div class="empty-icon"><i class="fas fa-exclamation-circle"></i></div>
+    <div class="empty-title">Product not found</div>
+    <p class="empty-desc">This product may have been removed or is no longer available.</p>
+    <a routerLink="/" class="btn-primary btn-back-home">Back to Home</a>
+  </div>
+</div>
+} @else {
+<div class="product-detail page-container">
+  <div class="product-detail__layout">
+
+    <!-- Left: gallery -->
+    <div class="product-detail__gallery">
+      <app-image-gallery [images]="filteredImages"></app-image-gallery>
+    </div>
+
+    <!-- Right: info -->
+    <div class="product-detail__info">
+      <p class="product-detail__category">{{ product.categoryName }}</p>
+      <h1 class="product-detail__name">{{ product.name }}</h1>
+
+      <div class="product-detail__pricing">
+        <span class="product-detail__price">
+          {{ displayPrice | appCurrency:(cs.selectedCurrency$ | async) }}
+        </span>
+        @if (product.isOnSale) {
+        <span class="product-detail__original">
+          {{ product.basePrice | appCurrency:(cs.selectedCurrency$ | async) }}
+        </span>
+        <span class="badge badge--sale">SALE</span>
+        }
+      </div>
+
+      @if (product.variants.length > 0) {
+        <app-variant-selector
+          [variants]="product.variants"
+          [allColors]="product.colors"
+          [allSizes]="product.sizes"
+          (variantSelect)="onVariantSelect($event)">
+        </app-variant-selector>
+      @if (currentSku) {
+      <p class="product-detail__sku">SKU: <strong>{{ currentSku }}</strong></p>
+      }
+      }
+
+      @if (!isAdmin) {
+      <div class="product-detail__qty">
+        <span class="qty-label">
+          Quantity
+        </span>
+        <div class="qty-control">
+          <button class="qty-btn" (click)="decrement()" [disabled]="quantity <= 1">−</button>
+          <span class="qty-value">{{ quantity }}</span>
+          <button class="qty-btn" (click)="increment()" [disabled]="quantity >= effectiveStock">+</button>
+        </div>
+        <span class="qty-available" [class.qty-available--out]="effectiveStock === 0">
+          @if (effectiveStock === 0) { Out of stock }
+          @else { (Available: {{ effectiveStock }}) }
+        </span>
+      </div>
+
+      <button class="btn-add-to-cart" [class.btn-add-to-cart--added]="cartAdded" (click)="addToCart()"
+        [disabled]="effectiveStock === 0">
+        @if (cartAdded) {
+        <i class="fas fa-check"></i> Added to Cart!
+        } @else if (effectiveStock === 0) {
+        <i class="fas fa-ban"></i> Out of Stock
+        } @else {
+        <i class="fas fa-cart-plus"></i> Add to Cart
+        }
+      </button>
+      } @else {
+      <div class="admin-product-actions">
+        <a [routerLink]="['/admin/products']" class="btn-admin-primary">
+          <i class="fas fa-pen"></i> Manage in Admin
+        </a>
+      </div>
+      }
+
+      @if (product.description) {
+      <div class="product-detail__desc">
+        <h3>Description</h3>
+        <p class="product-detail__desc-text">{{ product.description }}</p>
+      </div>
+      }
+
+      @if (canCheckDelivery) {
+      <div class="delivery-check-premium">
+        <div class="delivery-check-header">
+          <div class="delivery-icon-box">
+            <i class="fas fa-truck-fast"></i>
+          </div>
+          <div class="delivery-title-group">
+            <span class="delivery-label">Shipping & Delivery</span>
+            <span class="delivery-sub">Check estimated arrival at your location</span>
+          </div>
+        </div>
+
+        <div class="delivery-input-wrapper">
+          <div class="delivery-input-field">
+            <i class="fas fa-location-dot"></i>
+            <input type="text" [(ngModel)]="deliveryInput" placeholder="Enter pincode or address"
+              (keyup.enter)="checkDelivery()">
+          </div>
+          <button type="button" class="btn-check-delivery" (click)="checkDelivery()" [disabled]="!deliveryInput.trim()">
+            <span>Check</span>
+          </button>
+        </div>
+
+        @if (deliveryEstimate) {
+        <div class="delivery-status ok animate-slide-in">
+          <i class="fas fa-calendar-check"></i>
+          <div class="status-info">
+            <span class="status-msg">{{ deliveryEstimate }}</span>
+            <span class="status-hint">Fastest shipping available</span>
+          </div>
+        </div>
+        }
+        @if (deliveryError) {
+        <div class="delivery-status bad animate-slide-in">
+          <i class="fas fa-circle-exclamation"></i>
+          <div class="status-info">
+            <span class="status-msg">{{ deliveryError }}</span>
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- Top Reviews Section (Full Width) -->
+  <section class="product-detail-reviews">
+    <div class="product-detail-reviews__container-flat">
+      <main class="product-detail-reviews__main">
+        <h3 class="main-title">Top reviews</h3>
+
+        @if (loadingReviews) {
+        <div class="reviews-loading"><i class="fas fa-spinner fa-spin"></i> Loading reviews...</div>
+        } @else if (reviews.length === 0) {
+        <div class="reviews-empty">
+          <i class="fas fa-star"></i>
+          <h3>No reviews yet</h3>
+          <p>Be the first to review this product!</p>
+        </div>
+        } @else {
+        <div class="product-detail-reviews__list">
+          @for (review of reviews; track review.reviewId) {
+          <article class="product-detail-reviews__card">
+            <div class="user-info">
+              <div class="avatar">
+                <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + review.userName" alt="Reviewer Avatar">
+              </div>
+              <span class="name">{{ review.userName }}</span>
+            </div>
+
+            <div class="rating-info">
+              <div class="stars">
+                @for (s of stars(review.rating); track s) { <i class="fas fa-star"></i> }
+                @for (s of emptyStars(review.rating); track s) { <i class="far fa-star"></i> }
+              </div>
+              <span class="tagline">{{ review.rating >= 4 ? 'Great purchase!' : 'Verified Purchase' }}</span>
+            </div>
+
+            <div class="meta-info">
+              <span>Reviewed on {{ review.createdAt | date:'longDate' }}</span>
+              <span class="verified">Verified Purchase</span>
+            </div>
+
+            <p class="comment">{{ review.comment || 'The user didn\'t leave a written review.' }}</p>
+          </article>
+          }
+        </div>
+        }
+      </main>
+    </div>
+  </section>
+</div>
+}

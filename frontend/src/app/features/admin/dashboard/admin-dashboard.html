@@ -1,0 +1,251 @@
+<div class="admin-page admin-page--full">
+
+  <!-- Page header -->
+  <div class="db-ph">
+    <h1 class="db-ph__title">Dashboard</h1>
+    <div class="db-ph__actions">
+      <div class="date-range-picker" (click)="$event.stopPropagation()">
+        <button type="button" class="db-filter-btn" [class.is-open]="showRangeMenu"
+                (click)="toggleRangeMenu($event)">
+          <i class="far fa-calendar-alt"></i>
+          <span>{{ rangeLabel }}</span>
+          <i class="fas fa-chevron-down chev"></i>
+        </button>
+
+        @if (showRangeMenu) {
+          <div class="date-range-menu">
+            @for (opt of rangeOptions; track opt.key) {
+              <button type="button" class="date-range-menu__item"
+                      [class.active]="filter.range === opt.key"
+                      (click)="pickRange(opt.key)">
+                <i class="fas fa-check"></i><span>{{ opt.label }}</span>
+              </button>
+            }
+            @if (filter.range === 'custom') {
+              <div class="date-range-menu__custom">
+                <div class="date-range-menu__field">
+                  <span class="date-range-menu__field-label">From</span>
+                  <mat-form-field class="app-datepicker app-datepicker--compact">
+                    <input matInput [matDatepicker]="fromDp" [(ngModel)]="customFrom" name="customFrom">
+                    <mat-datepicker-toggle matIconSuffix [for]="fromDp"></mat-datepicker-toggle>
+                    <mat-datepicker #fromDp></mat-datepicker>
+                  </mat-form-field>
+                </div>
+                <div class="date-range-menu__field">
+                  <span class="date-range-menu__field-label">To</span>
+                  <mat-form-field class="app-datepicker app-datepicker--compact">
+                    <input matInput [matDatepicker]="toDp" [(ngModel)]="customTo" name="customTo">
+                    <mat-datepicker-toggle matIconSuffix [for]="toDp"></mat-datepicker-toggle>
+                    <mat-datepicker #toDp></mat-datepicker>
+                  </mat-form-field>
+                </div>
+                <button type="button" class="date-range-menu__apply"
+                        [disabled]="!customFrom || !customTo || customFrom > customTo"
+                        (click)="applyCustom()">Apply</button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading skeletons -->
+  @if (loading) {
+    <div class="db-skeleton-row db-skeleton-row--top">
+      <div class="db-skeleton-col">
+        <div class="db-skeleton" style="height: 140px;"></div>
+        <div class="db-skeleton" style="height: 140px;"></div>
+      </div>
+      <div class="db-skeleton" style="height: 300px; flex: 1.8;"></div>
+      <div class="db-skeleton" style="height: 300px; flex: 1.5;"></div>
+    </div>
+    <div class="db-skeleton-row">
+      <div class="db-skeleton" style="height: 280px; flex: 1.7;"></div>
+      <div class="db-skeleton" style="height: 280px; flex: 1;"></div>
+    </div>
+  }
+
+  <!-- Error -->
+  @else if (error) {
+    <div class="db-alert">
+      <i class="fas fa-exclamation-triangle"></i>
+      <span>Failed to load dashboard data. Please refresh the page.</span>
+    </div>
+  }
+
+  <!-- Dashboard content -->
+  @else if (stats) {
+
+    <!-- ── Row 1: KPI cards + bar chart + donut ── -->
+    <section class="db-row1">
+
+      <!-- Left: 2 stacked KPI cards -->
+      <div class="db-kpi-col">
+        <div class="db-kpi">
+          <div class="db-kpi__top">
+            <span class="db-kpi__lbl">Total Revenue</span>
+            <span class="db-kpi__ico"><i class="fas fa-chart-line"></i></span>
+          </div>
+          <div class="db-kpi__val-row">
+            <span class="db-kpi__val">{{ totalRevenueSummary }}</span>
+            @if (stats.recentSales > 0) {
+              <span class="db-kpi__delta">
+                {{ stats.recentSales }} orders <i class="fas fa-arrow-up"></i>
+              </span>
+            }
+          </div>
+          <a class="db-kpi__link" routerLink="../orders">
+            View Sales Details <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+
+        <div class="db-kpi">
+          <div class="db-kpi__top">
+            <span class="db-kpi__lbl">Active Products</span>
+            <span class="db-kpi__ico"><i class="fas fa-box-open"></i></span>
+          </div>
+          <div class="db-kpi__val-row">
+            <span class="db-kpi__val">{{ stats.activeProducts | number }}</span>
+            @if (stats.lowStockProducts > 0) {
+              <span class="db-kpi__delta down">
+                {{ stats.lowStockProducts }} low stock
+              </span>
+            }
+          </div>
+          <a class="db-kpi__link" routerLink="../products">
+            View All Products <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Middle: monthly revenue bar chart -->
+      <div class="db-bigchart">
+        <div class="db-bigchart__head">
+          <div>
+            <span class="db-bigchart__lbl">Monthly Revenue</span>
+            <div class="db-bigchart__val">{{ totalRevenueSummary }}</div>
+          </div>
+          <div class="db-bigchart__legend">
+            <span><em class="db-bigchart__dot"></em> Revenue</span>
+            <span><em class="db-bigchart__dot db-bigchart__dot--muted"></em> Orders</span>
+          </div>
+        </div>
+        <div class="db-chart-wrap">
+          <canvas #revenueBarChart></canvas>
+        </div>
+      </div>
+
+      <!-- Right: category donut chart -->
+      <div class="db-donut-card">
+        <div class="db-donut-card__head">
+          <h3>Category Sales</h3>
+          <span class="db-donut-card__period">{{ rangeLabel }}</span>
+        </div>
+
+        <div class="db-donut-wrap">
+          <canvas #donutChart></canvas>
+          <div class="db-donut-center">
+            <b>{{ stats.totalOrders | number }}</b>
+            <span>orders</span>
+          </div>
+        </div>
+
+        @if (categoryBreakdown.length > 0) {
+          <div class="db-donut-legend">
+            @for (cat of categoryBreakdown.slice(0, 4); track cat.category; let i = $index) {
+              <div class="db-donut-leg-item">
+                <em class="db-donut-leg-dot" [style.background]="getCatColor(i)"></em>
+                <span class="db-donut-leg-name">{{ cat.category }}</span>
+                <span class="db-donut-leg-val">{{ cat.percentage }}%</span>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="db-donut-footer">
+          <span>Total Sales</span>
+          <b>CA${{ stats.totalRevenueCAD | number:'1.0-0' }}</b>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Row 2: recent orders + top products ── -->
+    <section class="db-row2">
+
+      <!-- Recent orders table -->
+      <div class="db-orders">
+        <div class="db-orders__head">
+          <div>
+            <h3>Recent Orders</h3>
+            <p>Keep track of the latest orders on the platform.</p>
+          </div>
+          <a class="db-orders__view-btn" routerLink="../orders">
+            View All <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+        <table class="db-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Buyer</th>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (recentOrders.length === 0) {
+              <tr>
+                <td colspan="5" class="db-table__empty">No orders yet in this period.</td>
+              </tr>
+            }
+            @for (order of recentOrders; track order.orderId) {
+              <tr>
+                <td class="db-table__id">#{{ order.orderId }}</td>
+                <td>{{ order.buyerName }}</td>
+                <td>{{ formatDate(order.createdAt) }}</td>
+                <td class="db-table__amount">CA${{ order.displayTotal | number:'1.2-2' }}</td>
+                <td>
+                  <span class="db-pill db-pill--{{ getStatusClass(order.status) }}">
+                    {{ order.status }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Top selling products -->
+      <div class="db-top">
+        <div class="db-top__head">
+          <h3>Top Products</h3>
+          <span class="db-top__period">{{ rangeLabel }}</span>
+        </div>
+
+        @if (topProducts.length === 0) {
+          <div class="db-top__empty">No sales data available for this period.</div>
+        }
+
+        @for (product of topProducts; track product.productId; let i = $index) {
+          <div class="db-top__item">
+            <span class="db-top__rank">{{ i + 1 }}</span>
+            <div class="db-top__img">
+              @if (product.imageUrl) {
+                <img [src]="product.imageUrl" [alt]="product.name" (error)="onImgError($event)">
+              } @else {
+                <i class="fas fa-box"></i>
+              }
+            </div>
+            <div class="db-top__info">
+              <b>{{ product.name }}</b>
+              <span>{{ product.unitsSold | number }} units sold</span>
+            </div>
+            <span class="db-top__rev">{{ formatCompact(product.revenue) }}</span>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</div>

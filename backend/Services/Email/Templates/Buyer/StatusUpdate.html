@@ -1,0 +1,78 @@
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td style="padding-bottom: 32px;">
+            <table cellpadding="0" cellspacing="0" border="0" style="background-color: #f1f5f9; border-radius: 12px;">
+                <tr>
+                    <td style="padding: 8px 16px; color: #64748b; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;">Order Transit Report</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    
+    <tr>
+        <td>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td valign="top">
+                        <h1 style="margin: 0 0 12px; font-size: 34px; font-weight: 900; color: #0f172a; letter-spacing: -1.5px; line-height: 1.1;">
+                            Your Package is<br>on the Move!
+                        </h1>
+                        <p style="font-size: 17px; line-height: 1.7; color: #64748b; margin: 0;">
+                            Great news, {{FullName}}! Order #{{OrderId}} has transitioned to <span style="color: #ff6000; font-weight: 800;">{{NewStatus}}</span>.
+                        </p>
+                    </td>
+                    <td valign="top" width="120" align="right">
+                        <img src="{{ApiUrl}}/uploads/drone_premium.png" width="100" style="display: block; margin-top: -10px;">
+                    </td>
+                </tr>
+            </table>
+
+            <div style="height: 1.5px; background: #f1f5f9; margin: 48px 0; border: none;"></div>
+
+            <!-- Timeline (Fixed Alignment) -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <!-- Step 1 -->
+                <tr>
+                    <td width="40" valign="top" align="center">
+                        <div style="width: 22px; height: 22px; background: #ff6000; border-radius: 50%; border: 5px solid #fff; box-shadow: 0 0 0 1.5px #ff6000; margin-top: 4px;"></div>
+                        <div style="width: 2px; height: 40px; background: #ff6000; margin: 4px 0;"></div>
+                    </td>
+                    <td style="padding-bottom: 32px; padding-left: 20px;" valign="top">
+                        <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Verified Placement</div>
+                        <div style="font-size: 16px; font-weight: 800; color: #0f172a;">Order Placed successfully</div>
+                        <div style="font-size: 14px; color: #64748b; margin-top: 2px;">Warehouse processing initiated.</div>
+                    </td>
+                </tr>
+                <!-- Step 2 (Active) -->
+                <tr>
+                    <td width="40" valign="top" align="center">
+                        <div style="width: 22px; height: 22px; background: #ff6000; border-radius: 50%; border: 5px solid #fff; box-shadow: 0 0 0 1.5px #ff6000; margin-top: 4px;"></div>
+                        <div style="width: 2px; height: 40px; background: #f1f5f9; margin: 4px 0;"></div>
+                    </td>
+                    <td style="padding-bottom: 32px; padding-left: 20px;" valign="top">
+                        <div style="font-size: 11px; font-weight: 800; color: #ff6000; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Current Status</div>
+                        <div style="font-size: 16px; font-weight: 800; color: #0f172a;">{{NewStatus}}</div>
+                        <div style="font-size: 14px; color: #64748b; margin-top: 2px;">Updated in real-time by logistics.</div>
+                    </td>
+                </tr>
+                <!-- Step 3 (Pending) -->
+                <tr>
+                    <td width="40" valign="top" align="center">
+                        <div style="width: 22px; height: 22px; background: #f1f5f9; border-radius: 50%; border: 5px solid #fff; box-shadow: 0 0 0 1.5px #f1f5f9; margin-top: 4px;"></div>
+                    </td>
+                    <td style="padding-left: 20px;" valign="top">
+                        <div style="font-size: 11px; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Awaiting</div>
+                        <div style="font-size: 16px; font-weight: 800; color: #cbd5e1;">Final Delivery</div>
+                        <div style="font-size: 14px; color: #cbd5e1; margin-top: 2px;">Expected within scheduled timeframe.</div>
+                    </td>
+                </tr>
+            </table>
+
+            {{NoteHtml}}
+
+            <div style="text-align: center; margin-top: 64px;">
+                <a href="{{AppUrl}}/profile/orders/{{OrderId}}" style="display: inline-block; padding: 22px 48px; background: #0f172a; color: #ffffff; font-weight: 900; border-radius: 20px; text-decoration: none; font-size: 17px; box-shadow: 0 12px 24px rgba(15, 23, 42, 0.2); text-transform: uppercase; letter-spacing: 1px;">Track Shipment Live</a>
+            </div>
+        </td>
+    </tr>
+</table>

@@ -1,0 +1,32 @@
+<div class="pgn" *ngIf="totalCount > 0">
+  <div class="pgn__range" *ngIf="showRange">
+    Showing <strong>{{ rangeStart }}</strong>–<strong>{{ rangeEnd }}</strong> of
+    <strong>{{ totalCount }}</strong>
+  </div>
+
+  <div class="pgn__actions">
+    <button type="button" class="pgn__btn" [disabled]="page === 1" (click)="first()" title="First page">
+      <i class="fas fa-angle-double-left"></i>
+    </button>
+    <button type="button" class="pgn__btn" [disabled]="page === 1" (click)="prev()" title="Previous">
+      <i class="fas fa-angle-left"></i>
+    </button>
+
+    @for (b of pageButtons; track $index) {
+      @if (b === 'ellipsis-left' || b === 'ellipsis-right') {
+        <span class="pgn__ellipsis">…</span>
+      } @else {
+        <button type="button" class="pgn__num" [class.is-active]="b === page" (click)="goTo($any(b))">
+          {{ b }}
+        </button>
+      }
+    }
+
+    <button type="button" class="pgn__btn" [disabled]="page === totalPages" (click)="next()" title="Next">
+      <i class="fas fa-angle-right"></i>
+    </button>
+    <button type="button" class="pgn__btn" [disabled]="page === totalPages" (click)="last()" title="Last page">
+      <i class="fas fa-angle-double-right"></i>
+    </button>
+  </div>
+</div>

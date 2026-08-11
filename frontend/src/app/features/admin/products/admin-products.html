@@ -1,0 +1,241 @@
+<div class="admin-page">
+  <!-- Header Section -->
+  <div class="admin-page__header">
+    <div class="header-main">
+      <h1 class="admin-page__title">
+        <div class="title-icon title-icon--products"><i class="fas fa-boxes"></i></div>
+        <span>Product Catalog</span>
+      </h1>
+      <p class="admin-page__subtitle">View, edit, and manage your complete marketplace inventory with ease.</p>
+    </div>
+  </div>
+
+  <!-- Toolbar Section -->
+  <div class="admin-toolbar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input [(ngModel)]="search" (input)="onSearch()" placeholder="Search products by name, SKU or category..." aria-label="Search products" />
+    </div>
+    
+    <div class="filter-actions">
+
+      <button class="btn-refresh" (click)="load()" title="Refresh catalog">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- VIEW Product Modal -->
+  @if (viewingProduct) {
+    <div class="admin-modal-overlay" (click)="closeView()">
+      <div class="admin-modal view-modal animate-slide-up" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <h3 class="modal-title">Product Details</h3>
+            <span class="modal-subtitle">ID: #{{ viewingProduct.productId }}</span>
+          </div>
+          <button class="modal-close" (click)="closeView()">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="view-grid">
+            <div class="view-image-side">
+              <div class="main-image">
+                <img [src]="viewingProduct.primaryImageUrl || '/assets/images/placeholder.png'" [alt]="viewingProduct.name" />
+              </div>
+            </div>
+            <div class="view-info-side">
+              <div class="info-group">
+                <label>Product Name</label>
+                <div class="info-value bold">{{ viewingProduct.name }}</div>
+              </div>
+              <div class="info-row">
+                <div class="info-group">
+                  <label>Category</label>
+                  <div class="info-value"><span class="tag">{{ viewingProduct.categoryName }}</span></div>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-group">
+                  <label>Base Price</label>
+                  <div class="info-value">CA${{ viewingProduct.basePrice | number:'1.2-2' }}</div>
+                </div>
+                @if (viewingProduct.salePrice) {
+                  <div class="info-group">
+                    <label>Sale Price</label>
+                    <div class="info-value text-sale">CA${{ viewingProduct.salePrice | number:'1.2-2' }}</div>
+                  </div>
+                }
+              </div>
+              <div class="info-row">
+                <div class="info-group">
+                  <label>Stock Status</label>
+                  <div class="info-value">
+                    <span class="stock-badge" [class.stock-low]="viewingProduct.stock <= 10">
+                      {{ viewingProduct.stock }} units available
+                    </span>
+                  </div>
+                </div>
+                <div class="info-group">
+                  <label>Visibility</label>
+                  <div class="info-value">
+                    <span class="status-indicator" [class.active]="viewingProduct.isActive">
+                      {{ viewingProduct.isActive ? 'Active' : 'Hidden' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="info-group mt-20">
+                <label>Product URL Slug</label>
+                <div class="info-value slug">/products/{{ viewingProduct.slug }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-modal-cancel" (click)="closeView()">Close Preview</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- EDIT Product Modal -->
+  @if (editingProduct) {
+    <div class="admin-modal-overlay" (click)="cancelEdit()">
+      <div class="admin-modal animate-slide-up" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <h3 class="modal-title">Update Pricing</h3>
+            <span class="modal-subtitle">{{ editingProduct.name }}</span>
+          </div>
+          <button class="modal-close" (click)="cancelEdit()">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          @if (error) { <div class="alert alert-error mb-20">{{ error }}</div> }
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Base Price (CAD)</label>
+              <div class="currency-input">
+                <span class="prefix">$</span>
+                <input [(ngModel)]="editForm.basePrice" type="number" step="0.01" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Sale Price (CAD)</label>
+              <div class="currency-input">
+                <span class="prefix">$</span>
+                <input [(ngModel)]="editForm.salePrice" type="number" step="0.01" placeholder="Optional" />
+              </div>
+            </div>
+            <p class="form-group span-2 info-text-admin">
+              <i class="fas fa-info-circle"></i> Other product details are managed by the seller and cannot be modified by administrators.
+            </p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-modal-cancel" (click)="cancelEdit()">Discard</button>
+          <button class="btn-modal-save" (click)="saveEdit()" [disabled]="saving">
+            <i class="fas fa-{{ saving ? 'spinner fa-spin' : 'dollar-sign' }}"></i>
+            {{ saving ? 'Updating...' : 'Update Prices' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Products Table Section -->
+  <div class="admin-content-card">
+    @if (loading) {
+      <div class="loading-state">
+        <div class="loader"></div>
+        <span>Retrieving latest catalog data...</span>
+      </div>
+    } @else if (!products.length) {
+      <div class="empty-state">
+        <div class="empty-illustration">
+          <i class="fas fa-search"></i>
+        </div>
+        <h3>No products found</h3>
+        <p>We couldn't find any products matching your current search or filter criteria.</p>
+        <button class="btn-reset" (click)="search=''; load()">Clear All Filters</button>
+      </div>
+    } @else {
+      <div class="table-overflow">
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>Product Details</th>
+              <th>Category</th>
+
+              <th>Pricing (CAD)</th>
+              <th>Inventory</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of pagedProducts; track p.productId) {
+              <tr [class.row-inactive]="!p.isActive">
+                <td class="product-col">
+                  <div class="product-item">
+                    <div class="product-thumb">
+                      <img [src]="p.primaryImageUrl || '/assets/images/placeholder.png'" [alt]="p.name" />
+                    </div>
+                    <div class="product-meta">
+                      <span class="name">{{ p.name }}</span>
+                      <span class="sku">ID: #{{ p.productId }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="category-pill">{{ p.categoryName }}</span></td>
+
+                <td>
+                  <div class="pricing-stack">
+                    @if (p.salePrice) {
+                      <span class="price-sale">CA${{ p.salePrice | number:'1.2-2' }}</span>
+                      <span class="price-original">CA${{ p.basePrice | number:'1.2-2' }}</span>
+                    } @else {
+                      <span class="price-normal">CA${{ p.basePrice | number:'1.2-2' }}</span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="stock-badge" [class.stock-low]="p.stock <= 10">
+                    <span class="stock-count">{{ p.stock }}</span>
+                    <span class="stock-label">units</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-indicator" [class.active]="p.isActive">
+                    {{ p.isActive ? 'Active' : 'Hidden' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-set">
+                    <button class="btn-action view" (click)="viewProduct(p)" title="View product details">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-action edit" (click)="openEdit(p)" title="Update pricing">
+                      <i class="fas fa-dollar-sign"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-pagination
+        [page]="page"
+        [pageSize]="pageSize"
+        [totalCount]="products.length"
+        (pageChange)="goPage($event)">
+      </app-pagination>
+    }
+  </div>
+</div>
+

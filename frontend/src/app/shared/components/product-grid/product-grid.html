@@ -1,0 +1,16 @@
+<div class="product-grid">
+  @if (loading) {
+    @for (s of skeletons; track $index) {
+      <app-skeleton-card></app-skeleton-card>
+    }
+  } @else {
+    @for (p of products; track p.productId) {
+      <app-product-card [product]="p"></app-product-card>
+    } @empty {
+      <div class="product-grid__empty">
+        <span class="empty-icon">📦</span>
+        <p>No products found. Try adjusting your filters.</p>
+      </div>
+    }
+  }
+</div>

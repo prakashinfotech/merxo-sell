@@ -1,0 +1,212 @@
+<div class="admin-page">
+  <!-- Header -->
+  <div class="admin-page__header">
+    <div class="header-main">
+      <h1 class="admin-page__title">
+        <div class="title-icon title-icon--sellers"><i class="fas fa-store"></i></div>
+        <span>Sellers</span>
+      </h1>
+      <p class="admin-page__subtitle">Manage marketplace seller accounts, verification, and store visibility.</p>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="admin-toolbar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="applyFilters()"
+        placeholder="Search by store name or owner email..."
+        aria-label="Search sellers" />
+    </div>
+    <div class="filter-actions">
+      <mat-form-field appearance="outline" class="mat-dd">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="statusFilter" (selectionChange)="applyFilters()">
+          <mat-option value="">All statuses</mat-option>
+          <mat-option value="true">Active</mat-option>
+          <mat-option value="false">Inactive</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button class="btn-refresh" (click)="resetFilters()" title="Reset filters">
+        <i class="fas fa-filter-circle-xmark"></i>
+      </button>
+      <button class="btn-refresh" (click)="load()" title="Refresh list">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- VIEW Modal -->
+  @if (viewing) {
+    <div class="admin-modal-overlay" (click)="closeView()">
+      <div class="admin-modal view-modal animate-slide-up" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <h3 class="modal-title">Seller Details</h3>
+            <span class="modal-subtitle">ID: #{{ viewing.sellerId }} · User: #{{ viewing.userId }}</span>
+          </div>
+          <button class="modal-close" (click)="closeView()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="view-info-side">
+            <div class="info-group">
+              <label>Store Name</label>
+              <div class="info-value bold">
+                {{ viewing.storeName }}
+                @if (viewing.isVerified) {
+                  <span class="badge-verified" title="Verified seller"><i class="fas fa-check-circle"></i> Verified</span>
+                }
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-group">
+                <label>Owner Name</label>
+                <div class="info-value">{{ viewing.ownerName }}</div>
+              </div>
+              <div class="info-group">
+                <label>Owner Email</label>
+                <div class="info-value">{{ viewing.ownerEmail }}</div>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-group">
+                <label>Status</label>
+                <div class="info-value">
+                  <span class="status-indicator" [class.active]="viewing.isActive">
+                    {{ viewing.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </div>
+              </div>
+              <div class="info-group">
+                <label>Total Products</label>
+                <div class="info-value bold">{{ viewing.productCount }}</div>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-group">
+                <label>Contact Email</label>
+                <div class="info-value">{{ viewing.contactEmail || 'N/A' }}</div>
+              </div>
+              <div class="info-group">
+                <label>Phone</label>
+                <div class="info-value">{{ viewing.phone || 'N/A' }}</div>
+              </div>
+            </div>
+            <div class="info-group">
+              <label>Store Description</label>
+              <div class="info-value">{{ viewing.storeDescription || 'No description provided.' }}</div>
+            </div>
+            <div class="info-group">
+              <label>Joined</label>
+              <div class="info-value">{{ viewing.createdAt | date:'mediumDate' }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-modal-cancel" (click)="closeView()">Close</button>
+        </div>
+      </div>
+    </div>
+  }
+
+
+  <!-- Data Table -->
+  <div class="admin-content-card">
+    @if (loading) {
+      <div class="loading-state">
+        <div class="loader"></div>
+        <span>Loading sellers...</span>
+      </div>
+    } @else if (!sellers.length) {
+      <div class="empty-state">
+        <div class="empty-illustration"><i class="fas fa-store-slash"></i></div>
+        <h3>No Sellers Found</h3>
+        <p>No seller accounts match the current filters.</p>
+        <button class="btn-primary" (click)="resetFilters()">Reset Filters</button>
+      </div>
+    } @else {
+      <div class="table-overflow">
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>Store</th>
+              <th>Owner</th>
+              <th>Contact</th>
+              <th>Products</th>
+              <th>Verified</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of pagedSellers; track trackById($index, s)) {
+              <tr [class.row-inactive]="!s.isActive">
+                <td class="brand-col">
+                  <div class="brand-info">
+                    <span class="name">{{ s.storeName }}</span>
+                    <span class="id">ID: #{{ s.sellerId }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="contact-stack">
+                    <span class="email">{{ s.ownerName }}</span>
+                    <span class="phone">{{ s.ownerEmail }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="contact-stack">
+                    <span class="email">{{ s.contactEmail || '—' }}</span>
+                    <span class="phone">{{ s.phone || '—' }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="count-pill">{{ s.productCount }}</span>
+                </td>
+                <td>
+                  <button
+                    class="badge-toggle"
+                    [class.is-on]="s.isVerified"
+                    (click)="toggleVerified(s)"
+                    [title]="s.isVerified ? 'Click to revoke verification' : 'Click to verify seller'">
+                    <i class="fas" [class.fa-check-circle]="s.isVerified" [class.fa-circle]="!s.isVerified"></i>
+                    {{ s.isVerified ? 'Verified' : 'Unverified' }}
+                  </button>
+                </td>
+                <td>
+                  <span class="status-indicator" [class.active]="s.isActive">
+                    {{ s.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-set">
+                    <button class="btn-action view" (click)="openView(s)" title="View details">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button
+                      class="btn-action toggle"
+                      [class.is-active]="s.isActive"
+                      (click)="toggleStatus(s)"
+                      [title]="s.isActive ? 'Deactivate seller' : 'Activate seller'">
+                      <i class="fas" [class.fa-pause]="s.isActive" [class.fa-play]="!s.isActive"></i>
+                    </button>
+                    <button class="btn-action hide" (click)="delete(s)" title="Soft-delete (deactivate)">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-pagination
+        [page]="page"
+        [pageSize]="pageSize"
+        [totalCount]="sellers.length"
+        (pageChange)="goPage($event)">
+      </app-pagination>
+    }
+  </div>
+</div>

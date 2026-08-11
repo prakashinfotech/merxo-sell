@@ -1,0 +1,81 @@
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="text-align: center;">
+    <tr>
+        <td style="padding-bottom: 48px;">
+            <h1 style="margin: 0 0 12px; font-size: 34px; font-weight: 900; color: #0f172a; letter-spacing: -1.5px; line-height: 1.1;">
+                Payment Confirmed!
+            </h1>
+            <p style="font-size: 17px; line-height: 1.7; color: #64748b; margin: 0 auto; max-width: 480px;">
+                Hello {{FullName}}, we've received your payment for Order #{{OrderId}}. Our team is now preparing your items for shipment.
+            </p>
+        </td>
+    </tr>
+
+    <!-- Progress Tracker (Image 4 style) -->
+    <tr>
+        <td style="padding-bottom: 64px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td align="center" width="33%">
+                        <div style="width: 50px; height: 50px; background: rgba(22, 163, 74, 0.1); border-radius: 50%; margin-bottom: 12px; display: table-cell; vertical-align: middle;">
+                            <center><img src="https://img.icons8.com/ios-filled/24/16a34a/checkmark.png" width="20"></center>
+                        </div>
+                        <div style="font-size: 10px; font-weight: 800; color: #16a34a; text-transform: uppercase; letter-spacing: 1px;">Step 1</div>
+                        <div style="font-size: 12px; font-weight: 800; color: #0f172a; margin-top: 4px;">PAYMENT</div>
+                    </td>
+                    <td align="center" width="33%">
+                        <div style="width: 60px; height: 60px; background: rgba(255, 96, 0, 0.1); border-radius: 20px; border: 2px solid #ff6000; margin-bottom: 12px; display: table-cell; vertical-align: middle;">
+                            <center><img src="https://img.icons8.com/ios-filled/32/ff6000/box.png" width="28"></center>
+                        </div>
+                        <div style="font-size: 10px; font-weight: 800; color: #ff6000; text-transform: uppercase; letter-spacing: 1px;">Step 2</div>
+                        <div style="font-size: 12px; font-weight: 800; color: #0f172a; margin-top: 4px;">PROCESSING</div>
+                    </td>
+                    <td align="center" width="33%">
+                        <div style="width: 50px; height: 50px; background: #f1f5f9; border-radius: 50%; margin-bottom: 12px; display: table-cell; vertical-align: middle;">
+                            <center><img src="https://img.icons8.com/ios-filled/24/94a3b8/delivery.png" width="20"></center>
+                        </div>
+                        <div style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Step 3</div>
+                        <div style="font-size: 12px; font-weight: 800; color: #cbd5e1; margin-top: 4px;">SHIPPING</div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <!-- Order Summary Box -->
+    <tr>
+        <td>
+            <table width="100%" cellpadding="40" cellspacing="0" border="0" style="background-color: #f8fafc; border-radius: 32px; border: 1.5px solid #f1f5f9; text-align: left;">
+                <tr>
+                    <td>
+                        <h4 style="margin: 0 0 32px; font-size: 14px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 16px;">Order Summary</h4>
+                        
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            {{ItemsHtml}}
+                            <tr><td height="40"></td></tr>
+                            <tr>
+                                <td style="border-top: 1.5px solid #e2e8f0; padding-top: 32px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td style="font-size: 18px; font-weight: 900; color: #0f172a;">Order Total</td>
+                                            <td align="right" style="font-size: 24px; font-weight: 900; color: #ff6000;">{{Total}}</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <!-- Action -->
+    <tr>
+        <td align="center" style="padding-top: 64px;">
+            <a href="{{AppUrl}}/profile/orders/{{OrderId}}" class="btn">View Order Details</a>
+            <p style="margin: 24px 0 0; font-size: 13px; color: #94a3b8; font-weight: 500; line-height: 1.6;">
+                Need help with your order? Visit our Help Center or contact our<br>support team 24/7.
+            </p>
+        </td>
+    </tr>
+</table>

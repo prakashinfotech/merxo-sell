@@ -1,0 +1,27 @@
+<div class="confirm-dialog">
+  <button type="button" class="close-btn" (click)="onCancel()">
+    <i class="fas fa-times"></i>
+  </button>
+
+  <div class="confirm-dialog__icon"
+       [class.confirm-dialog__icon--danger]="data.isDanger"
+       [class.confirm-dialog__icon--warning]="data.isWarning">
+    <i class="fas"
+       [class]="data.icon || (data.isDanger ? 'fa-exclamation-triangle' : data.isWarning ? 'fa-exclamation-circle' : 'fa-question-circle')"></i>
+  </div>
+
+  <h2 class="confirm-dialog__title">{{ data.title }}</h2>
+  <p class="confirm-dialog__message">{{ data.message }}</p>
+
+  <div class="confirm-dialog__actions" [class.confirm-dialog__actions--single]="data.hideCancel">
+    <button *ngIf="!data.hideCancel" class="btn-cancel" (click)="onCancel()">
+      {{ data.cancelText || 'Cancel' }}
+    </button>
+    <button class="btn-confirm"
+            [class.btn-confirm--danger]="data.isDanger"
+            [class.btn-confirm--warning]="data.isWarning"
+            (click)="onConfirm()">
+      {{ data.confirmText || 'Confirm' }}
+    </button>
+  </div>
+</div>

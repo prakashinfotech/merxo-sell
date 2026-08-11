@@ -1,0 +1,49 @@
+<div class="mpb-wrap"
+     *ngIf="activeBanner"
+     [class.mpb-wrap--right]="align === 'right'"
+     [style.background-color]="activeBanner.backgroundColor || '#f0f4ff'"
+     (mouseenter)="pauseCarousel()"
+     (mouseleave)="resumeCarousel()"
+     (click)="navigate()">
+
+  <!-- Main lifestyle image -->
+  <div class="mpb-image-area">
+    <img [src]="activeBanner.imageUrl"
+         [alt]="activeBanner.title"
+         (error)="onImgError($event)"
+         class="mpb-image"
+         loading="lazy" />
+  </div>
+
+  <!-- Text overlay -->
+  <div class="mpb-overlay">
+    <!-- Badge pill top-right -->
+    <span class="mpb-badge" *ngIf="activeBanner.badgeText">{{ activeBanner.badgeText }}</span>
+
+    <div class="mpb-text" [style.color]="activeBanner.textColor || '#1a1a2e'">
+      <p class="mpb-subtitle" *ngIf="activeBanner.subtitle">{{ activeBanner.subtitle }}</p>
+      <h3 class="mpb-title">{{ activeBanner.title }}</h3>
+
+      <button class="mpb-cta"
+              *ngIf="activeBanner.ctaLabel"
+              (click)="$event.stopPropagation(); navigate()">
+        {{ activeBanner.ctaLabel }}
+        <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Carousel Navigation Dots -->
+  <div class="mpb-nav" *ngIf="banners.length > 1" (click)="$event.stopPropagation()">
+    <div class="mpb-nav__dots">
+      <span *ngFor="let b of banners; let i = index"
+            class="mpb-nav__dot"
+            [class.active]="i === activeIndex"
+            (click)="goTo(i, $event)">
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Shimmer placeholder when no banner -->
+<div class="mpb-skeleton" *ngIf="!activeBanner"></div>

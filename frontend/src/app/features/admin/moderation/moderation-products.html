@@ -1,0 +1,241 @@
+<section class="moderation-page">
+  <header class="moderation-page__header">
+    <div class="moderation-page__header-text">
+      <div class="title-icon"><i class="fas fa-clipboard-check"></i></div>
+      <div>
+        <h1>Pending Products</h1>
+        <p>Review seller submissions before they go live in the buyer storefront.</p>
+      </div>
+    </div>
+    <div class="moderation-page__header-actions">
+      <span class="moderation-count-pill">
+        <i class="fas fa-hourglass-half"></i>
+        {{ products.length }} awaiting review
+      </span>
+      <button type="button" class="btn-refresh" (click)="load()" [disabled]="loading">
+        <i class="fas fa-sync" [class.fa-spin]="loading"></i> Refresh
+      </button>
+    </div>
+  </header>
+
+  @if (error) {
+    <div class="moderation-banner moderation-banner--err">
+      <i class="fas fa-exclamation-circle"></i> {{ error }}
+    </div>
+  }
+
+  @if (loading) {
+    <div class="moderation-empty">
+      <i class="fas fa-spinner fa-spin"></i>
+      <h3>Loading pending products…</h3>
+    </div>
+  } @else if (products.length === 0) {
+    <div class="moderation-empty">
+      <i class="fas fa-check-double"></i>
+      <h3>You're all caught up</h3>
+      <p>No products are awaiting approval right now.</p>
+    </div>
+  } @else {
+    <ul class="moderation-grid">
+      @for (p of products; track p.productId) {
+        <li class="mod-card">
+          <div class="mod-card__media">
+            <img [src]="p.primaryImageUrl || 'assets/images/placeholder-product.png'" [alt]="p.name" />
+            <span class="mod-card__chip">{{ p.categoryName }}</span>
+          </div>
+
+          <div class="mod-card__body">
+            <h3 class="mod-card__title">{{ p.name }}</h3>
+            <div class="mod-card__price-row">
+              <span class="mod-card__price">CA${{ p.basePrice | number:'1.2-2' }}</span>
+              @if (p.salePrice) {
+                <span class="mod-card__sale">CA${{ p.salePrice | number:'1.2-2' }}</span>
+              }
+              <span class="mod-card__stock">
+                <i class="fas fa-boxes"></i> {{ p.stock }} in stock
+              </span>
+            </div>
+
+            <div class="mod-card__meta">
+              <span class="mod-meta-row">
+                <i class="fas fa-store"></i>
+                <strong>{{ p.sellerStoreName }}</strong>
+              </span>
+              <span class="mod-meta-row mod-meta-row--muted">
+                <i class="fas fa-envelope"></i>
+                {{ p.sellerEmail }}
+              </span>
+              <span class="mod-meta-row mod-meta-row--muted">
+                <i class="far fa-clock"></i>
+                Submitted {{ p.createdAt | date:'MMM d, y, h:mm a' }}
+              </span>
+            </div>
+
+            @if (rejectingId === p.productId) {
+              <div class="mod-card__reject">
+                <textarea
+                  rows="2"
+                  placeholder="Reason for rejection (will be emailed to the seller)…"
+                  [(ngModel)]="rejectReason"></textarea>
+                <div class="mod-card__btn-row">
+                  <button type="button" class="btn-danger"
+                          [disabled]="saving || !rejectReason.trim()"
+                          (click)="confirmReject()">
+                    <i class="fas fa-times"></i> Confirm reject
+                  </button>
+                  <button type="button" class="btn-ghost" (click)="cancelReject()">Cancel</button>
+                </div>
+              </div>
+            } @else {
+              <div class="mod-card__btn-row">
+                <button type="button" class="btn-approve" [disabled]="saving" (click)="approve(p)">
+                  <i class="fas fa-check"></i> Approve
+                </button>
+                <button type="button" class="btn-reject" (click)="beginReject(p.productId)">
+                  <i class="fas fa-times"></i> Reject
+                </button>
+                <button type="button" class="btn-preview" (click)="openPreview(p)">
+                  <i class="fas fa-eye"></i> Preview
+                </button>
+              </div>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>
+
+<!-- Preview modal — production-style, scoped to the moderation flow -->
+@if (previewSummary) {
+  <div class="preview-overlay" (click)="closePreview()">
+    <div class="preview-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <header class="preview-modal__header">
+        <div>
+          <span class="preview-modal__eyebrow">Product preview</span>
+          <h2>{{ previewSummary.name }}</h2>
+          <span class="preview-modal__chip">{{ previewSummary.categoryName }}</span>
+        </div>
+        <button type="button" class="preview-modal__close" aria-label="Close" (click)="closePreview()">
+          <i class="fas fa-times"></i>
+        </button>
+      </header>
+
+      @if (previewLoading) {
+        <div class="preview-modal__body preview-modal__body--center">
+          <i class="fas fa-spinner fa-spin"></i>
+          <span>Loading product details…</span>
+        </div>
+      } @else {
+        <div class="preview-modal__body">
+          <!-- Gallery -->
+          <div class="preview-gallery">
+            @if (previewProduct && previewProduct.images && previewProduct.images.length > 0) {
+              <div class="preview-gallery__main">
+                <img [src]="previewProduct.images[activeImageIndex]?.imageUrl || previewSummary.primaryImageUrl"
+                     [alt]="previewProduct.name" />
+              </div>
+              @if (previewProduct.images.length > 1) {
+                <div class="preview-gallery__thumbs">
+                  @for (img of previewProduct.images; track img.imageId; let i = $index) {
+                    <button type="button" class="preview-thumb"
+                            [class.is-active]="i === activeImageIndex"
+                            (click)="setActiveImage(i)">
+                      <img [src]="img.imageUrl" [alt]="img.altText" />
+                    </button>
+                  }
+                </div>
+              }
+            } @else {
+              <div class="preview-gallery__main">
+                <img [src]="previewSummary.primaryImageUrl || 'assets/images/placeholder-product.png'"
+                     [alt]="previewSummary.name" />
+              </div>
+            }
+          </div>
+
+          <!-- Right column: summary + actions -->
+          <div class="preview-summary">
+            <div class="preview-price">
+              <span class="preview-price__current">CA${{ previewSummary.basePrice | number:'1.2-2' }}</span>
+              @if (previewSummary.salePrice) {
+                <span class="preview-price__sale">CA${{ previewSummary.salePrice | number:'1.2-2' }}</span>
+              }
+            </div>
+
+            <ul class="preview-meta">
+              <li>
+                <span class="preview-meta__label"><i class="fas fa-store"></i> Seller</span>
+                <span class="preview-meta__value">{{ previewSummary.sellerStoreName }}</span>
+              </li>
+              <li>
+                <span class="preview-meta__label"><i class="fas fa-envelope"></i> Contact</span>
+                <span class="preview-meta__value">{{ previewSummary.sellerEmail }}</span>
+              </li>
+              <li>
+                <span class="preview-meta__label"><i class="fas fa-tag"></i> Category</span>
+                <span class="preview-meta__value">{{ previewSummary.categoryName }}</span>
+              </li>
+              <li>
+                <span class="preview-meta__label"><i class="fas fa-boxes"></i> Stock</span>
+                <span class="preview-meta__value">{{ previewSummary.stock }} units</span>
+              </li>
+              <li>
+                <span class="preview-meta__label"><i class="far fa-clock"></i> Submitted</span>
+                <span class="preview-meta__value">{{ previewSummary.createdAt | date:'medium' }}</span>
+              </li>
+            </ul>
+
+            @if (previewProduct?.description) {
+              <section class="preview-section">
+                <h4>Description</h4>
+                <p>{{ previewProduct?.description }}</p>
+              </section>
+            }
+
+            @if (previewProduct && (previewProduct.colors.length || previewProduct.sizes.length)) {
+              <section class="preview-section preview-section--variants">
+                @if (previewProduct.colors.length) {
+                  <div>
+                    <span class="preview-section__label">Colors</span>
+                    <div class="preview-chip-row">
+                      @for (c of previewProduct.colors; track c) {
+                        <span class="preview-chip">{{ c }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+                @if (previewProduct.sizes.length) {
+                  <div>
+                    <span class="preview-section__label">Sizes</span>
+                    <div class="preview-chip-row">
+                      @for (s of previewProduct.sizes; track s) {
+                        <span class="preview-chip preview-chip--size">{{ s }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+              </section>
+            }
+
+            @if (previewError) {
+              <div class="preview-warning">
+                <i class="fas fa-info-circle"></i> {{ previewError }}
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <footer class="preview-modal__footer">
+        <button type="button" class="btn-ghost" (click)="closePreview()">Close</button>
+        <button type="button" class="btn-reject" (click)="beginReject(previewSummary.productId); closePreview()">
+          <i class="fas fa-times"></i> Reject
+        </button>
+        <button type="button" class="btn-approve" [disabled]="saving" (click)="approve(previewSummary)">
+          <i class="fas fa-check"></i> Approve & Publish
+        </button>
+      </footer>
+    </div>
+  </div>
+}

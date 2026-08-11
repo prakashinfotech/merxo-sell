@@ -1,0 +1,231 @@
+<div class="tc-cart-page page-container">
+
+  @if ((items$ | async)?.length) {
+    <div class="tc-cart-layout">
+
+      <!-- ── LEFT: cart items ──────────────────────────────────── -->
+      <section>
+        <div class="tc-cart-card">
+
+          <h1 class="tc-cart-card__title">
+            Shopping Cart
+            <small>({{ (items$ | async)?.length }} item{{ (items$ | async)?.length === 1 ? '' : 's' }})</small>
+          </h1>
+
+          <div class="tc-ship-note">
+            <i class="fas fa-truck"></i> Free shipping on your entire order
+          </div>
+
+          <div class="tc-group-head" (click)="toggleCollapse()" title="Toggle item list">
+            <span>{{ (items$ | async)?.length }} Item{{ (items$ | async)?.length === 1 ? '' : 's' }}</span>
+            <button type="button" class="tc-group-head__btn" aria-label="Toggle collapse">
+              <i class="fas" [class.fa-chevron-up]="!isItemsCollapsed" [class.fa-chevron-down]="isItemsCollapsed"></i>
+            </button>
+          </div>
+
+          @if (!isItemsCollapsed) {
+            <div class="tc-arrival">
+              <span>Standard Delivery · 5–10 business days</span>
+              <span class="tc-arrival__count">{{ (items$ | async)?.length }} Item{{ (items$ | async)?.length === 1 ? '' : 's' }}</span>
+            </div>
+
+            <div class="tc-seller-row">
+              Sold and shipped by MerxoSell &nbsp;
+              <span class="tc-seller-pro"><i class="fas fa-shield-alt"></i> Pro Seller</span>
+            </div>
+
+            @for (item of items$ | async; track item.cartItemId) {
+              <div class="tc-line">
+                <div class="tc-line__img">
+                  <img [src]="item.primaryImageUrl" [alt]="item.productName">
+                </div>
+
+                <div class="tc-line__info">
+                  <span class="tc-line__name">{{ item.productName }}</span>
+                  @if (item.variantInfo) {
+                    <span class="tc-line__meta">{{ item.variantInfo }}</span>
+                  }
+                  <span class="tc-line__free">Eligible for FREE Shipping</span>
+                  <a class="tc-line__save-later">Save for Later</a>
+                </div>
+
+                <div class="tc-line__right">
+                  <span class="tc-line__price">
+                    {{ (item.unitPriceCAD * item.quantity) | appCurrency:(currencyService.selectedCurrency$ | async) }}
+                  </span>
+                  <span class="tc-line__unit">
+                    {{ item.unitPriceCAD | appCurrency:(currencyService.selectedCurrency$ | async) }} / each
+                  </span>
+                  <span class="tc-line__qty">
+                    Qty:
+                    <span class="tc-stepper">
+                      <button (click)="updateQuantity(item.cartItemId, item.quantity, -1)" [disabled]="item.quantity <= 1">−</button>
+                      <span class="tc-stepper__v">{{ item.quantity }}</span>
+                      <button (click)="updateQuantity(item.cartItemId, item.quantity, 1)">+</button>
+                    </span>
+                  </span>
+                </div>
+
+                <button class="tc-line__close" (click)="removeItem(item.cartItemId)" title="Remove">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            }
+          }
+
+        </div>
+
+        <div class="tc-pickup" (click)="openPickupModal()" title="Change pickup and delivery options">
+          <div class="tc-pickup__content">
+            <span class="tc-pickup__icon">
+              <i class="fas" [class.fa-truck]="selectedDeliveryMode === 'standard'" [class.fa-bolt]="selectedDeliveryMode === 'express'" [class.fa-store]="selectedDeliveryMode === 'pickup'"></i>
+            </span>
+            <div class="tc-pickup__text">
+              <div class="tc-pickup__title">Pickup and delivery options</div>
+              <div class="tc-pickup__subtitle">
+                @if (selectedDeliveryMode === 'standard') { Standard Home Delivery (5–10 days) · FREE }
+                @else if (selectedDeliveryMode === 'express') { Express Priority (2–3 days) · CA$ 9.99 }
+                @else { In-Store / Hub Pickup (Ready in 2 hrs) · FREE }
+              </div>
+            </div>
+          </div>
+          <i class="fas fa-chevron-right tc-pickup__arrow"></i>
+        </div>
+      </section>
+
+      <!-- ── RIGHT: order summary ──────────────────────────────── -->
+      <aside>
+        <div class="tc-sum">
+          <h3>Order Summary</h3>
+
+          <div class="tc-sum__row">
+            <span>Sub Total ({{ (items$ | async)?.length }} item{{ (items$ | async)?.length === 1 ? '' : 's' }})</span>
+            <b>{{ (total$ | async) | appCurrency:(currencyService.selectedCurrency$ | async) }}</b>
+          </div>
+
+          <div class="tc-sum__row">
+            <span class="tc-sum__delivery-lbl">
+              Delivery 
+              <span class="tc-sum__badge" [class.tc-sum__badge--express]="selectedDeliveryMode === 'express'">
+                @if (selectedDeliveryMode === 'standard') { Standard }
+                @else if (selectedDeliveryMode === 'express') { Express }
+                @else { Hub Pickup }
+              </span>
+            </span>
+            @if (selectedDeliveryMode === 'express') {
+              <b>{{ 9.99 | appCurrency:(currencyService.selectedCurrency$ | async) }}</b>
+            } @else {
+              <span class="tc-sum__green">Free</span>
+            }
+          </div>
+
+          <div class="tc-coupon" (click)="goToCheckout()">
+            <span>Apply Coupon</span>
+            <i class="fas fa-tag"></i>
+          </div>
+
+          <div class="tc-sum__sep"></div>
+
+          <div class="tc-sum__total-row">
+            <span>Estimated total</span>
+            <b>{{ getFinalTotal(total$ | async) | appCurrency:(currencyService.selectedCurrency$ | async) }}</b>
+          </div>
+
+          <div class="tc-sum__row tc-sum__row--sm">
+            <span>Shipping</span>
+            @if (selectedDeliveryMode === 'express') {
+              <b>{{ 9.99 | appCurrency:(currencyService.selectedCurrency$ | async) }}</b>
+            } @else {
+              <span class="tc-sum__green">Free</span>
+            }
+          </div>
+
+          <div class="tc-sum__final">
+            <span>Total</span>
+            <b>{{ getFinalTotal(total$ | async) | appCurrency:(currencyService.selectedCurrency$ | async) }}</b>
+          </div>
+
+          <button class="tc-checkout-btn" (click)="goToCheckout()">
+            <i class="fas fa-lock"></i> Continue to checkout
+          </button>
+        </div>
+
+        <div class="tc-methods">
+          <h4>Accepted Payment</h4>
+          <div class="tc-methods__row">
+            <span class="tc-methods__tag tc-methods__tag--paypal">PayPal</span>
+            <span class="tc-methods__tag tc-methods__tag--visa">VISA</span>
+            <span class="tc-methods__tag tc-methods__tag--amex">AMEX</span>
+            <span class="tc-methods__tag">MC</span>
+            <span class="tc-methods__tag">COD</span>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+
+  } @else {
+
+    <div class="tc-cart-empty">
+      <div class="tc-cart-empty__icon"><i class="fas fa-shopping-bag"></i></div>
+      <h3>Your cart is empty</h3>
+      <p>Add some products to get started.</p>
+      <a routerLink="/products" class="tc-cart-empty__btn">Browse Products</a>
+    </div>
+
+  }
+
+  <!-- Pickup & Delivery Options Modal -->
+  @if (showPickupModal) {
+    <div class="pickup-modal-overlay" (click)="closePickupModal()">
+      <div class="pickup-modal-card" (click)="$event.stopPropagation()">
+        <button type="button" class="close-btn" (click)="closePickupModal()" title="Close">
+          <i class="fas fa-times"></i>
+        </button>
+
+        <div class="pickup-modal-header">
+          <div class="pickup-icon-badge">
+            <i class="fas fa-shipping-fast"></i>
+          </div>
+          <h2>Pickup & Delivery Options</h2>
+          <p>Select your preferred delivery speed or pick up location</p>
+        </div>
+
+        <div class="pickup-options-list">
+          @for (opt of deliveryOptions; track opt.id) {
+            <div 
+              class="pickup-option-card" 
+              [class.active]="selectedDeliveryMode === opt.id" 
+              (click)="selectDeliveryMode(opt.id)">
+              
+              <div class="pickup-option-left">
+                <span class="pickup-opt-icon">
+                  <i class="fas" [class]="opt.icon"></i>
+                </span>
+                <div class="pickup-opt-info">
+                  <div class="pickup-opt-title">{{ opt.title }}</div>
+                  <div class="pickup-opt-desc">{{ opt.desc }}</div>
+                  <div class="pickup-opt-time"><i class="far fa-clock"></i> {{ opt.subtitle }}</div>
+                </div>
+              </div>
+
+              <div class="pickup-option-right">
+                <span class="pickup-opt-price" [class.free]="opt.price === 'FREE'">{{ opt.price }}</span>
+                <div class="radio-indicator">
+                  @if (selectedDeliveryMode === opt.id) {
+                    <i class="fas fa-check"></i>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="pickup-modal-footer">
+          <button type="button" class="btn-cancel-modal" (click)="closePickupModal()">Cancel</button>
+          <button type="button" class="btn-save-modal" (click)="confirmDeliveryOption()">Apply Choice</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,51 @@
+@import '../admin-shared.scss';
+
+.row-cancelled { background: #fef2f2 !important; }
+.reason-row td { background: #fef2f2; border-top: 0; padding: 0 24px 14px; }
+.cancel-reason-cell {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 14px; background: #fff;
+  border: 1px solid #fecaca; border-radius: 10px;
+  color: #991b1b; font-size: 0.88rem;
+}
+.cancel-reason-cell strong { margin-right: 4px; }
+
+.status-pill { @extend .count-pill; padding: 3px 10px; border-radius: 999px; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.4px; }
+.status-pill--pending   { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+.status-pill--progress  { background: #dbeafe; color: #1e3a8a; border-color: #bfdbfe; }
+.status-pill--shipped   { background: #ede9fe; color: #5b21b6; border-color: #ddd6fe; }
+.status-pill--delivered { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+.status-pill--cancelled { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+.status-pill--refunded  { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+
+.section-heading { font-size: 0.85rem; font-weight: 800; color: var(--admin-ink); text-transform: uppercase; letter-spacing: 0.8px; margin: 24px 0 12px; border-bottom: 1.5px solid var(--admin-line-soft); padding-bottom: 6px; }
+
+.address-card { background: #f8fafc; border: 1.5px solid var(--admin-line); padding: 20px; border-radius: 20px; margin-bottom: 24px; }
+.address-name { font-weight: 850; color: var(--admin-ink); margin-bottom: 6px; font-size: 1rem; }
+.address-line { font-size: 0.95rem; color: var(--admin-ink-2); line-height: 1.6; font-weight: 500; }
+
+.items-table { border: 1.5px solid var(--admin-line-soft); border-radius: 16px; overflow: hidden; }
+.item-row { display: flex; align-items: center; gap: 20px; padding: 16px; border-bottom: 1px solid var(--admin-line-soft); &:last-child { border-bottom: none; } }
+.item-thumb { width: 64px; height: 64px; border-radius: 14px; border: 1px solid var(--admin-line); overflow: hidden; flex-shrink: 0; background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: var(--admin-shadow-sm); }
+.item-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+.item-thumb__placeholder { font-size: 1.5rem; color: #cbd5e1; }
+.item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.item-name { font-weight: 800; color: var(--admin-ink); font-size: 1rem; letter-spacing: -0.2px; }
+.item-variant { font-size: 0.8rem; color: var(--admin-muted); font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.item-meta { font-size: 0.82rem; color: var(--admin-muted); font-weight: 700; i { color: #cbd5e1; } }
+.item-total { font-weight: 900; color: var(--admin-brand); font-size: 1.1rem; letter-spacing: -0.4px; }
+
+.premium-mat-select { width: 100%; }
+
+/* Timeline specifics */
+.timeline-head { display: flex; align-items: center; gap: 14px; }
+.ord-timeline { list-style: none; padding: 0; margin: 0; position: relative; }
+.ord-timeline::before { content: ''; position: absolute; left: 18px; top: 0; bottom: 0; width: 2px; background: var(--admin-line-soft); }
+.ord-step { position: relative; padding-left: 52px; padding-bottom: 32px; &:last-child { padding-bottom: 0; } }
+.ord-step__dot { position: absolute; left: 0; width: 38px; height: 38px; background: #fff; border: 2px solid var(--admin-line); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: var(--admin-muted); z-index: 1; }
+.ord-step.is-latest .ord-step__dot { border-color: var(--admin-brand); color: var(--admin-brand); box-shadow: 0 0 0 4px var(--admin-brand-soft); }
+.ord-step__head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.ord-step__from { font-size: 0.78rem; color: var(--admin-muted); font-weight: 600; }
+.ord-step__latest { font-size: 0.65rem; font-weight: 800; color: #fff; background: var(--admin-brand); padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.ord-step__note { background: #fafbfc; padding: 10px 14px; border-radius: 12px; font-size: 0.88rem; color: var(--admin-ink-2); font-style: italic; border-left: 3px solid var(--admin-brand); margin-bottom: 8px; }
+.ord-step__meta { display: flex; align-items: center; gap: 16px; font-size: 0.78rem; color: var(--admin-muted); font-weight: 600; i { margin-right: 4px; } }

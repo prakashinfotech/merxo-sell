@@ -1,0 +1,204 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Reusable UI Patterns — import in any feature SCSS that needs shared patterns.
+// All rules here are purely additive; they do NOT override global material
+// styles. Feature files that import this can @extend or copy these classes.
+// ─────────────────────────────────────────────────────────────────────────────
+@use 'tokens' as t;
+
+// ── KPI / Stat card ──────────────────────────────────────────────────────────
+// Usage: <div class="kpi-card"> <div class="kpi-value">42</div>
+//          <div class="kpi-label">Orders</div> </div>
+.kpi-card {
+  background: #fff;
+  border: 1px solid t.$admin-line;
+  border-radius: t.$r-lg;
+  padding: 22px 24px;
+  box-shadow: t.$shadow-md;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: box-shadow t.$transition-base, transform t.$transition-base;
+
+  &:hover { box-shadow: t.$shadow-lg; transform: translateY(-2px); }
+
+  .kpi-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: t.$r-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+
+  .kpi-value {
+    font-size: 1.9rem;
+    font-weight: 900;
+    color: t.$admin-ink;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  .kpi-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: t.$admin-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+
+  .kpi-delta {
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-top: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    &--up   { color: #059669; }
+    &--down { color: #dc2626; }
+  }
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+// ── Page header with breadcrumb ───────────────────────────────────────────────
+// <div class="page-header">
+//   <nav class="breadcrumb">...</nav>
+//   <div class="page-header__actions">...</div>
+// </div>
+.page-header {
+  margin-bottom: 24px;
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: t.$admin-muted;
+    font-weight: 600;
+    margin-bottom: 8px;
+
+    a { color: t.$admin-muted; text-decoration: none; &:hover { color: t.$admin-ink; } }
+    .sep { color: t.$admin-line; }
+    .current { color: t.$admin-ink; font-weight: 700; }
+  }
+}
+
+// ── Data table wrapper ────────────────────────────────────────────────────────
+// Re-exports the admin-shared patterns for files that can't import admin-shared.
+.data-table-card {
+  background: #fff;
+  border-radius: t.$r-lg;
+  border: 1px solid t.$admin-line;
+  box-shadow: t.$shadow-premium;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+// ── Status pill (standalone, no admin-shell scope) ────────────────────────────
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: t.$r-full;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.8;
+  }
+
+  @include t.status-pill-variants;
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.empty-panel {
+  padding: 64px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  color: t.$admin-muted;
+
+  .empty-panel__icon {
+    width: 80px;
+    height: 80px;
+    background: t.$admin-line-soft;
+    border-radius: t.$r-xl;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #cbd5e1;
+    margin-bottom: 4px;
+  }
+
+  h3 { font-size: 1.25rem; font-weight: 800; color: t.$admin-ink; margin: 0; }
+  p  { font-size: 0.95rem; max-width: 360px; margin: 0; }
+}
+
+// ── Skeleton loader ───────────────────────────────────────────────────────────
+.skeleton {
+  border-radius: t.$r-sm;
+  @include t.skeleton-shimmer;
+
+  &--line  { height: 14px; border-radius: t.$r-xs; margin-bottom: 8px; }
+  &--title { height: 22px; width: 60%; border-radius: t.$r-xs; }
+  &--card  { height: 120px; border-radius: t.$r-md; }
+  &--circle { border-radius: 50%; }
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border-bottom: 1px solid t.$admin-line-soft;
+
+  &:last-child { border-bottom: none; }
+}
+
+// ── Skeleton table (5 fake rows) ──────────────────────────────────────────────
+.skeleton-table {
+  padding: 0;
+
+  .skeleton-row {
+    .s-avatar { width: 40px; height: 40px; border-radius: t.$r-sm; flex-shrink: 0; @include t.skeleton-shimmer; }
+    .s-lines  { flex: 1; .skeleton--line:last-child { width: 45%; } }
+    .s-pill   { width: 72px; height: 22px; border-radius: t.$r-full; @include t.skeleton-shimmer; }
+    .s-btn    { width: 32px; height: 32px; border-radius: t.$r-sm; @include t.skeleton-shimmer; }
+  }
+}
+
+// ── Global overlay / modal backdrop ──────────────────────────────────────────
+// Shared by any feature that needs its own modal; mirrors admin-shared's overlay.
+.overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+}

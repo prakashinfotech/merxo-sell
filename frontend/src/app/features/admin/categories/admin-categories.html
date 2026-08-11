@@ -1,0 +1,290 @@
+<div class="admin-page">
+  <!-- Header -->
+  <div class="admin-page__header">
+    <div class="header-main">
+      <h1 class="admin-page__title">
+        <div class="title-icon title-icon--categories"><i class="fas fa-sitemap"></i></div>
+        <span>Categories</span>
+      </h1>
+      <p class="admin-page__subtitle">Manage the marketplace category tree — root groups and their sub-categories.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" (click)="openCreate()">
+        <i class="fas fa-plus"></i> Add Category
+      </button>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="admin-toolbar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        [(ngModel)]="searchTerm"
+        (input)="onFilterChanged()"
+        placeholder="Search by name, slug or parent..."
+        aria-label="Search categories" />
+    </div>
+    <div class="filter-actions">
+      <div class="scope-tabs">
+        <button [class.active]="scopeFilter === 'all'"   (click)="onScopeChange('all')">All</button>
+        <button [class.active]="scopeFilter === 'roots'" (click)="onScopeChange('roots')">Top-level</button>
+        <button [class.active]="scopeFilter === 'subs'"  (click)="onScopeChange('subs')">Sub-categories</button>
+      </div>
+      <button class="btn-refresh" (click)="resetFilters()" title="Reset filters">
+        <i class="fas fa-filter-circle-xmark"></i>
+      </button>
+      <button class="btn-refresh" (click)="load()" title="Refresh list">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- VIEW Modal -->
+  @if (viewing) {
+    <div class="admin-modal-overlay" (click)="closeView()">
+      <div class="admin-modal animate-slide-up" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <h3 class="modal-title">{{ viewing.name }}</h3>
+            <span class="modal-subtitle">/{{ viewing.slug }}</span>
+          </div>
+          <button class="modal-close" (click)="closeView()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="view-info-side">
+            <div class="info-row">
+              <div class="info-group">
+                <label>Type</label>
+                <div class="info-value bold">
+                  {{ viewing.parentCategoryId ? 'Sub-Category' : 'Top-Level' }}
+                </div>
+              </div>
+              <div class="info-group">
+                <label>Parent</label>
+                <div class="info-value">{{ viewing.parentName || '—' }}</div>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-group">
+                <label>Products</label>
+                <div class="info-value bold">{{ viewing.productCount }}</div>
+              </div>
+              <div class="info-group">
+                <label>Sub-categories</label>
+                <div class="info-value bold">{{ viewing.subCategoryCount }}</div>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-group">
+                <label>Sort Order</label>
+                <div class="info-value">{{ viewing.sortOrder }}</div>
+              </div>
+              <div class="info-group">
+                <label>Status</label>
+                <div class="info-value">
+                  <span class="status-indicator" [class.active]="viewing.isActive">
+                    {{ viewing.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="info-group">
+              <label>Image URL</label>
+              <div class="info-value">{{ viewing.imageUrl || 'Not set' }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-modal-cancel" (click)="closeView()">Close</button>
+          <button class="btn-modal-save" (click)="closeView(); openEdit(viewing)">
+            <i class="fas fa-pen"></i> Edit Category
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- CREATE / EDIT Modal -->
+  @if (showForm) {
+    <div class="admin-modal-overlay" (click)="cancelForm()">
+      <div class="admin-modal animate-slide-up" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <h3 class="modal-title">{{ editing ? 'Edit Category' : 'Add Category' }}</h3>
+            <span class="modal-subtitle">{{ editing ? 'Update name, parent or status' : 'Create a top-level group or sub-category' }}</span>
+          </div>
+          <button class="modal-close" (click)="cancelForm()">&times;</button>
+        </div>
+        <div class="modal-body">
+          @if (error) { <div class="alert alert-error mb-20">{{ error }}</div> }
+          <div class="form-grid">
+            <div class="form-group span-2">
+              <label>Category Name</label>
+              <input [(ngModel)]="form.name" maxlength="120" placeholder="e.g. Women's Sweatshirts" />
+            </div>
+            <div class="form-group">
+              <label>Slug (URL fragment)</label>
+              <input [(ngModel)]="form.slug" maxlength="140" placeholder="auto-generated if empty" />
+            </div>
+            <div class="form-group">
+              <label>Sort Order</label>
+              <input [(ngModel)]="form.sortOrder" type="number" min="0" max="1000" />
+            </div>
+            <div class="form-group span-2">
+              <mat-form-field appearance="outline" class="mat-dd">
+                <mat-label>Parent Category</mat-label>
+                <mat-select [(ngModel)]="form.parentCategoryId">
+                  <mat-option [value]="null">— None (top-level) —</mat-option>
+                  @for (root of rootCategories; track root.categoryId) {
+                    <mat-option [value]="root.categoryId"
+                                [disabled]="!!editing && editing.categoryId === root.categoryId">
+                      {{ root.name }}
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="form-group span-2">
+              <label>Image URL (optional)</label>
+              <input [(ngModel)]="form.imageUrl" placeholder="https://..." />
+            </div>
+            <div class="form-group span-2">
+              <div class="status-toggle-box">
+                <label class="toggle-switch">
+                  <input type="checkbox" [(ngModel)]="form.isActive" />
+                  <span class="slider round"></span>
+                </label>
+                <div class="toggle-text">
+                  <span class="toggle-label">Active</span>
+                  <span class="toggle-desc">Inactive categories are hidden from the buyer-facing storefront.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-modal-cancel" (click)="cancelForm()">Discard</button>
+          <button class="btn-modal-save" (click)="save()" [disabled]="saving">
+            <i class="fas fa-{{ saving ? 'spinner fa-spin' : 'save' }}"></i>
+            {{ saving ? 'Saving...' : (editing ? 'Save Changes' : 'Add Category') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Data Table -->
+  <div class="admin-content-card">
+    @if (loading) {
+      <div class="loading-state">
+        <div class="loader"></div>
+        <span>Loading category tree...</span>
+      </div>
+    } @else if (!filteredCategories.length) {
+      <div class="empty-state">
+        <div class="empty-illustration"><i class="fas fa-layer-group"></i></div>
+        <h3>No Categories Found</h3>
+        <p>{{ searchTerm || scopeFilter !== 'all' ? 'No categories match your filters.' : 'Add your first category to get started.' }}</p>
+        <button class="btn-primary" (click)="openCreate()">Add Category</button>
+      </div>
+    } @else {
+      <div class="table-overflow">
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Parent</th>
+              <th>Slug</th>
+              <th>Products</th>
+              <th>Sub-categories</th>
+              <th>Order</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of pagedCategories; track trackById($index, c)) {
+              <tr [class.row-inactive]="!c.isActive" [class.row-sub]="c.parentCategoryId != null">
+                <td>
+                  <div class="brand-info">
+                    @if (c.parentCategoryId == null) {
+                      <button class="btn-toggle" (click)="toggleRow(c.categoryId)" [class.expanded]="isExpanded(c.categoryId)">
+                        <i class="fas fa-chevron-right"></i>
+                      </button>
+                      <span class="cat-badge cat-badge--root"><i class="fas fa-folder"></i></span>
+                    } @else {
+                      <div class="indent-guide"></div>
+                      <span class="cat-badge cat-badge--sub"><i class="fas fa-folder-tree"></i></span>
+                    }
+                    <span class="name">{{ c.name }}</span>
+                  </div>
+                </td>
+                <td>
+                  @if (c.parentName) {
+                    <span class="parent-tag">{{ c.parentName }}</span>
+                  } @else {
+                    <span class="muted">Top-level</span>
+                  }
+                </td>
+                <td>
+                  <code class="slug-tag">{{ c.slug }}</code>
+                </td>
+                <td>
+                  <span class="count-pill">{{ c.productCount }}</span>
+                </td>
+                <td>
+                  <span class="count-pill">{{ c.subCategoryCount }}</span>
+                </td>
+                <td>
+                  <span class="muted">{{ c.sortOrder }}</span>
+                </td>
+                <td>
+                  <span class="status-indicator" [class.active]="c.isActive">
+                    {{ c.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-set">
+                    @if (c.parentCategoryId == null) {
+                      <button class="btn-action add-sub" (click)="openCreateSubFor(c)" title="Add sub-category">
+                        <i class="fas fa-plus"></i>
+                      </button>
+                    }
+                    <button class="btn-action view" (click)="openView(c)" title="View details">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-action edit" (click)="openEdit(c)" title="Edit category">
+                      <i class="fas fa-pen"></i>
+                    </button>
+                    <button
+                      class="btn-action toggle"
+                      (click)="toggleActive(c)"
+                      [title]="c.isActive ? 'Deactivate' : 'Activate'">
+                      <i class="fas" [class.fa-pause]="c.isActive" [class.fa-play]="!c.isActive"></i>
+                    </button>
+                    <button
+                      class="btn-action hide"
+                      (click)="delete(c)"
+                      [disabled]="c.productCount > 0 || c.subCategoryCount > 0"
+                      title="Soft-delete (deactivate)">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="portal-pagination">
+        <span>Showing {{ ((page - 1) * pageSize) + 1 }}-{{ ((page - 1) * pageSize) + pagedCategories.length }} of {{ displayedCategories.length }}</span>
+        <div class="portal-pagination__actions">
+          <button (click)="goPage(page - 1)" [disabled]="page === 1">‹</button>
+          <span>Page {{ page }} / {{ totalPages }}</span>
+          <button (click)="goPage(page + 1)" [disabled]="page === totalPages">›</button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

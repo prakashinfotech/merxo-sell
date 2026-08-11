@@ -1,0 +1,112 @@
+.not-found {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.not-found__card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 56px 48px;
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+  border: 1px solid #f1f5f9;
+
+  @media (max-width: 480px) { padding: 40px 24px; border-radius: 18px; }
+}
+
+.not-found__visual {
+  position: relative;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.not-found__code {
+  font-size: 7rem;
+  font-weight: 900;
+  letter-spacing: -4px;
+  color: #f1f5f9;
+  line-height: 1;
+  user-select: none;
+
+  @media (max-width: 480px) { font-size: 5rem; }
+}
+
+.not-found__icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--primary, #008ecc) 0%, var(--accent, #00bcd4) 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #fff;
+  box-shadow: 0 12px 32px rgba(0, 142, 204, 0.25);
+  margin-top: -32px;
+  position: relative;
+  z-index: 1;
+}
+
+.not-found__title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 12px;
+  letter-spacing: -0.4px;
+}
+
+.not-found__desc {
+  color: #64748b;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 32px;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.not-found__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-home,
+.btn-browse {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+
+  &:focus-visible { outline: 3px solid var(--primary, #008ecc); outline-offset: 3px; }
+}
+
+.btn-home {
+  background: var(--primary, #008ecc);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(0, 142, 204, 0.2);
+
+  &:hover { background: var(--primary-dark, #006999); transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0, 142, 204, 0.3); }
+}
+
+.btn-browse {
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1.5px solid #e2e8f0;
+
+  &:hover { background: #f1f5f9; border-color: #cbd5e1; transform: translateY(-2px); }
+}

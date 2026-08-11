@@ -1,0 +1,113 @@
+<div class="admin-page">
+  <div class="admin-page__header">
+    <div class="header-main">
+      <h1 class="admin-page__title">
+        <div class="title-icon title-icon--reviews"><i class="fas fa-star"></i></div>
+        <span>Customer Reviews</span>
+      </h1>
+      <p class="admin-page__subtitle">Monitor and manage feedback across all marketplace products.</p>
+    </div>
+    <div class="header-actions">
+      <div class="count-pill">
+        <strong>{{ reviews.length }}</strong> Reviews
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-toolbar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" [(ngModel)]="searchTerm" (keyup.enter)="load()" placeholder="Search by product, buyer, email or comment keyword..." aria-label="Search reviews">
+    </div>
+    
+    <div class="filter-actions">
+      <div class="premium-select-wrap">
+        <select [(ngModel)]="ratingFilter" (change)="load()" class="premium-select">
+          <option [value]="null">All Ratings</option>
+          @for (r of [5,4,3,2,1]; track r) {
+            <option [value]="r">{{ r }} Stars</option>
+          }
+        </select>
+      </div>
+      <button class="btn-refresh" (click)="resetFilters()" title="Reset Filters">
+        <i class="fas fa-undo"></i>
+      </button>
+      <button class="btn-refresh" (click)="load()" title="Refresh Data">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="admin-content-card">
+    <div class="table-overflow">
+      @if (loading) {
+        <div class="admin-loading-state">
+          <div class="premium-spinner"></div>
+          <p>Retrieving feedback data...</p>
+        </div>
+      } @else if (!reviews.length) {
+        <div class="empty-state">
+          <div class="empty-illustration"><i class="fas fa-star"></i></div>
+          <h3>No reviews found</h3>
+          <p>Adjust your filters or search terms to see more results.</p>
+        </div>
+      } @else {
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>Product Details</th>
+              <th>Buyer Information</th>
+              <th>Seller / Store</th>
+              <th>Rating</th>
+              <th>Comment Preview</th>
+              <th>Date Posted</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of pagedReviews; track r.reviewId) {
+              <tr class="animate-in" [style.animation-delay]="($index * 0.05) + 's'">
+                <td>
+                  <div class="prod-cell">
+                    <strong>{{ r.productName }}</strong>
+                    <span class="muted">#{{ r.productId }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="cust-cell">
+                    <strong>{{ r.userName }}</strong>
+                    <span class="muted">{{ r.userEmail }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="seller-badge">{{ r.storeName || 'Marketplace' }}</span>
+                </td>
+                <td>
+                  <div class="rating-badge">
+                    {{ r.rating }} <i class="fas fa-star"></i>
+                  </div>
+                </td>
+                <td>
+                  <div class="comment-preview" [title]="r.comment">
+                    {{ r.comment || '—' }}
+                  </div>
+                </td>
+                <td>
+                  <span class="date-text">{{ r.createdAt | date:'mediumDate' }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <div class="portal-pagination">
+          <span>Showing {{ ((page - 1) * pageSize) + 1 }}-{{ ((page - 1) * pageSize) + pagedReviews.length }} of {{ reviews.length }}</span>
+          <div class="portal-pagination__actions">
+            <button (click)="goPage(page - 1)" [disabled]="page === 1">‹</button>
+            <span>Page {{ page }} / {{ totalPages }}</span>
+            <button (click)="goPage(page + 1)" [disabled]="page === totalPages">›</button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

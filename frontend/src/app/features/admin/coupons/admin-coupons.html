@@ -1,0 +1,282 @@
+<div class="admin-page">
+  <div class="admin-page__header">
+    <div class="header-main">
+      <h1 class="admin-page__title">
+        <div class="title-icon title-icon--coupons"><i class="fas fa-ticket-alt"></i></div>
+        <span>Coupons & Promotions</span>
+      </h1>
+      <p class="admin-page__subtitle">Create and manage marketplace-wide discount codes and buyer incentives.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" (click)="openCreate()">
+        <i class="fas fa-plus"></i> Create New Coupon
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary KPI strip -->
+  <div class="coupon-summary">
+    <div class="summary-card summary-card--brand">
+      <div class="summary-card__icon"><i class="fas fa-ticket"></i></div>
+      <div>
+        <span class="summary-card__label">Total Coupons</span>
+        <div class="summary-card__value">{{ coupons.length }}</div>
+      </div>
+    </div>
+    <div class="summary-card summary-card--green">
+      <div class="summary-card__icon"><i class="fas fa-circle-check"></i></div>
+      <div>
+        <span class="summary-card__label">Active</span>
+        <div class="summary-card__value">{{ activeCount }}</div>
+      </div>
+    </div>
+    <div class="summary-card summary-card--amber">
+      <div class="summary-card__icon"><i class="fas fa-fire"></i></div>
+      <div>
+        <span class="summary-card__label">Redemptions</span>
+        <div class="summary-card__value">{{ totalRedemptions }}</div>
+      </div>
+    </div>
+    <div class="summary-card summary-card--navy">
+      <div class="summary-card__icon"><i class="fas fa-piggy-bank"></i></div>
+      <div>
+        <span class="summary-card__label">Buyer Savings</span>
+        <div class="summary-card__value">{{ totalSavings | currency:'INR':'symbol':'1.0-0' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar (search + filter chips + refresh) -->
+  <div class="admin-content-card section-toolbar">
+    <div class="toolbar-search">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search by code or title…" [(ngModel)]="searchTerm" name="couponSearch" aria-label="Search coupons">
+    </div>
+    <div class="filter-chips">
+      <button class="chip" [class.is-active]="statusFilter === 'all'"
+              (click)="statusFilter = 'all'">All <span class="chip__count">{{ coupons.length }}</span></button>
+      <button class="chip" [class.is-active]="statusFilter === 'active'"
+              (click)="statusFilter = 'active'">Active <span class="chip__count">{{ activeCount }}</span></button>
+      <button class="chip" [class.is-active]="statusFilter === 'paused'"
+              (click)="statusFilter = 'paused'">Paused <span class="chip__count">{{ coupons.length - activeCount - expiredCount }}</span></button>
+      <button class="chip" [class.is-active]="statusFilter === 'expired'"
+              (click)="statusFilter = 'expired'">Expired <span class="chip__count">{{ expiredCount }}</span></button>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn-refresh" (click)="load()" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+    </div>
+  </div>
+
+  <!-- Coupons Table -->
+  <div class="admin-content-card">
+    <div class="table-overflow">
+      @if (loading) {
+        <div class="admin-loading-state">
+          <div class="premium-spinner"></div>
+          <p>Loading coupons...</p>
+        </div>
+      } @else if (!filteredCoupons.length) {
+        <div class="empty-state">
+          <div class="empty-illustration"><i class="fas fa-ticket-alt"></i></div>
+          <p>No coupons {{ searchTerm || statusFilter !== 'all' ? 'match your filters' : 'yet' }}.</p>
+          @if (!searchTerm && statusFilter === 'all') {
+            <button class="btn-primary btn-small" (click)="openCreate()">
+              <i class="fas fa-plus"></i> Create your first coupon
+            </button>
+          }
+        </div>
+      } @else {
+        <table class="premium-table coupon-table">
+          <thead>
+            <tr>
+              <th>Coupon</th>
+              <th>Discount</th>
+              <th class="col-usage">Usage</th>
+              <th>Validity</th>
+              <th>Performance</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of filteredCoupons; track c.couponId) {
+              <tr class="animate-in" [style.animation-delay]="($index * 0.04) + 's'">
+                <td>
+                  <div class="coupon-cell">
+                    <span class="code-pill">{{ c.couponCode }}</span>
+                    <span class="coupon-title">{{ c.title }}</span>
+                    @if (c.description) { <small class="muted ellipsis">{{ c.description }}</small> }
+                  </div>
+                </td>
+                <td>
+                  <div class="discount-cell">
+                    @if (c.discountType === 'Percentage') {
+                      <span class="val">{{ c.discountValue }}% OFF</span>
+                    } @else {
+                      <span class="val">{{ c.discountValue | currency:'INR':'symbol':'1.0-0' }} OFF</span>
+                    }
+                    @if (c.minimumPurchaseAmount) {
+                      <small class="muted">Min spend {{ c.minimumPurchaseAmount | currency:'INR':'symbol':'1.0-0' }}</small>
+                    }
+                  </div>
+                </td>
+                <td class="col-usage">
+                  <div class="usage-stack">
+                    <div class="usage-stack__head">
+                      <strong>{{ c.usedCount }}</strong>
+                      <span class="muted">/ {{ c.usageLimit || '∞' }}</span>
+                    </div>
+                    @if (c.usageLimit) {
+                      <div class="usage-bar"><span [style.width.%]="usagePct(c)"></span></div>
+                    } @else {
+                      <div class="usage-bar usage-bar--infinite"><span></span></div>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="date-stack">
+                    <span><i class="fas fa-play"></i> {{ c.startDate | date:'mediumDate' }}</span>
+                    <span class="muted"><i class="fas fa-stop"></i>
+                      {{ c.expiryDate ? (c.expiryDate | date:'mediumDate') : 'Indefinite' }}
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <div class="perf-cell">
+                    <span class="perf-savings">{{ statFor(c.couponId)?.totalDiscountGiven || 0 | currency:'INR':'symbol':'1.0-0' }} saved</span>
+                    @if (statFor(c.couponId)?.lastUsedAt) {
+                      <small class="muted">Last: {{ statFor(c.couponId)?.lastUsedAt | date:'shortDate' }}</small>
+                    } @else {
+                      <small class="muted">No redemptions yet</small>
+                    }
+                  </div>
+                </td>
+                <td>
+                  @if (daysToExpiry(c) === -1) {
+                    <span class="status-pill status-pill--cancelled">Expired</span>
+                  } @else if (!c.isActive) {
+                    <span class="status-pill status-pill--paused">Paused</span>
+                  } @else {
+                    <span class="status-pill status-pill--active">Active</span>
+                    @if (daysToExpiry(c) !== null && daysToExpiry(c)! <= 7) {
+                      <small class="warn-note"><i class="fas fa-clock"></i> {{ daysToExpiry(c) }}d left</small>
+                    }
+                  }
+                </td>
+                <td class="text-right">
+                  <div class="action-set">
+                    <button class="btn-action edit" (click)="edit(c)" title="Edit"><i class="fas fa-pen"></i></button>
+                    <button class="btn-action hide" (click)="remove(c)" title="Delete"><i class="fas fa-trash"></i></button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Create / Edit Modal -->
+@if (showForm) {
+  <div class="admin-modal-overlay" (click)="closeForm()">
+    <div class="admin-modal admin-modal--wide animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="timeline-head">
+          <div class="title-icon title-icon--coupons"><i class="fas fa-ticket-alt"></i></div>
+          <div>
+            <h3 class="modal-title">{{ editing ? 'Edit Coupon' : 'Create Coupon' }}</h3>
+            <span class="modal-subtitle">{{ editing ? 'Update discount terms and usage limits.' : 'Define a discount code, value, and validity window.' }}</span>
+          </div>
+        </div>
+        <button class="modal-close" (click)="closeForm()" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+      <form (ngSubmit)="save()" class="modal-body">
+        @if (error) { <div class="alert alert-error">{{ error }}</div> }
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Coupon Code</label>
+            <input type="text" name="code" [(ngModel)]="form.couponCode" [readonly]="!!editing" placeholder="e.g. SAVE20">
+          </div>
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" name="title" [(ngModel)]="form.title" placeholder="Public title">
+          </div>
+          <div class="form-group span-2">
+            <label>Description</label>
+            <textarea name="desc" [(ngModel)]="form.description" rows="2" placeholder="Internal or detailed description..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Discount Type</label>
+            <select name="type" [(ngModel)]="form.discountType">
+              <option value="FixedAmount">Fixed Amount</option>
+              <option value="Percentage">Percentage</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Value</label>
+            <input type="number" name="value" [(ngModel)]="form.discountValue">
+          </div>
+          @if (form.discountType === 'FixedAmount') {
+            <div class="form-group">
+              <label>Currency</label>
+              <select name="currency" [(ngModel)]="form.currencyCode">
+                <option value="CAD">CAD – Canadian Dollar</option>
+                <option value="USD">USD – US Dollar</option>
+                <option value="EUR">EUR – Euro</option>
+                <option value="GBP">GBP – British Pound</option>
+                <option value="INR">INR – Indian Rupee</option>
+                <option value="AUD">AUD – Australian Dollar</option>
+                <option value="JPY">JPY – Japanese Yen</option>
+              </select>
+            </div>
+          }
+          <div class="form-group">
+            <label>Min Purchase</label>
+            <input type="number" name="min" [(ngModel)]="form.minimumPurchaseAmount">
+          </div>
+          <div class="form-group">
+            <label>Usage Limit</label>
+            <input type="number" name="limit" [(ngModel)]="form.usageLimit">
+          </div>
+          <div class="form-group">
+            <mat-form-field class="app-datepicker">
+              <mat-label>Start Date</mat-label>
+              <input matInput [matDatepicker]="startDp" [ngModel]="startDateVal" (dateChange)="onStartDateChange($event.value)" name="start">
+              <mat-datepicker-toggle matIconSuffix [for]="startDp"></mat-datepicker-toggle>
+              <mat-datepicker #startDp></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="form-group">
+            <mat-form-field class="app-datepicker">
+              <mat-label>Expiry Date</mat-label>
+              <input matInput [matDatepicker]="expiryDp" [ngModel]="expiryDateVal" (dateChange)="onExpiryDateChange($event.value)" name="expiry">
+              <mat-datepicker-toggle matIconSuffix [for]="expiryDp"></mat-datepicker-toggle>
+              <mat-datepicker #expiryDp></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="form-group span-2">
+            <div class="status-toggle-box">
+              <label class="toggle-switch">
+                <input type="checkbox" name="active" [(ngModel)]="form.isActive">
+                <span class="slider"></span>
+              </label>
+              <div class="toggle-text">
+                <span class="toggle-label">Active &amp; enabled</span>
+                <span class="toggle-desc">Disabled coupons can&rsquo;t be applied to new orders.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-cancel" (click)="closeForm()">Cancel</button>
+        <button type="submit" class="btn-modal-save" (click)="save()" [disabled]="saving">
+          <i class="fas" [class.fa-save]="!saving" [class.fa-spinner]="saving" [class.fa-spin]="saving"></i>
+          {{ editing ? 'Update Coupon' : 'Create Coupon' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

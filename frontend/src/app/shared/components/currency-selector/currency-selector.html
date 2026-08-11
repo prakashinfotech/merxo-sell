@@ -1,0 +1,33 @@
+<div class="currency-selector">
+  <div 
+    class="currency-trigger" 
+    [class.is-open]="isOpen" 
+    (click)="toggleDropdown()"
+    role="button"
+    aria-haspopup="listbox"
+    [attr.aria-expanded]="isOpen">
+    
+    <span class="current-code">{{ (selected$ | async)?.currencyCode }}</span>
+    <i class="fas fa-chevron-down chevron"></i>
+  </div>
+
+  @if (isOpen) {
+    <div class="currency-dropdown" role="listbox">
+      @for (c of (currencies$ | async) ?? []; track c.currencyCode) {
+        <div 
+          class="currency-option" 
+          [class.selected]="(selected$ | async)?.currencyCode === c.currencyCode"
+          (click)="selectCurrency(c.currencyCode)"
+          role="option">
+          
+          <span class="option-code">{{ c.currencyCode }}</span>
+          <span class="option-name">{{ c.currencyName }}</span>
+          
+          @if ((selected$ | async)?.currencyCode === c.currencyCode) {
+            <i class="fas fa-check check-icon"></i>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

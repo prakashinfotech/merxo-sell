@@ -1,0 +1,413 @@
+<div class="admin-page">
+  <div class="dashboard-welcome mb-40">
+    <div class="welcome-text">
+      <h1 class="welcome-title">Customer Orders <span class="title-badge">{{ orders.length }} Total</span></h1>
+      <p class="welcome-subtitle">Manage customer transactions, track shipping, and update order statuses.</p>
+    </div>
+    <div class="header-actions">
+      <div class="header-stats-mini">
+        <div class="mini-stat">
+          <span class="label">Processing</span>
+          <span class="value">{{ processingCount }} Orders</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="order-management-card">
+    <!-- Search & Filters Toolbar -->
+    <div class="orders-toolbar">
+      <div class="search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" [(ngModel)]="searchTerm" (keyup.enter)="applyFilters()"
+          placeholder="Order #, Buyer, Email..." class="modern-input">
+      </div>
+
+      <div class="filter-actions">
+        <mat-form-field appearance="outline" class="premium-mat-select">
+          <mat-select [(ngModel)]="statusFilter" (selectionChange)="applyFilters()" placeholder="All Statuses"
+            panelClass="premium-dropdown-panel">
+            <mat-option value="">All Statuses</mat-option>
+            <mat-option value="Pending">Pending</mat-option>
+            <mat-option value="Processing">Processing</mat-option>
+            <mat-option value="Shipped">Shipped</mat-option>
+            <mat-option value="Delivered">Delivered</mat-option>
+            <mat-option value="Cancelled">Cancelled</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button class="btn-action-primary" (click)="applyFilters()" [disabled]="loading">
+          <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+        </button>
+      </div>
+    </div>
+
+    @if (error) {
+    <div class="orders-alert-error">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>{{ error }}</span>
+      <button class="close-alert" (click)="error = ''">&times;</button>
+    </div>
+    }
+
+    <!-- Orders Table -->
+    <div class="orders-table-container">
+      @if (loading) {
+      <div class="orders-loading-state">
+        <div class="premium-spinner"></div>
+        <p>Retrieving your order data...</p>
+      </div>
+      } @else {
+      <table class="premium-orders-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Order Date</th>
+            <th>Earnings</th>
+            <th>Items</th>
+            <th>Status</th>
+            <th class="text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (o of pagedOrders; track o.orderId) {
+          <tr class="order-row animate-in" [style.animation-delay]="($index * 0.05) + 's'">
+            <td class="id-cell">
+              <span class="order-number">#{{ o.orderId }}</span>
+            </td>
+            <td class="customer-cell">
+              <div class="cust-info">
+                <span class="cust-name">{{ o.buyerName }}</span>
+                <span class="cust-email">{{ o.buyerEmail }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="date-stack">
+                <span class="main-date">{{ o.createdAt | date:'mediumDate' }}</span>
+                <span class="sub-date">{{ o.createdAt | date:'shortTime' }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="revenue-stack">
+                <span class="rev-amount">CA${{ o.sellerRevenueCAD | number:'1.2-2' }}</span>
+                <span class="rev-label">Net Sales</span>
+              </div>
+            </td>
+            <td>
+              <div class="items-badge">
+                <i class="fas fa-shopping-bag"></i>
+                <span>{{ o.itemCount }} {{ o.itemCount === 1 ? 'Item' : 'Items' }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="status-pill" [attr.data-status]="statusVariant(o.status)">
+                {{ o.status }}
+              </span>
+            </td>
+            <td class="text-right">
+              <div class="action-set">
+                <button class="btn-row-action" (click)="openTimeline(o)" title="Status timeline">
+                  <i class="fas fa-stream"></i>
+                </button>
+                <button class="btn-row-action" (click)="viewDetail(o.orderId)" title="View details">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="7">
+              <div class="orders-empty-state">
+                <div class="empty-icon"><i class="fas fa-receipt"></i></div>
+                <h3>No Orders Found</h3>
+                <p>Your filter didn't match any recent transactions.</p>
+                <button class="btn-outline" (click)="resetFilters()">Clear Filters</button>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      @if (orders.length) {
+      <app-pagination
+        [page]="page"
+        [pageSize]="pageSize"
+        [totalCount]="orders.length"
+        (pageChange)="goPage($event)">
+      </app-pagination>
+      }
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Premium Detail Modal -->
+@if (selectedOrder || loadingDetail) {
+<div class="order-modal-overlay" (click)="closeDetail()" @fadeScale>
+  <div class="order-modal-card" (click)="$event.stopPropagation()">
+    @if (loadingDetail) {
+    <div class="modal-loading">
+      <div class="premium-spinner"></div>
+    </div>
+    } @else if (selectedOrder) {
+    <div class="modal-head">
+      <div class="head-left">
+        <div class="order-tag">Order #{{ selectedOrder.orderId }}</div>
+        <span class="status-pill big" [attr.data-status]="statusVariant(selectedOrder.status)">
+          {{ selectedOrder.status }}
+        </span>
+      </div>
+      <button class="head-close" (click)="closeDetail()"><i class="fas fa-times"></i></button>
+    </div>
+
+    <div class="modal-content">
+      <div class="content-grid">
+        <!-- Left: Information Cards -->
+        <div class="grid-side">
+          <div class="detail-card">
+            <div class="card-header"><i class="fas fa-user"></i> Customer Info</div>
+            <div class="card-body">
+              <div class="info-item">
+                <span class="lbl">Name</span>
+                <span class="val">{{ selectedOrder.buyerName }}</span>
+              </div>
+              <div class="info-item">
+                <span class="lbl">Email</span>
+                <span class="val">{{ selectedOrder.buyerEmail }}</span>
+              </div>
+              @if (selectedOrder.buyerPhone) {
+              <div class="info-item">
+                <span class="lbl">Phone</span>
+                <span class="val">{{ selectedOrder.buyerPhone }}</span>
+              </div>
+              }
+            </div>
+          </div>
+
+          <div class="detail-card mt-24">
+            <div class="card-header"><i class="fas fa-map-marker-alt"></i> Shipping Address</div>
+            @if (selectedOrder.shippingAddress) {
+            <div class="card-body">
+              <div class="addr-block">
+                <div class="addr-name">{{ selectedOrder.shippingAddress.fullName }}</div>
+                <div class="addr-line">{{ selectedOrder.shippingAddress.addressLine1 }}</div>
+                @if (selectedOrder.shippingAddress.addressLine2) {
+                <div class="addr-line">{{ selectedOrder.shippingAddress.addressLine2 }}</div>
+                }
+                <div class="addr-city">{{ selectedOrder.shippingAddress.city }}, {{ selectedOrder.shippingAddress.state
+                  }} {{ selectedOrder.shippingAddress.postalCode }}</div>
+                <div class="addr-country">{{ selectedOrder.shippingAddress.country }}</div>
+              </div>
+            </div>
+            } @else {
+            <div class="card-body text-muted italic">No address provided.</div>
+            }
+          </div>
+        </div>
+
+        <!-- Right: Items List -->
+        <div class="grid-main">
+          <div class="items-container">
+            <div class="container-title">My Items in this Order</div>
+            <div class="items-list-modern">
+              @for (item of selectedOrder.items; track item.orderItemId) {
+              <div class="order-item-card">
+                <div class="item-visual">
+                  <img [src]="item.primaryImageUrl || 'assets/images/placeholder-product.png'" alt="Product">
+                </div>
+                <div class="item-details">
+                  <div class="item-title">{{ item.productName }}</div>
+                  @if (item.variantInfo) {
+                  <div class="item-meta">{{ item.variantInfo }}</div>
+                  }
+                  <div class="item-math">
+                    <span class="qty">Qty: {{ item.quantity }}</span>
+                    <span class="unit-price">@ CA${{ item.unitPriceCAD | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+                <div class="item-sum">
+                  CA${{ (item.quantity * item.unitPriceCAD) | number:'1.2-2' }}
+                </div>
+              </div>
+              }
+            </div>
+
+            <div class="order-financials">
+              <div class="fin-row total-row">
+                <span>My Sales Total</span>
+                <span>CA${{ selectedOrder.sellerRevenueCAD | number:'1.2-2' }}</span>
+              </div>
+              <div class="fin-note">Values are calculated and authorized in CAD</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-modal-close" (click)="closeDetail()">Done</button>
+    </div>
+    }
+  </div>
+</div>
+}
+
+<!-- Status update modal -->
+@if (statusModalOpen && statusModalOrder) {
+<div class="order-modal-overlay" (click)="closeStatusModal()" @fadeScale>
+  <div class="order-modal-card modern-small" (click)="$event.stopPropagation()">
+    <div class="modal-head border-none">
+      <div class="head-brand">
+        <div class="brand-visual bg-blue-grad"><i class="fas fa-truck-loading"></i></div>
+        <div class="brand-text">
+          <h2>Update Logistics</h2>
+          <p>Order #{{ statusModalOrder.orderId }}</p>
+        </div>
+      </div>
+      <button class="head-close-round" (click)="closeStatusModal()"><i class="fas fa-times"></i></button>
+    </div>
+
+    <div class="modal-body-content p-40">
+      <div class="form-section">
+        <div class="form-field">
+          <label class="field-label-premium">NEW STATUS</label>
+          <mat-form-field appearance="outline" class="premium-mat-select">
+            <mat-select [(ngModel)]="pendingStatus" placeholder="Select Status" panelClass="premium-dropdown-panel">
+              @for (s of statuses; track $index) {
+              <mat-option [value]="s">{{ s }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-field mt-32">
+          <label class="field-label-premium">MESSAGE FOR CUSTOMER</label>
+          <textarea class="premium-textarea-modern" rows="5" maxlength="1000" [(ngModel)]="pendingNote"
+            placeholder="Share shipment details or a friendly update..."></textarea>
+          <p class="field-hint-premium">A notification email will be sent to the buyer automatically.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer-premium">
+      <button class="btn-premium-ghost" (click)="closeStatusModal()" [disabled]="savingStatus">Dismiss</button>
+      <button class="btn-premium-solid" (click)="saveStatus()" [disabled]="savingStatus">
+        @if (savingStatus) {
+        <span><i class="fas fa-circle-notch fa-spin"></i> Updating...</span>
+        } @else {
+        <span>Apply Status Change</span>
+        }
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Cancel modal -->
+@if (cancelModalOpen && cancelModalOrder) {
+<div class="order-modal-overlay" (click)="closeCancelModal()" @fadeScale>
+  <div class="order-modal-card modern-small" (click)="$event.stopPropagation()">
+    <div class="modal-head border-none">
+      <div class="head-brand">
+        <div class="brand-visual bg-red-grad"><i class="fas fa-ban"></i></div>
+        <div class="brand-text">
+          <h2>Order Cancellation</h2>
+          <p>Reviewing order #{{ cancelModalOrder.orderId }}</p>
+        </div>
+      </div>
+      <button class="head-close-round" (click)="closeCancelModal()"><i class="fas fa-times"></i></button>
+    </div>
+
+    <div class="modal-body-content p-40">
+      <div class="premium-alert warning">
+        <div class="alert-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="alert-msg">
+          Cancelling an order is a serious action. The customer will be refunded and the items will be returned to your
+          active inventory.
+        </div>
+      </div>
+
+      <div class="form-field mt-32">
+        <label class="field-label-premium">REASON FOR CANCELLATION <span class="req">*</span></label>
+        <textarea class="premium-textarea-modern" rows="5" maxlength="1000" [(ngModel)]="cancelReason"
+          placeholder="Provide a reason for the customer (e.g., out of stock, inventory error)..."></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer-premium">
+      <button class="btn-premium-ghost" (click)="closeCancelModal()" [disabled]="cancellingOrder">Keep Order</button>
+      <button class="btn-premium-danger" (click)="confirmCancel()" [disabled]="cancellingOrder || !cancelReason.trim()">
+        @if (cancellingOrder) {
+        <i class="fas fa-circle-notch fa-spin"></i> Processing...
+        } @else {
+        Confirm Cancellation
+        }
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Timeline modal -->
+@if (timelineOpen) {
+<div class="admin-modal-overlay" (click)="closeTimeline()">
+  <div class="admin-modal admin-modal--timeline" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="timeline-head">
+        <div class="title-icon title-icon--orders"><i class="fas fa-route"></i></div>
+        <div>
+          <h3 class="modal-title">Order Timeline</h3>
+          <span class="modal-subtitle">Order #{{ timelineForOrderId }} · {{ timeline.length }} {{ timeline.length === 1 ? 'event' : 'events' }}</span>
+        </div>
+      </div>
+      <button class="modal-close" (click)="closeTimeline()" title="Close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      @if (loadingTimeline) {
+      <div class="loading-state"><div class="loader"></div><span>Loading order history…</span></div>
+      } @else if (!timeline.length) {
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-history"></i></div>
+        <p>No history entries yet for this order.</p>
+      </div>
+      } @else {
+      <ol class="ord-timeline">
+        @for (h of timeline; track trackHistory($index, h); let isLast = $last) {
+        <li class="ord-step" [attr.data-status]="statusVariant(h.toStatus)" [class.is-latest]="isLast">
+          <div class="ord-step__dot">
+            <i class="fas" [class.fa-circle-check]="statusVariant(h.toStatus) === 'delivered'"
+                            [class.fa-truck]="statusVariant(h.toStatus) === 'shipped'"
+                            [class.fa-clock]="statusVariant(h.toStatus) === 'pending'"
+                            [class.fa-spinner]="statusVariant(h.toStatus) === 'progress'"
+                            [class.fa-ban]="statusVariant(h.toStatus) === 'cancelled'"
+                            [class.fa-rotate-left]="statusVariant(h.toStatus) === 'refunded'"></i>
+          </div>
+          <div class="ord-step__body">
+            <div class="ord-step__head">
+              <span class="status-pill" [class]="'status-pill--' + statusVariant(h.toStatus)">{{ h.toStatus }}</span>
+              @if (h.fromStatus && h.fromStatus !== h.toStatus) {
+              <span class="ord-step__from"><i class="fas fa-arrow-right"></i> from {{ h.fromStatus }}</span>
+              }
+              @if (isLast) { <span class="ord-step__latest">Latest</span> }
+            </div>
+            @if (h.note) {
+            <div class="ord-step__note"><i class="fas fa-quote-left"></i> {{ h.note }}</div>
+            }
+            <div class="ord-step__meta">
+              <span><i class="fas fa-user-shield"></i> {{ h.changedByName || 'System' }}@if (h.changedByRole) { <span> · {{ h.changedByRole }}</span> }</span>
+              <span><i class="far fa-clock"></i> {{ h.createdAt | date:'medium' }}</span>
+            </div>
+          </div>
+        </li>
+        }
+      </ol>
+      }
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" (click)="closeTimeline()">Close</button>
+    </div>
+  </div>
+</div>
+}

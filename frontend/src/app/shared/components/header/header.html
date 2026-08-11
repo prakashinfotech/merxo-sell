@@ -1,0 +1,115 @@
+<header class="site-header" *ngIf="!isHiddenPage()">
+  <div class="header-inner">
+
+    <!-- Logo -->
+    <a routerLink="/" class="logo" title="MerxoSell - Every Category. One Destination.">
+      <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="logo__icon">
+        <defs>
+          <linearGradient id="msGradMain" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#0284c7"/>
+            <stop offset="100%" stop-color="#0f172a"/>
+          </linearGradient>
+          <linearGradient id="msGradAccent" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#ff7e00"/>
+            <stop offset="100%" stop-color="#f59e0b"/>
+          </linearGradient>
+        </defs>
+        <rect x="2" y="2" width="34" height="34" rx="9" fill="url(#msGradMain)"/>
+        <path d="M14 11 C14 8, 24 8, 24 11" stroke="url(#msGradAccent)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M10 27 V15 L19 22.5 L28 15 V27" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M24 22 L28 18 L32 22" stroke="url(#msGradAccent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <span class="logo__text">Merxo<strong>Sell</strong></span>
+    </a>
+
+    <!-- Global search (Buyers only) -->
+    @if (isStorefront()) {
+      <form class="header-search" (submit)="$event.preventDefault(); onSearchSubmit()">
+        <input
+          type="text"
+          class="header-search__input"
+          placeholder="Search products, categories…"
+          autocomplete="off"
+          [value]="searchTerm"
+          (input)="onSearchInput($any($event.target).value)"
+          (focus)="suggestions().length > 0 && showSuggestions.set(true)"
+          (blur)="hideSuggestions()" />
+        <button type="submit" class="header-search__btn" aria-label="Search">
+          <i class="fas fa-search"></i>
+        </button>
+        @if (showSuggestions() && suggestions().length > 0) {
+          <ul class="header-search__panel" (mousedown)="$event.preventDefault()">
+            @for (s of suggestions(); track s.type + '-' + s.id) {
+              <li class="header-search__item" (click)="pickSuggestion(s)">
+                @if (s.type === 'product' && s.imageUrl) {
+                  <img [src]="s.imageUrl" alt="" />
+                } @else {
+                  <span class="header-search__icon-tag">
+                    <i class="fas" [class.fa-tag]="s.type === 'product'" [class.fa-folder]="s.type === 'category'"></i>
+                  </span>
+                }
+                <div class="header-search__meta">
+                  <span class="header-search__label">{{ s.label }}</span>
+                  <span class="header-search__type">{{ s.type === 'product' ? 'Product' : 'Category' }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </form>
+    }
+
+
+    <!-- Right-side controls -->
+    <div class="header-actions">
+      @if (isStorefront()) {
+        <button class="cart-btn" (click)="goCart()" aria-label="Open cart">
+          <i class="fas fa-shopping-bag"></i>
+          @if (((cartCount$ | async) ?? 0) > 0) {
+            <span class="cart-badge">{{ cartCount$ | async }}</span>
+          }
+        </button>
+      }
+
+      @if (isStorefront()) {
+        @if (loggedIn()) {
+          <!-- Username left · Cartoon avatar right -->
+          <a routerLink="/profile" class="user-chip" title="My Profile">
+            <span class="user-chip__label">{{ userName() }}</span>
+            <div class="user-avatar-cartoon">
+              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="20" cy="20" r="20" fill="#7C3AED"/>
+                <ellipse cx="20" cy="13" rx="11" ry="9" fill="#1e1b4b"/>
+                <ellipse cx="20" cy="24" rx="11" ry="10" fill="#FDBA74"/>
+                <circle cx="15.5" cy="22" r="2.8" fill="white"/>
+                <circle cx="24.5" cy="22" r="2.8" fill="white"/>
+                <circle cx="16" cy="22.5" r="1.4" fill="#1e1b4b"/>
+                <circle cx="25" cy="22.5" r="1.4" fill="#1e1b4b"/>
+                <circle cx="16.7" cy="21.7" r="0.55" fill="white"/>
+                <circle cx="25.7" cy="21.7" r="0.55" fill="white"/>
+                <ellipse cx="12" cy="27" rx="2.8" ry="1.6" fill="#FB7185" opacity="0.55"/>
+                <ellipse cx="28" cy="27" rx="2.8" ry="1.6" fill="#FB7185" opacity="0.55"/>
+                <path d="M15 29 Q20 33.5 25 29" stroke="#92400e" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </a>
+          <button (click)="logout()" class="header-icon-btn logout-mini" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        } @else {
+          <a routerLink="/auth/login" class="header-btn-ghost">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </a>
+          <a routerLink="/auth/register" class="header-btn-lime">
+            <i class="fas fa-user-plus"></i> Register
+          </a>
+        }
+      } @else if (loggedIn()) {
+        <button (click)="logout()" class="header-icon-btn logout-mini" title="Logout">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      }
+    </div>
+
+  </div>
+</header>

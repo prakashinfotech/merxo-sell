@@ -1,0 +1,224 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+// ── Product card (matches tc-pc reference design) ─────────────────
+.tc-pc {
+  display: flex;
+  flex-direction: column;
+  background: #FFF;
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  // ── Image area ──────────────────────────────────────────────────
+  &__img {
+    aspect-ratio: 1;
+    background: #F4F1E8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    position: relative;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      mix-blend-mode: multiply;
+      transition: transform 0.4s ease;
+    }
+  }
+
+  &:hover &__img img { transform: scale(1.06); }
+
+  // ── Heart / wishlist ────────────────────────────────────────────
+  &__heart {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #9ca3af;
+    backdrop-filter: blur(4px);
+    transition: color 0.18s, transform 0.18s;
+    z-index: 2;
+
+    &:hover { transform: scale(1.15); color: #ef4444; }
+    &.on { color: #ef4444; }
+  }
+
+  // ── "Top item" amber badge ──────────────────────────────────────
+  &__top-item {
+    position: absolute;
+    bottom: -9px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #F59E0B;
+    color: #fff;
+    font-size: 0.64rem;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 6px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    z-index: 3;
+  }
+
+  &__badges {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 2;
+  }
+
+  // ── Card body ───────────────────────────────────────────────────
+  &__body {
+    padding: 10px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    flex: 1;
+  }
+
+  // ── Product name ────────────────────────────────────────────────
+  &__name {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0B0B0B;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0;
+  }
+
+  // ── Pricing row ─────────────────────────────────────────────────
+  &__pricing {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-top: auto;
+  }
+
+  // ── Buy button (Midnight Navy + Hover style) ─────────────────────
+  &__buy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: #1a3a5e;
+    color: #ffffff;
+    font-size: 0.74rem;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+
+    i { font-size: 11px; }
+
+    &:hover {
+      background: #2b5278;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(26, 58, 94, 0.3);
+    }
+
+    &.added {
+      background: #10b981;
+      color: #fff;
+    }
+
+    &--orig {
+      background: transparent;
+      color: #9ca3af;
+      border: 1.5px solid #E8E2D6;
+      span { text-decoration: line-through; font-size: 0.8rem; }
+      &:hover { background: transparent; color: #9ca3af; }
+    }
+  }
+
+  // ── Meta row (stars + admin actions) ────────────────────────────
+  &__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__admin-actions {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+  }
+}
+
+// ── Stars ─────────────────────────────────────────────────────────
+.tc-stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+
+  i { font-size: 0.65rem; color: #E8E2D6; }
+  i.active { color: #F59E0B; }
+
+  &__val {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #6b7280;
+    margin-left: 4px;
+  }
+}
+
+// ── Sale badge ────────────────────────────────────────────────────
+.tc-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 900;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+}
+.tc-badge--sale { background: #ef4444; color: #fff; }
+
+// ── Admin action buttons ──────────────────────────────────────────
+.btn-card-action {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s;
+}
+.btn-card-action--edit   { background: #f3f4f6; color: #374151; &:hover { background: #e5e7eb; } }
+.btn-card-action--delete { background: #fef2f2; color: #ef4444;  &:hover { background: #fee2e2; } }

@@ -1,0 +1,20 @@
+<div class="image-gallery">
+  <div class="image-gallery__main">
+    @if (images.length > 0) {
+    <img [src]="images[activeIndex].imageUrl" [alt]="images[activeIndex].altText" class="image-gallery__main-img" />
+    } @else {
+    <div class="image-gallery__placeholder">No image available</div>
+    }
+  </div>
+
+  @if (images.length > 1) {
+  <div class="image-gallery__thumbs">
+    @for (img of images; track img.imageId; let i = $index) {
+    <button class="image-gallery__thumb" [class.image-gallery__thumb--active]="activeIndex === i" (click)="select(i)"
+      [attr.aria-label]="'View image ' + (i + 1)">
+      <img [src]="img.imageUrl" [alt]="img.altText" />
+    </button>
+    }
+  </div>
+  }
+</div>

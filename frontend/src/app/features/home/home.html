@@ -1,0 +1,218 @@
+<!-- ─────────── Hero Offer Banner Zone ─────────── -->
+<section class="offer-hero-section" *ngIf="!hasActiveFilter && bannersBySlot?.hero?.length">
+  <div class="hero-container">
+    <app-hero-banner [banners]="bannersBySlot!.hero"></app-hero-banner>
+  </div>
+</section>
+
+
+
+<!-- ─────────── Mid-Promo Row (MidLeft + MidRight) ─────────── -->
+<section class="mid-promo-section"
+         *ngIf="!hasActiveFilter && (bannersBySlot?.midLeft?.length || bannersBySlot?.midRight?.length)">
+  <div class="hero-container">
+    <div class="mid-promo-row">
+      <app-mid-promo-banner
+        *ngIf="bannersBySlot?.midLeft?.length"
+        [banners]="bannersBySlot!.midLeft"
+        align="left">
+      </app-mid-promo-banner>
+      <app-mid-promo-banner
+        *ngIf="bannersBySlot?.midRight?.length"
+        [banners]="bannersBySlot!.midRight"
+        align="right">
+      </app-mid-promo-banner>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── Bottom cards row (More Products · Stats · Popular) ─────────── -->
+<div class="bottom-row" *ngIf="!hasActiveFilter && !loadingRows && !loadingTrending">
+  <div class="hero-container">
+    <div class="bottom-cards">
+
+      <!-- More Products card -->
+      <div class="bcard bcard--more">
+        <div class="bcard__head">
+          <div>
+            <h3 class="bcard__title">More Products</h3>
+            <p class="bcard__count">{{ bestSellers.length * 6 }}+ items</p>
+          </div>
+          <span class="bcard__heart"><i class="fas fa-heart"></i></span>
+        </div>
+        <div class="bcard__thumbs">
+          @for (p of bestSellers.slice(0, 5); track p.productId) {
+            <a [routerLink]="['/products', p.productId]" class="bcard__thumb">
+              <img [src]="p.primaryImageUrl || 'assets/placeholder.png'" [alt]="p.name" />
+            </a>
+          }
+        </div>
+      </div>
+
+      <!-- Stats card -->
+      <div class="bcard bcard--stats">
+        <div class="stats-circle">
+          <span class="stats-circle__num">{{ newlyAdded.length * 12 }}+</span>
+          <span class="stats-circle__lbl">Products</span>
+        </div>
+        <div class="stats-bottom">
+          <div class="stats-stars">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star-half-alt"></i>
+          </div>
+          <span class="stats-rating-txt">4.8 avg rating</span>
+        </div>
+      </div>
+
+      <!-- Popular product card -->
+      @if (trending[3]) {
+        <a [routerLink]="['/products', trending[3].productId]" class="bcard bcard--popular">
+          <div class="bcard__pop-head">
+            <span class="pop-badge"><i class="fas fa-heart"></i> Popular</span>
+            <span class="pop-arrow"><i class="fas fa-arrow-up-right-from-square"></i></span>
+          </div>
+          <h3 class="bcard__pop-name">{{ trending[3].name }}</h3>
+          <div class="bcard__pop-img">
+            <img [src]="trending[3].primaryImageUrl || 'assets/placeholder.png'" [alt]="trending[3].name" />
+          </div>
+          <div class="bcard__pop-rating">
+            <i class="fas fa-star"></i>
+            <span>{{ trending[3].rating | number:'1.1-1' }}</span>
+          </div>
+        </a>
+      }
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────────── Strip Offer Banner ─────────── -->
+<div class="hero-container"
+     *ngIf="!hasActiveFilter && bannersBySlot?.strip?.length">
+  <app-strip-banner [banner]="bannersBySlot!.strip[0]"></app-strip-banner>
+</div>
+
+<!-- ─────────── Product rows (Best Sellers · Newly Added · Top Rated) ─────────── -->
+<div class="rows-wrap" *ngIf="!hasActiveFilter">
+
+  <!-- Best Sellers -->
+  <section class="row">
+    <header class="row-head">
+      <h2 class="row-title">
+        <span class="row-ico row-ico--orange"><i class="fas fa-fire"></i></span>
+        Best Sellers
+      </h2>
+    </header>
+    @if (loadingRows) {
+      <div class="row-grid">
+        @for (i of [1,2,3,4,5,6,7,8]; track i) { <div class="skel-card"></div> }
+      </div>
+    } @else if (bestSellers.length === 0) {
+      <div class="row-empty">No best-sellers yet — check back soon.</div>
+    } @else {
+      <div class="row-grid">
+        @for (p of bestSellers; track trackByProductId($index, p)) {
+          <div class="grid-card"><app-product-card [product]="p"></app-product-card></div>
+        }
+      </div>
+      @if (hasMoreBestSellers) {
+        <div class="row-more">
+          <button class="btn-load-more" (click)="loadMoreBestSellers()" [disabled]="loadingMoreBestSellers">
+            <i class="fas" [class.fa-spinner]="loadingMoreBestSellers" [class.fa-spin]="loadingMoreBestSellers"
+               [class.fa-chevron-down]="!loadingMoreBestSellers"></i>
+            {{ loadingMoreBestSellers ? 'Loading…' : 'Load More' }}
+          </button>
+        </div>
+      }
+    }
+  </section>
+
+  <!-- Newly Added -->
+  <section class="row">
+    <header class="row-head">
+      <h2 class="row-title">
+        <span class="row-ico row-ico--teal"><i class="fas fa-bolt-lightning"></i></span>
+        Newly Added
+      </h2>
+    </header>
+    @if (loadingRows) {
+      <div class="row-grid">
+        @for (i of [1,2,3,4,5,6,7,8]; track i) { <div class="skel-card"></div> }
+      </div>
+    } @else if (newlyAdded.length === 0) {
+      <div class="row-empty">No new arrivals just yet.</div>
+    } @else {
+      <div class="row-grid">
+        @for (p of newlyAdded; track trackByProductId($index, p)) {
+          <div class="grid-card"><app-product-card [product]="p"></app-product-card></div>
+        }
+      </div>
+      @if (hasMoreNewlyAdded) {
+        <div class="row-more">
+          <button class="btn-load-more" (click)="loadMoreNewlyAdded()" [disabled]="loadingMoreNewlyAdded">
+            <i class="fas" [class.fa-spinner]="loadingMoreNewlyAdded" [class.fa-spin]="loadingMoreNewlyAdded"
+               [class.fa-chevron-down]="!loadingMoreNewlyAdded"></i>
+            {{ loadingMoreNewlyAdded ? 'Loading…' : 'Load More' }}
+          </button>
+        </div>
+      }
+    }
+  </section>
+
+  <!-- Top Rated -->
+  <section class="row">
+    <header class="row-head">
+      <h2 class="row-title">
+        <span class="row-ico row-ico--gold"><i class="fas fa-star"></i></span>
+        Top Rated
+      </h2>
+    </header>
+    @if (loadingRows) {
+      <div class="row-grid">
+        @for (i of [1,2,3,4,5,6,7,8]; track i) { <div class="skel-card"></div> }
+      </div>
+    } @else if (topRated.length === 0) {
+      <div class="row-empty">Reviews are still rolling in.</div>
+    } @else {
+      <div class="row-grid">
+        @for (p of topRated; track trackByProductId($index, p)) {
+          <div class="grid-card"><app-product-card [product]="p"></app-product-card></div>
+        }
+      </div>
+      @if (hasMoreTopRated) {
+        <div class="row-more">
+          <button class="btn-load-more" (click)="loadMoreTopRated()" [disabled]="loadingMoreTopRated">
+            <i class="fas" [class.fa-spinner]="loadingMoreTopRated" [class.fa-spin]="loadingMoreTopRated"
+               [class.fa-chevron-down]="!loadingMoreTopRated"></i>
+            {{ loadingMoreTopRated ? 'Loading…' : 'Load More' }}
+          </button>
+        </div>
+      }
+    }
+  </section>
+
+</div>
+
+
+<!-- ─────────── Filtered "Browse All" grid ─────────── -->
+<div class="browse-all" *ngIf="hasActiveFilter">
+  <header class="row-head row-head--solo">
+    <h2 class="row-title">
+      <span class="row-ico row-ico--navy"><i class="fas fa-th-large"></i></span>
+      Browse Results
+    </h2>
+    <a routerLink="/" class="row-link">← Back to home</a>
+  </header>
+
+  <app-product-grid [products]="filtered" [loading]="loadingFiltered"></app-product-grid>
+
+  @if (hasMoreFiltered && !loadingFiltered) {
+    <div class="load-more-wrap">
+      <button class="btn-load-more" (click)="loadMoreFiltered()">Load More</button>
+    </div>
+  }
+</div>

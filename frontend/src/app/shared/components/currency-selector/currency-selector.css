@@ -1,0 +1,110 @@
+.currency-selector {
+  position: relative;
+  display: inline-block;
+  user-select: none;
+  font-family: 'Poppins', 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.currency-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.currency-trigger:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.currency-trigger.is-open {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--accent);
+}
+
+.chevron {
+  font-size: 0.7rem;
+  transition: transform 0.2s;
+  opacity: 0.8;
+}
+
+.is-open .chevron {
+  transform: rotate(180deg);
+}
+
+.currency-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 240px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  z-index: 1000;
+  padding: 8px;
+  animation: dropdownSlide 0.2s ease-out;
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.currency-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  color: var(--text-primary);
+}
+
+.currency-option:hover {
+  background: #f5f5f5;
+}
+
+.currency-option.selected {
+  background: rgba(192, 80, 0, 0.05);
+  color: var(--accent);
+}
+
+.option-code {
+  font-weight: 700;
+  font-size: 0.85rem;
+  width: 32px;
+  color: var(--text-secondary);
+}
+
+.selected .option-code {
+  color: var(--accent);
+}
+
+.option-name {
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.check-icon {
+  font-size: 0.8rem;
+  color: var(--accent);
+}

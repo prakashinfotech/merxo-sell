@@ -1,0 +1,104 @@
+.variant-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .variant-group {
+    &__label {
+      font-size: 0.8rem;
+      font-weight: 850;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+    }
+    &__value {
+      color: #0f172a;
+      font-weight: 900;
+      margin-left: 6px;
+      text-transform: none;
+    }
+    &__swatches, &__options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+  }
+
+  .swatch {
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: 2px solid #f1f5f9;
+    background: #fff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &__dot { display: none; }
+    &__name { display: block; }
+
+    &:hover:not(:disabled):not(.swatch--selected) {
+      border-color: #ff6000;
+      color: #ff6000;
+      transform: translateY(-1px);
+    }
+
+    &--selected {
+      border-color: #0f172a;
+      background: #0f172a;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+      transform: scale(1.02);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      text-decoration: line-through;
+      background: #f8fafc;
+    }
+  }
+
+  .size-chip {
+    height: 40px;
+    min-width: 54px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 2px solid #f1f5f9;
+    background: #fff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover:not(:disabled):not(.size-chip--selected) {
+      border-color: #ff6000;
+      color: #ff6000;
+      transform: translateY(-1px);
+    }
+
+    &--selected {
+      border-color: #0f172a;
+      background: #0f172a;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      text-decoration: line-through;
+      background: #f8fafc;
+    }
+  }
+}

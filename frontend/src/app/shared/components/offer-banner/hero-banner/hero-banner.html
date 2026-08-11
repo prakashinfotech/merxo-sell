@@ -1,0 +1,81 @@
+<!-- Hero Banner Carousel -->
+<div class="hero-banner-wrap"
+     *ngIf="banners.length > 0"
+     (mouseenter)="pauseCarousel()"
+     (mouseleave)="resumeCarousel()">
+
+  <!-- Shimmer skeleton while loading -->
+  <div class="hb-skeleton" *ngIf="loading"></div>
+
+  <!-- Banner slide -->
+  <div *ngIf="!loading && active"
+       class="hb-slide"
+       [style.background-color]="active.backgroundColor || '#fff8eb'"
+       [style.color]="active.textColor || '#1a3a5e'"
+       (click)="navigate(active)">
+
+    <!-- Left: text content -->
+    <div class="hb-content">
+      <!-- Badge pill -->
+      <span class="hb-badge" *ngIf="active.badgeText">{{ active.badgeText }}</span>
+
+      <h2 class="hb-title" [style.color]="active.textColor || '#1a3a5e'">
+        {{ active.title }}
+      </h2>
+
+      <p class="hb-subtitle" *ngIf="active.subtitle">{{ active.subtitle }}</p>
+
+      <div class="hb-actions">
+        <button class="hb-cta-primary"
+                *ngIf="active.ctaLabel"
+                (click)="$event.stopPropagation(); navigateCta(active)">
+          {{ active.ctaLabel }}
+          <i class="fas fa-arrow-right"></i>
+        </button>
+
+        <button class="hb-cta-secondary"
+                *ngIf="active.secondaryLabel"
+                (click)="$event.stopPropagation(); navigateSecondary(active)">
+          {{ active.secondaryLabel }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: main image -->
+    <div class="hb-image-wrap" *ngIf="active.imageUrl">
+      <img [src]="active.imageUrl"
+           [alt]="active.title"
+           (error)="onImgError($event)"
+           class="hb-image"
+           loading="lazy" />
+
+      <!-- Side thumbnail (Hero only) -->
+      <div class="hb-side-thumb" *ngIf="active.sideImageUrl">
+        <img [src]="active.sideImageUrl"
+             [alt]="active.title + ' thumbnail'"
+             (error)="onImgError($event, 'http://localhost:5000/uploads/sample-mid-left-banner.jpg')"
+             loading="lazy" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Dots + prev/next (only when multiple banners) -->
+  <div class="hb-nav" *ngIf="banners.length > 1">
+    <button class="hb-nav__arrow" (click)="$event.stopPropagation(); prev()" aria-label="Previous">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+
+    <div class="hb-nav__dots">
+      <span *ngFor="let b of banners; let i = index"
+            class="hb-nav__dot"
+            [class.active]="i === activeIndex"
+            (click)="$event.stopPropagation(); goTo(i)"
+            [attr.aria-label]="'Banner ' + (i + 1)">
+      </span>
+    </div>
+
+    <button class="hb-nav__arrow" (click)="$event.stopPropagation(); next()" aria-label="Next">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
+</div>

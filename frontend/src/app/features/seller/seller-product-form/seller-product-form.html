@@ -1,0 +1,299 @@
+<div class="admin-page">
+  <!-- Sticky Header for Actions -->
+  <div class="sticky-header">
+    <div class="header-content">
+      <div class="header-left">
+        <button class="btn-icon" (click)="cancel()" title="Back">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1 class="page-title">{{ isEdit ? 'Edit Product' : 'New Product' }}</h1>
+        <span class="status-pill" [attr.data-status]="status.toLowerCase()">{{ status }}</span>
+      </div>
+      <div class="header-right">
+        <button class="btn-ghost" (click)="cancel()">Discard</button>
+        <button class="btn-primary" (click)="onSubmit()" [disabled]="form.invalid || saving">
+          <i class="fas" [class.fa-save]="!saving" [class.fa-spinner]="saving" [class.fa-spin]="saving"></i>
+          {{ saving ? 'Saving...' : (isEdit ? 'Update Product' : 'List Product') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-content">
+    @if (loading) {
+      <div class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading details...</p>
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="compact-form">
+        <div class="form-grid">
+          <!-- Left Column: Core Info -->
+          <div class="form-column">
+            <section class="form-section">
+              <div class="section-header">
+                <i class="fas fa-info-circle"></i>
+                <h2>General Information</h2>
+              </div>
+              <div class="section-body">
+                <div class="form-field">
+                  <label>Product Name <span class="required">*</span></label>
+                  <input type="text" formControlName="name" placeholder="e.g. Cotton Polo T-Shirt">
+                  @if (form.get('name')?.touched && form.get('name')?.invalid) {
+                    <span class="error">Name is required.</span>
+                  }
+                </div>
+                
+                <div class="form-field">
+                  <label>Description</label>
+                  <textarea formControlName="description" rows="4" placeholder="Briefly describe the product..."></textarea>
+                </div>
+
+                <div class="grid-2">
+                  <div class="form-field">
+                    <label>Main Category <span class="required">*</span></label>
+                    <select formControlName="rootCategoryId">
+                      <option [value]="null">Select...</option>
+                      @for (cat of rootCategories; track cat.categoryId) {
+                        <option [value]="cat.categoryId">{{ cat.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="form-field" *ngIf="hasSubCategories">
+                    <label>Sub Category</label>
+                    <select formControlName="categoryId">
+                      <option [value]="null">Select...</option>
+                      @for (sub of subCategories; track sub.categoryId) {
+                        <option [value]="sub.categoryId">{{ sub.name }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="form-section mt-16" style="margin-top: 20px;">
+              <div class="section-header">
+                <i class="fas fa-tags"></i>
+                <h2>Pricing & Inventory</h2>
+              </div>
+              <div class="section-body">
+                <div class="grid-3">
+                  <div class="form-field">
+                    <label>Base Price ($) <span class="required">*</span></label>
+                    <input type="number" step="0.01" formControlName="basePrice">
+                  </div>
+                  <div class="form-field">
+                    <label>Sale Price ($)</label>
+                    <input type="number" step="0.01" formControlName="salePrice" placeholder="Optional">
+                  </div>
+                  <div class="form-field">
+                    <label>Global Stock <span class="required">*</span></label>
+                    <input type="number" formControlName="stock">
+                  </div>
+                </div>
+                <p class="field-hint">Note: Variant-specific stock and price will override these values.</p>
+              </div>
+            </section>
+          </div>
+
+          <!-- Right Column: Media -->
+          <div class="form-column">
+            <section class="form-section h-full">
+              <div class="section-header">
+                <i class="fas fa-images"></i>
+                <h2>Product Gallery</h2>
+              </div>
+              <div class="section-body">
+                <div class="primary-image-upload">
+                  <div class="preview-box" *ngIf="form.get('primaryImageUrl')?.value">
+                    <img [src]="form.get('primaryImageUrl')?.value" alt="Primary">
+                    <button type="button" class="btn-remove" (click)="form.patchValue({primaryImageUrl: ''})">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                  <div class="upload-trigger" *ngIf="!form.get('primaryImageUrl')?.value">
+                    <input type="file" (change)="onFileSelected($event)" hidden #fileInput>
+                    <button type="button" (click)="fileInput.click()" [disabled]="uploadingFile">
+                      <i class="fas fa-cloud-upload-alt"></i>
+                      <span>Upload Main Photo</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="gallery-grid mt-16" style="margin-top: 10px;">
+                  @for (img of secondaryImages; track $index) {
+                    <div class="gallery-item">
+                      <img [src]="img" alt="Gallery">
+                      <button type="button" (click)="removeSecondaryImage($index)"><i class="fas fa-times"></i></button>
+                    </div>
+                  }
+                  <div class="gallery-add">
+                    <input type="file" multiple (change)="onSecondaryFilesSelected($event)" hidden #galleryInput>
+                    <button type="button" (click)="galleryInput.click()"><i class="fas fa-plus"></i></button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- Bottom: Variants (Full Width) -->
+          <div class="form-column full-width">
+            <section class="form-section">
+              <div class="section-header">
+                <i class="fas fa-layer-group"></i>
+                <h2>Variant Management</h2>
+                <span class="spacer"></span>
+                @if (variantsDirty) { <span class="unsaved-badge">Unsaved Changes</span> }
+              </div>
+              <div class="section-body">
+                @if (!isEdit) {
+                  <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Save the basic product info first to unlock variant combinations.
+                  </div>
+                } @else if (!isFashionCategory) {
+                  <div class="alert alert-info">
+                    <i class="fas fa-tshirt"></i>
+                    Variants are only available for <strong>Fashion</strong> categories
+                    (e.g. Men, Women, Shoes, Clothing). For other categories, manage
+                    a single stock quantity in the Pricing &amp; Inventory section.
+                  </div>
+                } @else {
+                  <div class="variant-builder-v2">
+                    <div class="color-options-header">
+                      <div class="add-color-section">
+                        <label class="section-sub-label">Add Color Option</label>
+                        <div class="chip-input-wrap">
+                          <input type="text" placeholder="Type a color (e.g. Red)..." [(ngModel)]="newColor" [ngModelOptions]="{standalone: true}" (keyup.enter)="addColorGroup(newColor)">
+                          <button type="button" (click)="addColorGroup(newColor)"><i class="fas fa-plus"></i> Add Color</button>
+                        </div>
+                        <div class="suggestions">
+                          @for (s of suggestedColors; track s) {
+                            <button type="button" class="s-btn" (click)="addColorGroup(s)">{{ s }}</button>
+                          }
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="color-groups-list">
+                      @for (group of colorGroups; track group.color; let gIdx = $index) {
+                        <div class="color-group-card">
+                          <div class="color-group-header">
+                            <div class="color-title">
+                              <span class="color-dot" [style.background]="group.color.toLowerCase() || '#ccc'"></span>
+                              <h3>Color Option: {{ group.color || 'Standard' }}</h3>
+                            </div>
+                            <button type="button" class="btn-delete-group" (click)="removeColorGroup(gIdx)" title="Remove entire color option">
+                              <i class="fas fa-trash-alt"></i> Remove Color
+                            </button>
+                          </div>
+
+                          <div class="color-group-body">
+                            <!-- Column 1: Color Images -->
+                            <div class="color-images-section">
+                              <label>Product Images for {{ group.color || 'Standard' }}</label>
+                              <div class="v-gallery">
+                                @for (vimg of group.imageUrls; track $index; let j = $index) {
+                                  <div class="v-img-thumb">
+                                    <img [src]="vimg" alt="Color variant image">
+                                    <i class="fas fa-times-circle" (click)="removeColorGroupImage(gIdx, j)"></i>
+                                  </div>
+                                }
+                                <label class="v-img-add" [class.loading]="group.uploading">
+                                  <input type="file" multiple (change)="onColorGroupImageUpload(gIdx, $event)" hidden>
+                                  <i class="fas" [class.fa-plus]="!group.uploading" [class.fa-spinner]="group.uploading" [class.fa-spin]="group.uploading"></i>
+                                </label>
+                              </div>
+                              <p class="field-hint">Upload photos of the product in this color. These images will be shown when customers select this color.</p>
+                            </div>
+
+                            <!-- Column 2: Sizes Table -->
+                            <div class="color-sizes-section">
+                              <div class="sizes-header">
+                                <label>Sizes & Inventory</label>
+                                <div class="add-size-wrap">
+                                  <input type="text" #sizeInput placeholder="Add size (e.g. S, M)..." (keyup.enter)="addSizeToGroup(gIdx, sizeInput.value); sizeInput.value = ''">
+                                  <button type="button" class="btn-add-size" (click)="addSizeToGroup(gIdx, sizeInput.value); sizeInput.value = ''">
+                                    <i class="fas fa-plus"></i> Add Size
+                                  </button>
+                                </div>
+                              </div>
+
+                              @if (group.sizes.length > 0) {
+                                <div class="table-scroll">
+                                  <table class="matrix-table">
+                                    <thead>
+                                      <tr>
+                                        <th>Size</th>
+                                        <th>SKU</th>
+                                        <th>Price Delta</th>
+                                        <th>Stock</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      @for (sizeRow of group.sizes; track $index; let sIdx = $index) {
+                                        <tr [class.is-default]="sizeRow.isDefault">
+                                          <td><span class="s-pill">{{ sizeRow.size }}</span></td>
+                                          <td>
+                                            <input type="text" [(ngModel)]="sizeRow.sku" [ngModelOptions]="{standalone: true}" (change)="onVariantField()" placeholder="Auto">
+                                          </td>
+                                          <td>
+                                            <input type="number" [(ngModel)]="sizeRow.priceDelta" [ngModelOptions]="{standalone: true}" (change)="onVariantField()" step="0.01" class="w-70">
+                                          </td>
+                                          <td>
+                                            <input type="number" [(ngModel)]="sizeRow.stock" [ngModelOptions]="{standalone: true}" (change)="onVariantField()" class="w-60">
+                                          </td>
+                                          <td>
+                                            <div class="toggle-group">
+                                              <label class="switch">
+                                                <input type="checkbox" [(ngModel)]="sizeRow.isActive" [ngModelOptions]="{standalone: true}" (change)="onVariantField()">
+                                                <span class="slider"></span>
+                                              </label>
+                                              <button type="button" class="btn-star" [class.active]="sizeRow.isDefault" (click)="markDefaultCombination(gIdx, sIdx)" title="Set as default product view">
+                                                <i class="fas fa-star"></i>
+                                              </button>
+                                            </div>
+                                          </td>
+                                          <td>
+                                            <button type="button" class="btn-row-del" (click)="removeSizeFromGroup(gIdx, sIdx)"><i class="fas fa-trash"></i></button>
+                                          </td>
+                                        </tr>
+                                      }
+                                    </tbody>
+                                  </table>
+                                </div>
+                              } @else {
+                                <div class="empty-sizes-hint">
+                                  <i class="fas fa-info-circle"></i> No sizes added for this color yet. Add a size (e.g. S, M, L) above to configure stock/price.
+                                </div>
+                              }
+                            </div>
+                          </div>
+                        </div>
+                      } @empty {
+                        <div class="empty-matrix">
+                          <i class="fas fa-palette"></i>
+                          <p>Add a Color Option above to start configuring product variations.</p>
+                        </div>
+                      }
+                    </div>
+
+                    <div class="matrix-footer mt-24" *ngIf="colorGroups.length > 0">
+                      <span class="error-msg" *ngIf="variantsError">{{ variantsError }}</span>
+                      <button type="button" class="btn-primary btn-sm" (click)="saveVariants()" [disabled]="!variantsDirty || savingVariants">
+                        <i class="fas fa-save"></i> Save Variant Changes
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </section>
+          </div>
+        </div>
+      </form>
+    }
+  </div>
+</div>

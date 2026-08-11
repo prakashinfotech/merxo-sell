@@ -1,0 +1,77 @@
+<div class="admin-page">
+  <div class="dashboard-welcome mb-40">
+    <div class="welcome-text">
+      <h1 class="welcome-title">Customer Reviews <span class="title-badge">{{ reviews.length }} Total</span></h1>
+      <p class="welcome-subtitle">Review and manage feedback for products in your store.</p>
+    </div>
+    <div class="header-actions">
+      <div class="header-stats-mini">
+        <div class="mini-stat">
+          <span class="label">Avg Rating</span>
+          <span class="value">4.8 ★</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-filters">
+    <div class="admin-filters__search">
+      <i class="fas fa-search"></i>
+      <input [(ngModel)]="searchTerm" (keyup.enter)="load()" placeholder="Search product, buyer or comment..." />
+    </div>
+    <mat-form-field appearance="outline" class="mat-filter-field">
+      <mat-label>Rating</mat-label>
+      <mat-select [(ngModel)]="ratingFilter" (selectionChange)="load()">
+        <mat-option [value]="null">All ratings</mat-option>
+        @for (r of [5,4,3,2,1]; track r) {
+        <mat-option [value]="r">{{ r }} stars</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <button class="btn-admin-secondary" (click)="resetFilters()">Reset</button>
+    <button class="btn-admin-secondary" (click)="load()"><i class="fas fa-sync-alt"></i> Refresh</button>
+  </div>
+
+  <div class="admin-table-wrap">
+    @if (loading) {
+    <div class="admin-loading"><i class="fas fa-spinner fa-spin"></i> Loading reviews...</div>
+    } @else if (!reviews.length) {
+    <div class="empty-state">
+      <div class="empty-icon">★</div>
+      <div class="empty-title">No reviews found</div>
+    </div>
+    } @else {
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Buyer</th>
+          <th>Rating</th>
+          <th>Comment</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of pagedReviews; track r.reviewId) {
+        <tr>
+          <td><strong>{{ r.productName }}</strong>
+            <div class="admin-table__sub">#{{ r.productId }}</div>
+          </td>
+          <td>{{ r.userName }}<div class="admin-table__sub">{{ r.userEmail }}</div>
+          </td>
+          <td><span class="badge-count">{{ r.rating }} ★</span></td>
+          <td>{{ r.comment || '—' }}</td>
+          <td>{{ r.createdAt | date:'mediumDate' }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    <app-pagination
+      [page]="page"
+      [pageSize]="pageSize"
+      [totalCount]="reviews.length"
+      (pageChange)="goPage($event)">
+    </app-pagination>
+    }
+  </div>
+</div>

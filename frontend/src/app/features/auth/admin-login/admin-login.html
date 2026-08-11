@@ -1,0 +1,84 @@
+<div class="auth-wrapper role-admin">
+  <!-- Animated Background Elements -->
+  <div class="auth-bg-anim">
+    <i class="fas fa-shopping-cart float-icon" style="top: 10%; left: 10%; font-size: 8rem; --dur: 25s;"></i>
+    <i class="fas fa-shopping-bag float-icon blue" style="top: 60%; left: 20%; font-size: 6rem; --dur: 30s;"></i>
+    <i class="fas fa-box-open float-icon green" style="top: 20%; left: 80%; font-size: 7rem; --dur: 22s;"></i>
+    <i class="fas fa-tags float-icon" style="top: 70%; left: 70%; font-size: 5rem; --dur: 28s;"></i>
+    <i class="fas fa-gift float-icon blue" style="top: 40%; left: 40%; font-size: 9rem; --dur: 35s;"></i>
+    <i class="fas fa-shield-alt float-icon green" style="top: 85%; left: 5%; font-size: 6rem; --dur: 20s;"></i>
+    <i class="fas fa-database float-icon" style="top: 5%; left: 60%; font-size: 5rem; --dur: 40s;"></i>
+  </div>
+  <!-- Left: Hero Illustration -->
+  <div class="auth-hero admin">
+    <div class="auth-hero__content">
+      <h1 class="slide-in">{{ heroData.title }}</h1>
+      <p class="slide-in" style="animation-delay: 0.1s;">{{ heroData.subtitle }}</p>
+    </div>
+    <div class="auth-hero__visual slide-in" style="animation-delay: 0.3s;">
+      <img [src]="heroData.image" alt="Admin Illustration">
+    </div>
+  </div>
+
+  <!-- Right: Form -->
+  <div class="auth-form-container">
+    <div class="auth-form-card animate-in">
+      <div class="auth-mobile-brand" routerLink="/">
+        <div class="brand-icon">M</div>
+        <span>MerxoAdmin</span>
+      </div>
+      
+      <div class="auth-header">
+        <h2>Secure Login</h2>
+        <p>Administrative access only. Every action is audited.</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-group">
+          <label>Admin Email</label>
+          <div class="input-wrap">
+            <i class="fas fa-user-shield"></i>
+            <input type="email" formControlName="email" placeholder="Admin@merxosell.com" autocomplete="email">
+          </div>
+          <div class="error-msg" *ngIf="email.touched && email.invalid">
+            <span *ngIf="email.errors?.['required']">Email is required</span>
+            <span *ngIf="email.errors?.['email']">Invalid email format</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row">
+            <label>Master Password</label>
+          </div>
+          <div class="input-wrap">
+            <i class="fas fa-key"></i>
+            <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="••••••••" autocomplete="current-password">
+            <button type="button" class="toggle-pass" (click)="showPassword = !showPassword">
+              <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+            </button>
+          </div>
+          <div class="error-msg" *ngIf="password.touched && password.invalid">
+            Master password is required
+          </div>
+        </div>
+
+        <div class="error-msg server-error" *ngIf="errorMessage()">
+          <i class="fas fa-shield-alt"></i>
+          {{ errorMessage() }}
+        </div>
+
+        <button type="submit" class="btn-primary auth-btn admin" [disabled]="loading()">
+          <span *ngIf="!loading()">Secure Authorize</span>
+          <span *ngIf="loading()">
+            <i class="fas fa-circle-notch fa-spin"></i>
+            Establishing Session...
+          </span>
+        </button>
+
+        <p class="auth-footer">
+          Lost your access? <a href="mailto:it@MerxoSell.com">Contact IT Support</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>

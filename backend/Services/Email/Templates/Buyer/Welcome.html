@@ -1,0 +1,54 @@
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="text-align: center;">
+    <!-- Hero -->
+    <tr>
+        <td style="padding-bottom: 48px;">
+            <h1 style="margin: 0 0 16px; font-size: 36px; font-weight: 900; color: #0f172a; letter-spacing: -1.5px; line-height: 1.2;">
+                Welcome to the<br>Marketplace!
+            </h1>
+            <p style="font-size: 18px; line-height: 1.7; color: #64748b; margin: 0 auto; max-width: 480px;">
+                Hello {{FullName}}, your journey to unbeatable deals and verified quality starts right here.
+            </p>
+        </td>
+    </tr>
+
+    <!-- 3-Step Flow (Image 3 style) -->
+    <tr>
+        <td style="padding-bottom: 64px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td align="center" width="33%">
+                        <div style="width: 80px; height: 80px; background: #f8fafc; border-radius: 24px; margin-bottom: 16px; display: table-cell; vertical-align: middle;">
+                            <center><img src="{{ApiUrl}}/uploads/shield_premium.png" width="50" style="display: block;"></center>
+                        </div>
+                        <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Step 1</div>
+                        <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-top: 4px;">VERIFIED ACCOUNT</div>
+                    </td>
+                    <td align="center" width="33%">
+                        <div style="width: 80px; height: 80px; background: #fff7ed; border-radius: 24px; margin-bottom: 16px; display: table-cell; vertical-align: middle;">
+                            <center><img src="{{ApiUrl}}/uploads/heart_premium.png" width="50" style="display: block;"></center>
+                        </div>
+                        <div style="font-size: 11px; font-weight: 800; color: #ff6000; text-transform: uppercase; letter-spacing: 1px;">Step 2</div>
+                        <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-top: 4px;">FAVORITES LIST</div>
+                    </td>
+                    <td align="center" width="33%">
+                        <div style="width: 80px; height: 80px; background: #f8fafc; border-radius: 24px; margin-bottom: 16px; display: table-cell; vertical-align: middle;">
+                            <center><img src="{{ApiUrl}}/uploads/bag_premium.png" width="50" style="display: block;"></center>
+                        </div>
+                        <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Step 3</div>
+                        <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-top: 4px;">SECURE CHECKOUT</div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <!-- Dynamic Recommendations -->
+    {{RecommendationsHtml}}
+
+    <!-- Action -->
+    <tr>
+        <td align="center" style="padding-top: 56px;">
+            <a href="{{AppUrl}}/shop" class="btn">Start Your Shopping Tour</a>
+        </td>
+    </tr>
+</table>

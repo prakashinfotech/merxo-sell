@@ -1,0 +1,35 @@
+<div class="page-container coupons-page">
+  <div class="coupons-head">
+    <h1>Available Coupons</h1>
+    <p>Apply a valid code at checkout to reduce your final payable amount.</p>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Loading coupons...</div>
+  } @else if (!coupons.length) {
+    <div class="empty-state">
+      <i class="fas fa-ticket-alt"></i>
+      <h3>No active coupons right now</h3>
+    </div>
+  } @else {
+    <div class="coupon-grid">
+      @for (coupon of coupons; track coupon.couponId) {
+        <article class="coupon-card">
+          <div class="coupon-code">{{ coupon.couponCode }}</div>
+          <h2>{{ coupon.title }}</h2>
+          <p>{{ coupon.description || 'Limited-time buyer savings.' }}</p>
+          <div class="coupon-meta">
+            <span><i class="fas fa-tag"></i> {{ discount(coupon) }}</span>
+            @if (coupon.minimumPurchaseAmount) {
+              <span><i class="fas fa-shopping-cart"></i> Min {{ coupon.minimumPurchaseAmount | appCurrency:(currencyService.selectedCurrency$ | async) }}</span>
+            }
+            @if (coupon.maximumDiscountAmount) {
+              <span><i class="fas fa-arrow-down"></i> Max {{ coupon.maximumDiscountAmount | appCurrency:(currencyService.selectedCurrency$ | async) }}</span>
+            }
+            <span><i class="fas fa-clock"></i> {{ coupon.expiryDate ? (coupon.expiryDate | date:'mediumDate') : 'No expiry' }}</span>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>

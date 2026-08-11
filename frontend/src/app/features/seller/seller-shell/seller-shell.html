@@ -1,0 +1,111 @@
+<div class="seller-shell" [class.sidebar-collapsed]="isSidebarCollapsed">
+  <!-- Sidebar Overlay (Mobile Only) -->
+  <div class="sidebar-overlay" (click)="toggleSidebar()" *ngIf="!isSidebarCollapsed"></div>
+
+  <!-- Sidebar -->
+  <aside class="seller-sidebar">
+    <div class="sidebar-header">
+      <div class="admin-brand">
+        <div class="brand-icon">
+          <i class="fas fa-store"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Seller</span>
+          <span class="brand-sub">Merchant Portal</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <label>Main Navigation</label>
+        <a routerLink="dashboard" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-chart-pie"></i></div>
+          <span>Dashboard</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <label>Catalog</label>
+        <a routerLink="products" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-boxes"></i></div>
+          <span>My Products</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <label>Sales</label>
+        <a routerLink="orders" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-shopping-bag"></i></div>
+          <span>Orders</span>
+        </a>
+        <a routerLink="reviews" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-star"></i></div>
+          <span>Reviews</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <label>Account</label>
+        <a routerLink="profile" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-user-cog"></i></div>
+          <span>Store Profile</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="admin-user-card">
+        <div class="user-avatar-initials">{{ getInitials() }}</div>
+        <div class="user-info">
+          <span class="user-name">{{ userName || 'Seller' }}</span>
+          <span class="user-role">{{ userEmail }}</span>
+        </div>
+      </div>
+      <button (click)="logout()" class="btn-logout-sidebar">
+        <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Header -->
+  <header class="portal-header">
+    <div class="header-left">
+      <button class="btn-toggle-sidebar" (click)="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="portal-header-title">
+        <span class="portal-breadcrumb">Seller <strong>Merchant Portal</strong></span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="portal-logo-mini">
+        <svg width="28" height="28" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="sMsGradMain" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#0284c7"/>
+              <stop offset="100%" stop-color="#0f172a"/>
+            </linearGradient>
+            <linearGradient id="sMsGradAccent" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#ff7e00"/>
+              <stop offset="100%" stop-color="#f59e0b"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="34" height="34" rx="9" fill="url(#sMsGradMain)"/>
+          <path d="M14 11 C14 8, 24 8, 24 11" stroke="url(#sMsGradAccent)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <path d="M10 27 V15 L19 22.5 L28 15 V27" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M24 22 L28 18 L32 22" stroke="url(#sMsGradAccent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <span class="portal-brand-text">Merxo<strong>Sell</strong></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content Area -->
+  <main class="seller-main-container">
+    <div class="seller-page-container">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

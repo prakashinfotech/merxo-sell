@@ -1,0 +1,87 @@
+<div class="browse-page">
+
+  <!-- Main two-column layout -->
+  <div class="browse-page__layout">
+
+    <!-- Filter sidebar -->
+    <app-filter-sidebar
+      [initialFilter]="filter"
+      (filterChange)="onSidebarFilter($event)">
+    </app-filter-sidebar>
+
+    <!-- Product section -->
+    <section class="browse-page__main">
+
+      <!-- Sort bar -->
+      <div class="tc-sort">
+        <h2 class="tc-sort__title">
+          {{ filter.q ? 'Results for "' + filter.q + '"' : (activeCategory?.name || 'Browse') }}
+          @if (!loading && pagination) {
+            <small>· {{ resultLabel }}</small>
+          }
+        </h2>
+        <div class="tc-sort__right">
+          <select class="tc-sort__select" [value]="filter.sortBy || 'Newest'"
+            (change)="onSort($any($event.target).value)">
+            <option value="Newest">Sort: Newest</option>
+            <option value="PriceAsc">Price: Low → High</option>
+            <option value="PriceDesc">Price: High → Low</option>
+            <option value="Rating">Top Rated</option>
+            <option value="BestSelling">Best Selling</option>
+          </select>
+          <div class="tc-vsw">
+            <button class="tc-vsw__btn" [class.on]="viewMode === 'grid'" (click)="viewMode = 'grid'">
+              <i class="fas fa-th-large"></i>
+            </button>
+            <button class="tc-vsw__btn" [class.on]="viewMode === 'list'" (click)="viewMode = 'list'">
+              <i class="fas fa-list"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading skeletons -->
+      @if (loading) {
+        <div class="tc-pgrid" [class.tc-pgrid--list]="viewMode === 'list'">
+          @for (s of skeletons; track $index) {
+            <div class="tc-pc tc-pc--skel">
+              <div class="tc-pc__img tc-skel"></div>
+              <div class="tc-pc__body">
+                <div class="tc-skel" style="height:14px; width:80%; border-radius:6px;"></div>
+                <div class="tc-skel" style="height:36px; width:60%; border-radius:999px; margin-top:8px;"></div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Product grid -->
+      @else if (products.length > 0) {
+        <div class="tc-pgrid" [class.tc-pgrid--list]="viewMode === 'list'">
+          @for (p of products; track p.productId) {
+            <app-product-card [product]="p"></app-product-card>
+          }
+        </div>
+
+        @if (hasMore) {
+          <div class="tc-load-more">
+            <button class="tc-load-more__btn" (click)="loadMore()">
+              <i class="fas fa-arrow-down"></i> Load More
+            </button>
+          </div>
+        }
+      }
+
+      <!-- Empty state -->
+      @else {
+        <div class="tc-empty">
+          <div class="tc-empty__icon"><i class="fas fa-search"></i></div>
+          <h3>No products found</h3>
+          <p>Try adjusting your filters or search terms.</p>
+          <button class="tc-empty__btn" (click)="clearFilters()">Clear All Filters</button>
+        </div>
+      }
+
+    </section>
+  </div>
+</div>

@@ -1,0 +1,18 @@
+<div class="strip-wrap"
+     *ngIf="banner"
+     [style.background-color]="banner.backgroundColor || '#1a3a5e'"
+     [style.color]="banner.textColor || '#ffffff'"
+     (click)="navigate()">
+
+  <span class="strip-badge" *ngIf="banner.badgeText">{{ banner.badgeText }}</span>
+
+  <span class="strip-title">{{ banner.title }}</span>
+
+  <span class="strip-subtitle" *ngIf="banner.subtitle">— {{ banner.subtitle }}</span>
+
+  <button class="strip-cta"
+          *ngIf="banner.ctaLabel"
+          (click)="$event.stopPropagation(); navigate()">
+    {{ banner.ctaLabel }} <i class="fas fa-arrow-right"></i>
+  </button>
+</div>

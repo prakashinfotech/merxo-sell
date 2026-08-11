@@ -1,0 +1,16 @@
+<div class="filter-bar">
+  <div class="filter-bar__search">
+    <input class="filter-bar__input" type="search" placeholder="Search products…" [value]="search"
+      (input)="onSearch($any($event.target).value)" aria-label="Search products" />
+  </div>
+
+  <div class="filter-bar__sort">
+    <label class="filter-bar__label" for="sort-select">Sort by</label>
+    <select id="sort-select" class="filter-bar__select" [value]="sortBy"
+      (change)="onSortChange($any($event.target).value)">
+      @for (opt of sortOptions; track opt.value) {
+      <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  </div>
+</div>

@@ -1,0 +1,88 @@
+<section class="moderation-page">
+  <header class="moderation-page__header">
+    <div class="moderation-page__header-text">
+      <div class="title-icon"><i class="fas fa-flag"></i></div>
+      <div>
+        <h1>Flagged Reviews</h1>
+        <p>Approve to republish or reject to permanently hide. Rejected reviews stop counting toward the product rating.</p>
+      </div>
+    </div>
+    <div class="moderation-page__header-actions">
+      <span class="moderation-count-pill">
+        <i class="fas fa-flag"></i>
+        {{ reviews.length }} flagged
+      </span>
+      <button type="button" class="btn-refresh" (click)="load()" [disabled]="loading">
+        <i class="fas fa-sync" [class.fa-spin]="loading"></i> Refresh
+      </button>
+    </div>
+  </header>
+
+  @if (error) {
+    <div class="moderation-banner moderation-banner--err">{{ error }}</div>
+  }
+
+  @if (loading) {
+    <div class="moderation-empty">Loading…</div>
+  } @else if (reviews.length === 0) {
+    <div class="moderation-empty">
+      <i class="fas fa-check-circle"></i>
+      <h3>No flagged reviews</h3>
+      <p>Looks like the storefront is in good shape.</p>
+    </div>
+  } @else {
+    <ul class="moderation-list">
+      @for (r of reviews; track r.reviewId) {
+        <li class="moderation-card">
+          <img class="moderation-card__img" [src]="r.productImageUrl || 'assets/placeholder.png'" [alt]="r.productName" />
+          <div class="moderation-card__body">
+            <div class="moderation-card__title">
+              {{ r.productName }}
+              <span class="moderation-card__chip moderation-card__chip--warn">Flagged</span>
+            </div>
+            <div class="moderation-card__meta">
+              <span><i class="fas fa-user"></i> {{ r.authorName }}</span>
+              <span><i class="fas fa-envelope"></i> {{ r.authorEmail }}</span>
+              <span class="moderation-card__rating">
+                @for (i of stars(r.rating); track i) { <i class="fas fa-star"></i> }
+              </span>
+              <span><i class="far fa-clock"></i> {{ r.createdAt | date:'short' }}</span>
+            </div>
+            @if (r.comment) {
+              <blockquote class="moderation-card__quote">{{ r.comment }}</blockquote>
+            }
+            @if (r.flagReason) {
+              <p class="moderation-card__reason"><strong>Flag reason:</strong> {{ r.flagReason }}</p>
+            }
+
+            @if (rejectingId === r.reviewId) {
+              <div class="moderation-card__reject">
+                <textarea
+                  rows="2"
+                  placeholder="Why are you rejecting this review?"
+                  [(ngModel)]="rejectReason"></textarea>
+                <div class="moderation-card__actions">
+                  <button type="button" class="btn-danger"
+                          [disabled]="saving || !rejectReason.trim()"
+                          (click)="confirmReject()">
+                    <i class="fas fa-times"></i> Confirm reject
+                  </button>
+                  <button type="button" class="btn-ghost" (click)="cancelReject()">Cancel</button>
+                </div>
+              </div>
+            } @else {
+              <div class="moderation-card__actions">
+                <button type="button" class="btn-approve" [disabled]="saving" (click)="approve(r)">
+                  <i class="fas fa-check"></i> Approve
+                </button>
+                <button type="button" class="btn-reject" (click)="beginReject(r.reviewId)">
+                  <i class="fas fa-times"></i> Reject
+                </button>
+              </div>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

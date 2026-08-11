@@ -1,0 +1,20 @@
+<div class="category-scroll" role="navigation" aria-label="Browse by category">
+  <button
+    class="category-chip"
+    [class.category-chip--active]="selectedId === null"
+    (click)="select(null)">
+    All
+  </button>
+
+  @for (cat of categories; track cat.categoryId) {
+    <button
+      class="category-chip"
+      [class.category-chip--active]="selectedId === cat.categoryId"
+      (click)="select(cat.categoryId)">
+      @if (cat.iconUrl) {
+        <img [src]="cat.iconUrl" alt="" class="category-chip__icon" aria-hidden="true" />
+      }
+      {{ cat.name }}
+    </button>
+  }
+</div>

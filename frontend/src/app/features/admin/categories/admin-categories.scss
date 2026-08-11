@@ -1,0 +1,54 @@
+@import '../admin-shared.scss';
+
+.brand-info { @extend .brand-info; }
+.cat-badge { @extend .product-thumb; width: 36px; height: 36px; border-radius: 10px; }
+.cat-badge--root { background: var(--admin-line-soft); color: var(--admin-ink); }
+.cat-badge--sub { background: #ecfeff; color: #0e7490; }
+
+.parent-tag { @extend .category-pill; }
+.slug-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; background: #f8fafc; padding: 4px 8px; border-radius: 6px; color: #475569; }
+
+.btn-toggle {
+  background: none; border: none; color: var(--admin-muted); cursor: pointer;
+  padding: 4px; display: flex; align-items: center; justify-content: center;
+  transition: transform 0.2s; font-size: 0.8rem;
+  &.expanded { transform: rotate(90deg); color: var(--admin-brand); }
+}
+
+.indent-guide {
+  width: 32px; height: 10px; border-left: 2px solid var(--admin-line); border-bottom: 2px solid var(--admin-line);
+  margin-right: 8px; margin-top: -10px;
+}
+
+.scope-tabs {
+  display: flex; gap: 4px; padding: 4px; background: #fff; border: 1.5px solid var(--admin-line); border-radius: 14px;
+  button {
+    padding: 8px 16px; border: none; background: transparent; border-radius: 10px;
+    font-weight: 700; color: var(--admin-muted); cursor: pointer; transition: all 0.2s; font-size: 0.88rem;
+    &.active { background: var(--admin-ink); color: #fff; }
+  }
+}
+
+.status-toggle-box {
+  display: flex; align-items: flex-start; gap: 16px; padding: 16px;
+  background: #fafbfc; border-radius: 16px; border: 1.5px solid var(--admin-line-soft);
+}
+.toggle-text { display: flex; flex-direction: column; }
+.toggle-label { font-weight: 700; color: var(--admin-ink); }
+.toggle-desc { color: var(--admin-muted); font-size: 0.82rem; }
+
+.toggle-switch { position: relative; display: inline-block; width: 46px; height: 24px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; inset: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; }
+.slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: #fff; transition: .4s; border-radius: 50%; }
+input:checked+.slider { background-color: var(--admin-brand); }
+input:checked+.slider:before { transform: translateX(22px); }
+
+.mat-dd { width: 100%; }
+
+/* --- Modal Improvements --- */
+.view-group { margin-bottom: 20px; }
+.view-label { display: block; font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.view-value { font-size: 1rem; font-weight: 700; color: var(--admin-ink); }
+.view-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.view-box { background: #f8fafc; padding: 20px; border-radius: 16px; border: 1.5px solid var(--admin-line); }

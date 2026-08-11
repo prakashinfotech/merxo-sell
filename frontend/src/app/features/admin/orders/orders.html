@@ -1,0 +1,398 @@
+<div class="admin-page">
+  <!-- Header -->
+  <div class="admin-page__header">
+    <div class="header-main">
+      <h1 class="admin-page__title">
+        <div class="title-icon title-icon--orders"><i class="fas fa-shopping-bag"></i></div>
+        <span>Global Orders</span>
+      </h1>
+      <p class="admin-page__subtitle">Track every order across the marketplace, update status, and resolve cancellations.</p>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="admin-toolbar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="applyFilters()"
+        placeholder="Search by order ID, buyer name or email..."
+        aria-label="Search orders" />
+    </div>
+    <div class="filter-actions">
+      <mat-form-field appearance="outline" class="premium-mat-select">
+        <mat-select [(ngModel)]="statusFilter" (selectionChange)="applyFilters()" placeholder="All Statuses" panelClass="premium-dropdown-panel">
+          <mat-option value="">All statuses</mat-option>
+          @for (s of statuses; track s) {
+            <mat-option [value]="s">{{ s }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button class="btn-refresh" (click)="resetFilters()" title="Reset filters">
+        <i class="fas fa-filter-circle-xmark"></i>
+      </button>
+      <button class="btn-refresh" (click)="load()" title="Refresh list">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- VIEW Modal -->
+  @if (viewing || viewingLoading) {
+    <div class="admin-modal-overlay" (click)="closeView()">
+      <div class="admin-modal animate-slide-up" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <h3 class="modal-title">Order Details</h3>
+            @if (viewing) { <span class="modal-subtitle">#{{ viewing.orderId }} · {{ viewing.createdAt | date:'medium' }}</span> }
+          </div>
+          <button class="modal-close" (click)="closeView()">&times;</button>
+        </div>
+        <div class="modal-body">
+          @if (viewingLoading) {
+            <div class="loading-state">
+              <div class="loader"></div>
+              <span>Loading order...</span>
+            </div>
+          } @else if (viewing) {
+            <div class="view-info-side">
+              <div class="info-row">
+                <div class="info-group">
+                  <label>Status</label>
+                  <div class="info-value">
+                    <span class="status-pill" [class]="'status-pill--' + statusVariant(viewing.status)">{{ viewing.status }}</span>
+                  </div>
+                </div>
+                <div class="info-group">
+                  <label>Total (CAD)</label>
+                  <div class="info-value bold">CA${{ viewing.totalAmountCAD | number:'1.2-2' }}</div>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-group">
+                  <label>Display Total</label>
+                  <div class="info-value">{{ viewing.currencyCode }} {{ viewing.displayTotal | number:'1.2-2' }}</div>
+                </div>
+                <div class="info-group">
+                  <label>Currency</label>
+                  <div class="info-value">{{ viewing.currencyCode }}</div>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-group">
+                  <label>Shipping</label>
+                  <div class="info-value">CA${{ viewing.shippingAmount | number:'1.2-2' }}</div>
+                </div>
+                <div class="info-group">
+                  <label>Discount</label>
+                  <div class="info-value">CA${{ viewing.discountAmount | number:'1.2-2' }}</div>
+                </div>
+              </div>
+
+              <h4 class="section-heading">Buyer</h4>
+              <div class="info-row">
+                <div class="info-group">
+                  <label>Name</label>
+                  <div class="info-value">{{ viewing.buyerName }}</div>
+                </div>
+                <div class="info-group">
+                  <label>Email</label>
+                  <div class="info-value">{{ viewing.buyerEmail }}</div>
+                </div>
+              </div>
+              <div class="info-group">
+                <label>Phone</label>
+                <div class="info-value">{{ viewing.buyerPhone || 'N/A' }}</div>
+              </div>
+
+              @if (viewing.shippingAddress) {
+                <h4 class="section-heading">Shipping Address</h4>
+                <div class="address-card">
+                  <div class="address-name">{{ viewing.shippingAddress.fullName }}</div>
+                  <div class="address-line">
+                    {{ viewing.shippingAddress.addressLine1 }}{{ viewing.shippingAddress.addressLine2 ? ', ' + viewing.shippingAddress.addressLine2 : '' }}
+                  </div>
+                  <div class="address-line">
+                    {{ viewing.shippingAddress.city }}{{ viewing.shippingAddress.state ? ', ' + viewing.shippingAddress.state : '' }} {{ viewing.shippingAddress.postalCode }}
+                  </div>
+                  <div class="address-line muted">
+                    {{ viewing.shippingAddress.country }} · {{ viewing.shippingAddress.phone }}
+                  </div>
+                </div>
+              }
+
+              <h4 class="section-heading">Items ({{ viewing.items.length }})</h4>
+              <div class="items-table">
+                @for (item of viewing.items; track item.orderItemId) {
+                  <div class="item-row">
+                    <div class="item-thumb">
+                      @if (item.primaryImageUrl) {
+                        <img [src]="item.primaryImageUrl" [alt]="item.productName" />
+                      } @else {
+                        <div class="item-thumb__placeholder"><i class="fas fa-box"></i></div>
+                      }
+                    </div>
+                    <div class="item-info">
+                      <div class="item-name">{{ item.productName }}</div>
+                      @if (item.variantInfo) {
+                        <div class="item-variant">{{ item.variantInfo }}</div>
+                      }
+                      <div class="item-meta">Qty: {{ item.quantity }} · CA${{ item.unitPriceCAD | number:'1.2-2' }} each</div>
+                    </div>
+                    <div class="item-total">CA${{ (item.quantity * item.unitPriceCAD) | number:'1.2-2' }}</div>
+                  </div>
+                }
+              </div>
+
+              @if (viewing.notes) {
+                <h4 class="section-heading">Notes</h4>
+                <div class="info-value muted">{{ viewing.notes }}</div>
+              }
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn-modal-cancel" (click)="closeView()">Close</button>
+          @if (viewing) {
+            <button
+              class="btn-modal-save"
+              (click)="closeView(); openEditStatus({
+                orderId: viewing.orderId,
+                status: viewing.status,
+                totalAmountCAD: viewing.totalAmountCAD,
+                currencyCode: viewing.currencyCode,
+                displayTotal: viewing.displayTotal,
+                itemCount: viewing.items.length,
+                userId: viewing.userId,
+                buyerName: viewing.buyerName,
+                buyerEmail: viewing.buyerEmail,
+                createdAt: viewing.createdAt,
+                updatedAt: viewing.updatedAt
+              })">
+              <i class="fas fa-pen"></i> Update Status
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- EDIT STATUS Modal -->
+  @if (showStatusForm && editing) {
+    <div class="admin-modal-overlay" (click)="cancelEditStatus()">
+      <div class="admin-modal animate-slide-up" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <h3 class="modal-title">Update Order Status</h3>
+            <span class="modal-subtitle">Order #{{ editing.orderId }} · {{ editing.buyerName }}</span>
+          </div>
+          <button class="modal-close" (click)="cancelEditStatus()">&times;</button>
+        </div>
+        <div class="modal-body">
+          @if (error) { <div class="alert alert-error mb-20">{{ error }}</div> }
+          <div class="form-grid">
+            <div class="form-group span-2">
+              <label>Current Status</label>
+              <div class="info-value">
+                <span class="status-pill" [class]="'status-pill--' + statusVariant(editing.status)">{{ editing.status }}</span>
+              </div>
+            </div>
+            <div class="form-group span-2">
+              <label class="field-label-premium">New Status</label>
+              <mat-form-field appearance="outline" class="premium-mat-select">
+                <mat-select [(ngModel)]="pendingStatus" placeholder="Select Status" panelClass="premium-dropdown-panel">
+                  @for (s of statuses; track s) {
+                    <mat-option [value]="s">{{ s }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="form-group span-2">
+              <label>Note (optional)</label>
+              <textarea rows="3" maxlength="500" [(ngModel)]="pendingNote"
+                        placeholder="Tracking number, carrier, message to the buyer…"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-modal-cancel" (click)="cancelEditStatus()">Discard</button>
+          <button class="btn-modal-save" (click)="saveStatus()" [disabled]="saving">
+            <i class="fas fa-{{ saving ? 'spinner fa-spin' : 'save' }}"></i>
+            {{ saving ? 'Saving...' : 'Save Status' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Data Table -->
+  <div class="admin-content-card">
+    @if (loading) {
+      <div class="loading-state">
+        <div class="loader"></div>
+        <span>Loading orders...</span>
+      </div>
+    } @else if (!orders.length) {
+      <div class="empty-state">
+        <div class="empty-illustration"><i class="fas fa-receipt"></i></div>
+        <h3>No Orders Found</h3>
+        <p>No orders match the current filters.</p>
+        <button class="btn-primary" (click)="resetFilters()">Reset Filters</button>
+      </div>
+    } @else {
+      <div class="table-overflow">
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Buyer</th>
+              <th>Items</th>
+              <th>Total (CAD)</th>
+              <th>Display</th>
+              <th>Status</th>
+              <th>Placed</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (o of pagedOrders; track trackById($index, o)) {
+              <tr [class.row-cancelled]="o.status === 'Cancelled' || o.status === 'Refunded'">
+                <td>
+                  <div class="order-info">
+                    <span class="name">#{{ o.orderId }}</span>
+                    <span class="id">ID: {{ o.orderId }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="contact-stack">
+                    <span class="email">{{ o.buyerName }}</span>
+                    <span class="phone">{{ o.buyerEmail }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="count-pill">{{ o.itemCount }}</span>
+                </td>
+                <td>
+                  <span class="amount">CA${{ o.totalAmountCAD | number:'1.2-2' }}</span>
+                </td>
+                <td>
+                  <span class="display-amount">{{ o.currencyCode }} {{ o.displayTotal | number:'1.2-2' }}</span>
+                </td>
+                <td>
+                  <span class="status-pill" [class]="'status-pill--' + statusVariant(o.status)">{{ o.status }}</span>
+                </td>
+                <td>
+                  <span class="date-cell">{{ o.createdAt | date:'mediumDate' }}</span>
+                </td>
+                <td>
+                  <div class="action-set">
+                    <button class="btn-action view" (click)="openView(o)" title="View order">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-action edit" (click)="openTimeline(o)" title="Status timeline">
+                      <i class="fas fa-stream"></i>
+                    </button>
+                    <button class="btn-action edit" (click)="openEditStatus(o)" title="Update status">
+                      <i class="fas fa-pen"></i>
+                    </button>
+                    <button
+                      class="btn-action hide"
+                      (click)="cancelOrder(o)"
+                      [disabled]="o.status === 'Cancelled' || o.status === 'Delivered' || o.status === 'Refunded'"
+                      title="Cancel order">
+                      <i class="fas fa-ban"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              @if (o.cancellationReason) {
+                <tr class="reason-row">
+                  <td colspan="8">
+                    <div class="cancel-reason-cell">
+                      <i class="fas fa-circle-info"></i>
+                      <strong>Cancellation reason:</strong>
+                      <span>{{ o.cancellationReason }}</span>
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-pagination
+        [page]="page"
+        [pageSize]="pageSize"
+        [totalCount]="orders.length"
+        (pageChange)="goPage($event)">
+      </app-pagination>
+    }
+  </div>
+</div>
+
+<!-- Timeline modal -->
+@if (timelineOpen) {
+  <div class="admin-modal-overlay" (click)="closeTimeline()">
+    <div class="admin-modal admin-modal--timeline animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="timeline-head">
+          <div class="title-icon title-icon--orders"><i class="fas fa-route"></i></div>
+          <div>
+            <h3 class="modal-title">Order Timeline</h3>
+            <span class="modal-subtitle">Order #{{ timelineForOrderId }} · {{ timeline.length }} {{ timeline.length === 1 ? 'event' : 'events' }}</span>
+          </div>
+        </div>
+        <button class="modal-close" (click)="closeTimeline()" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        @if (loadingTimeline) {
+          <div class="loading-state"><div class="loader"></div><span>Loading order history…</span></div>
+        } @else if (!timeline.length) {
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-history"></i></div>
+            <p>No history entries yet for this order.</p>
+          </div>
+        } @else {
+          <ol class="ord-timeline">
+            @for (h of timeline; track trackHistory($index, h); let isLast = $last) {
+              <li class="ord-step" [attr.data-status]="statusVariant(h.toStatus)" [class.is-latest]="isLast">
+                <div class="ord-step__dot">
+                  <i class="fas" [class.fa-circle-check]="statusVariant(h.toStatus) === 'delivered'"
+                                  [class.fa-truck]="statusVariant(h.toStatus) === 'shipped'"
+                                  [class.fa-clock]="statusVariant(h.toStatus) === 'pending'"
+                                  [class.fa-spinner]="statusVariant(h.toStatus) === 'progress'"
+                                  [class.fa-ban]="statusVariant(h.toStatus) === 'cancelled'"
+                                  [class.fa-rotate-left]="statusVariant(h.toStatus) === 'refunded'"></i>
+                </div>
+                <div class="ord-step__body">
+                  <div class="ord-step__head">
+                    <span class="status-pill" [class]="'status-pill--' + statusVariant(h.toStatus)">{{ h.toStatus }}</span>
+                    @if (h.fromStatus && h.fromStatus !== h.toStatus) {
+                      <span class="ord-step__from"><i class="fas fa-arrow-right"></i> from {{ h.fromStatus }}</span>
+                    }
+                    @if (isLast) { <span class="ord-step__latest">Latest</span> }
+                  </div>
+                  @if (h.note) {
+                    <div class="ord-step__note"><i class="fas fa-quote-left"></i> {{ h.note }}</div>
+                  }
+                  <div class="ord-step__meta">
+                    <span>
+                      <i class="fas fa-user-shield"></i>
+                      {{ h.changedByName || 'System' }}<span *ngIf="h.changedByRole"> · {{ h.changedByRole }}</span>
+                    </span>
+                    <span><i class="far fa-clock"></i> {{ h.createdAt | date:'medium' }}</span>
+                  </div>
+                </div>
+              </li>
+            }
+          </ol>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" (click)="closeTimeline()">Close</button>
+      </div>
+    </div>
+  </div>
+}
+

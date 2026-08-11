@@ -1,0 +1,340 @@
+<div class="co-page page-container">
+
+  @if (loading) {
+    <div class="co-skeleton">
+      <div class="co-skel-title"></div>
+      <div class="co-skel-body"></div>
+    </div>
+  } @else {
+
+    <!-- Page heading -->
+    <div class="co-heading">
+      <h1 class="co-heading__title">Checkout</h1>
+      <a routerLink="/cart" class="co-heading__back"><i class="fas fa-arrow-left"></i> Back to Cart</a>
+    </div>
+
+    <div class="co-layout">
+
+      <!-- ── LEFT COLUMN ─────────────────────────────────────── -->
+      <div class="co-main">
+
+        <!-- 1. Review Items -->
+        <div class="co-card">
+          <div class="co-card__head">
+            <div class="co-card__icon co-card__icon--ink"><i class="fas fa-box"></i></div>
+            <div>
+              <h2 class="co-card__title">Review Items</h2>
+              <p class="co-card__sub">Confirm what you're ordering</p>
+            </div>
+            <a routerLink="/cart" class="co-link co-card__head-link">Edit Cart</a>
+          </div>
+
+          <div class="co-items">
+            @for (item of cartService.items$ | async; track item.cartItemId) {
+              <div class="co-item">
+                <div class="co-item__img">
+                  <img [src]="item.primaryImageUrl" [alt]="item.productName">
+                </div>
+                <div class="co-item__info">
+                  <div class="co-item__name">{{ item.productName }}</div>
+                  @if (item.variantInfo) {
+                    <div class="co-item__variant">{{ item.variantInfo }}</div>
+                  }
+                  <div class="co-item__price">
+                    {{ item.quantity }} × {{ item.unitPriceCAD | appCurrency:(currencyService.selectedCurrency$ | async) }}
+                  </div>
+                </div>
+                <div class="co-item__total">
+                  {{ (item.unitPriceCAD * item.quantity) | appCurrency:(currencyService.selectedCurrency$ | async) }}
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- 2. Coupon -->
+        <div class="co-card">
+          <div class="co-card__head">
+            <div class="co-card__icon co-card__icon--amber"><i class="fas fa-tag"></i></div>
+            <div>
+              <h2 class="co-card__title">Coupon Code</h2>
+              <p class="co-card__sub">Have a discount code?</p>
+            </div>
+            <a routerLink="/coupons" class="co-link co-card__head-link">View Coupons</a>
+          </div>
+
+          <div class="co-coupon-row">
+            <input type="text" class="co-coupon-input" [(ngModel)]="couponCode"
+                   placeholder="Enter coupon code…" [disabled]="!!appliedCoupon">
+            @if (!appliedCoupon) {
+              <button class="co-btn co-btn--dark co-btn--sm" (click)="applyCoupon()">Apply</button>
+            } @else {
+              <button class="co-btn co-btn--ghost co-btn--sm" (click)="removeCoupon()">Remove</button>
+            }
+          </div>
+
+          @if (couponMessage) {
+            <div class="co-msg co-msg--ok"><i class="fas fa-check-circle"></i> {{ couponMessage }}</div>
+          }
+          @if (couponError) {
+            <div class="co-msg co-msg--err"><i class="fas fa-exclamation-circle"></i> {{ couponError }}</div>
+          }
+
+          @if (availableCoupons.length) {
+            <div class="co-coupon-chips">
+              @for (c of availableCoupons.slice(0, 4); track c.couponId) {
+                <button class="co-chip" (click)="couponCode = c.couponCode; applyCoupon()">
+                  {{ c.couponCode }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- 3. Shipping Address -->
+        <div class="co-card">
+          <div class="co-card__head">
+            <div class="co-card__icon co-card__icon--blue"><i class="fas fa-map-marker-alt"></i></div>
+            <div>
+              <h2 class="co-card__title">Shipping Address</h2>
+              <p class="co-card__sub">Where should we send your order?</p>
+            </div>
+            <a routerLink="/profile" class="co-link co-card__head-link">Manage</a>
+          </div>
+
+          @if (addresses.length > 0) {
+            <div class="co-addr-grid">
+              @for (addr of addresses; track addr.addressId) {
+                <div class="co-addr-card" [class.on]="selectedAddressId === addr.addressId"
+                     (click)="selectAddress(addr.addressId)">
+                  <div class="co-addr-card__radio">
+                    <div class="co-radio" [class.on]="selectedAddressId === addr.addressId"></div>
+                  </div>
+                  <div class="co-addr-card__body">
+                    <div class="co-addr-card__name">
+                      {{ addr.fullName }}
+                      @if (addr.label) { <span class="co-tag">{{ addr.label }}</span> }
+                      @if (addr.isDefault) { <span class="co-tag co-tag--default">Default</span> }
+                    </div>
+                    <p>{{ addr.addressLine1 }}</p>
+                    @if (addr.addressLine2) { <p>{{ addr.addressLine2 }}</p> }
+                    <p>{{ addr.city }}, {{ addr.state }} {{ addr.postalCode }}</p>
+                    <p>{{ addr.country }}</p>
+                    @if (addr.phone) {
+                      <p class="co-addr-card__phone"><i class="fas fa-phone"></i> {{ addr.phone }}</p>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="co-empty-msg">No saved addresses — add one below.</p>
+          }
+
+          <button type="button" class="co-add-toggle" (click)="toggleNewAddressForm()">
+            <i class="fas" [class.fa-plus]="!showNewAddressForm" [class.fa-times]="showNewAddressForm"></i>
+            {{ showNewAddressForm ? 'Cancel' : 'Add new address' }}
+          </button>
+
+          @if (showNewAddressForm) {
+            <div class="co-form">
+              <div class="co-form__row">
+                <label class="co-field">
+                  <span>Label</span>
+                  <select [(ngModel)]="newAddress.label" name="label">
+                    <option value="Home">Home</option>
+                    <option value="Work">Work</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </label>
+                <label class="co-field">
+                  <span>Full name *</span>
+                  <input type="text" [(ngModel)]="newAddress.fullName" required />
+                </label>
+              </div>
+              <label class="co-field">
+                <span>Address line 1 *</span>
+                <input type="text" [(ngModel)]="newAddress.addressLine1" required />
+              </label>
+              <label class="co-field">
+                <span>Address line 2</span>
+                <input type="text" [(ngModel)]="newAddress.addressLine2" />
+              </label>
+              <div class="co-form__row">
+                <label class="co-field">
+                  <span>City *</span>
+                  <input type="text" [(ngModel)]="newAddress.city" required />
+                </label>
+                <label class="co-field">
+                  <span>State *</span>
+                  <input type="text" [(ngModel)]="newAddress.state" required />
+                </label>
+              </div>
+              <div class="co-form__row">
+                <label class="co-field">
+                  <span>Postal code *</span>
+                  <input type="text" [(ngModel)]="newAddress.postalCode" required />
+                </label>
+                <label class="co-field">
+                  <span>Country *</span>
+                  <select [(ngModel)]="newAddress.country" required>
+                    <option value="CA">Canada</option>
+                    <option value="US">United States</option>
+                    <option value="UK">United Kingdom</option>
+                    <option value="IN">India</option>
+                    <option value="AU">Australia</option>
+                    <option value="DE">Germany</option>
+                    <option value="FR">France</option>
+                  </select>
+                </label>
+              </div>
+              <div class="co-form__row co-form__row--align">
+                <label class="co-field">
+                  <span>Phone</span>
+                  <input type="tel" [(ngModel)]="newAddress.phone" />
+                </label>
+                <label class="co-field co-field--check">
+                  <input type="checkbox" [(ngModel)]="newAddress.isDefault" />
+                  <span>Set as default</span>
+                </label>
+              </div>
+
+              @if (newAddressError) {
+                <div class="co-form__error"><i class="fas fa-exclamation-circle"></i> {{ newAddressError }}</div>
+              }
+
+              <div class="co-form__actions">
+                <button type="button" class="co-btn co-btn--dark" (click)="saveNewAddress()" [disabled]="savingAddress">
+                  @if (savingAddress) { <i class="fas fa-spinner fa-spin"></i> Saving… }
+                  @else { <i class="fas fa-check"></i> Save & Use }
+                </button>
+                <button type="button" class="co-btn co-btn--ghost" (click)="toggleNewAddressForm()" [disabled]="savingAddress">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- 4. Payment Method -->
+        <div class="co-card">
+          <div class="co-card__head">
+            <div class="co-card__icon co-card__icon--green"><i class="fas fa-credit-card"></i></div>
+            <div>
+              <h2 class="co-card__title">Payment Method</h2>
+              <p class="co-card__sub">How would you like to pay?</p>
+            </div>
+          </div>
+
+          <div class="co-pay-grid">
+            <div class="co-pay-card" [class.on]="selectedPaymentId === 'cod'" (click)="selectPayment('cod')">
+              <div class="co-pay-card__icon"><i class="fas fa-wallet"></i></div>
+              <div class="co-pay-card__info">
+                <span>Cash on Delivery</span>
+                <small>Pay when you receive</small>
+              </div>
+              <div class="co-radio" [class.on]="selectedPaymentId === 'cod'"></div>
+            </div>
+
+            @for (card of savedCards; track card.id) {
+              <div class="co-pay-card" [class.on]="selectedPaymentId === card.id" (click)="selectPayment(card.id)">
+                <div class="co-pay-card__icon"><i class="fas fa-credit-card"></i></div>
+                <div class="co-pay-card__info">
+                  <span>{{ card.label }}</span>
+                  <small>{{ card.subLabel }}</small>
+                </div>
+                <div class="co-radio" [class.on]="selectedPaymentId === card.id"></div>
+              </div>
+            }
+
+            @for (upi of savedUpis; track upi.id) {
+              <div class="co-pay-card" [class.on]="selectedPaymentId === upi.id" (click)="selectPayment(upi.id)">
+                <div class="co-pay-card__icon"><i class="fas fa-mobile-alt"></i></div>
+                <div class="co-pay-card__info">
+                  <span>{{ upi.label }}</span>
+                  <small>{{ upi.subLabel }}</small>
+                </div>
+                <div class="co-radio" [class.on]="selectedPaymentId === upi.id"></div>
+              </div>
+            }
+          </div>
+
+          <div class="co-pay-actions">
+            <a routerLink="/profile" [queryParams]="{ tab: 'payment', action: 'add-card' }" class="co-btn co-btn--ghost co-btn--sm">
+              <i class="fas fa-plus"></i> Add Card
+            </a>
+            <a routerLink="/profile" [queryParams]="{ tab: 'payment', action: 'add-upi' }" class="co-btn co-btn--ghost co-btn--sm">
+              <i class="fas fa-plus"></i> Add UPI
+            </a>
+          </div>
+        </div>
+
+      </div><!-- /co-main -->
+
+      <!-- ── RIGHT COLUMN: order summary ──────────────────────── -->
+      <aside class="co-sidebar">
+
+        <div class="co-sum">
+          <h3 class="co-sum__title">Order Summary</h3>
+
+          <div class="co-sum__rows">
+            <div class="co-sum__row">
+              <span>Items Subtotal</span>
+              <b>{{ (cartService.total$ | async) | appCurrency:(currencyService.selectedCurrency$ | async) }}</b>
+            </div>
+            <div class="co-sum__row">
+              <span>Shipping &amp; Handling</span>
+              <span class="co-sum__free">FREE</span>
+            </div>
+            @if (appliedCoupon) {
+              <div class="co-sum__row co-sum__row--promo">
+                <span>Promotion Applied</span>
+                <span class="co-sum__discount">−{{ appliedCoupon.discountAmount | appCurrency:(currencyService.selectedCurrency$ | async) }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="co-sum__sep"></div>
+
+          <div class="co-sum__total">
+            <span>Order Total</span>
+            <b>{{ ((cartService.total$ | async) || 0) - (appliedCoupon?.discountAmount || 0) | appCurrency:(currencyService.selectedCurrency$ | async) }}</b>
+          </div>
+
+          @if (error) {
+            <div class="co-msg co-msg--err" style="margin-top: 12px;">
+              <i class="fas fa-exclamation-circle"></i> {{ error }}
+            </div>
+          }
+
+          @if (!selectedAddressId) {
+            <div class="co-msg co-msg--warn" style="margin-top: 12px;">
+              <i class="fas fa-map-marker-alt"></i> Please select a shipping address
+            </div>
+          }
+
+          <button class="co-place-btn"
+                  [disabled]="!selectedAddressId || submitting"
+                  (click)="placeOrder()">
+            @if (submitting) {
+              <i class="fas fa-spinner fa-spin"></i> Processing…
+            } @else {
+              <i class="fas fa-bag-shopping"></i> Place Your Order
+            }
+          </button>
+
+          <div class="co-secure">
+            <i class="fas fa-lock"></i> Secure Checkout
+          </div>
+
+          <p class="co-terms">
+            By placing your order you agree to our
+            <a href="#">privacy notice</a> and <a href="#">conditions of use</a>.
+          </p>
+        </div>
+
+      </aside>
+
+    </div><!-- /co-layout -->
+  }
+</div>

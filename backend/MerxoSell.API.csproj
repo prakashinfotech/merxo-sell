@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>MerxoSell.API</RootNamespace>
+    <AssemblyName>MerxoSell.API</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <!-- Exclude the test project subfolder so its files are not compiled by the API project -->
+  <ItemGroup>
+    <Compile Remove="MerxoSell.Tests\**" />
+    <Content Remove="MerxoSell.Tests\**" />
+    <EmbeddedResource Remove="MerxoSell.Tests\**" />
+    <None Remove="MerxoSell.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next"
+                      Version="4.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer"
+                      Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer"
+                      Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools"
+                      Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore"
+                      Version="6.5.0" />
+  </ItemGroup>
+
+</Project>

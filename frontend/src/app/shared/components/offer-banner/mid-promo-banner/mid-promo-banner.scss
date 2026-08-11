@@ -1,0 +1,197 @@
+// MidPromoBanner — promotional card occupying half the mid-row with carousel auto-scrolling
+:host {
+  display: block;
+  flex: 1;
+  min-width: 0;
+}
+
+.mpb-wrap {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  cursor: pointer;
+  height: 500px;
+  min-height: 400px;
+  max-height: 550px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.09);
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+
+    .mpb-image {
+      transform: scale(1.04);
+    }
+  }
+
+  @media (max-width: 767px) {
+    height: 320px;
+    min-height: 280px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+
+    .mpb-image {
+      transition: none !important;
+    }
+  }
+}
+
+// ── Image ────────────────────────────────────────────────────────────────────
+.mpb-image-area {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  inset: 0;
+}
+
+.mpb-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.5s ease;
+  display: block;
+}
+
+// ── Text overlay at bottom ────────────────────────────────────────────────────
+.mpb-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 36px 36px 40px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.45) 55%, transparent 100%);
+  z-index: 2;
+}
+
+.mpb-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #1a3a5e;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  z-index: 3;
+}
+
+.mpb-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 90%;
+}
+
+.mpb-subtitle {
+  font-size: 0.88rem;
+  font-weight: 700;
+  opacity: 0.92;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #e0ebe1;
+}
+
+.mpb-title {
+  font-size: clamp(1.4rem, 2.4vw, 2.1rem);
+  font-weight: 900;
+  margin: 0;
+  line-height: 1.16;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.mpb-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #1a3a5e;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 24px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  cursor: pointer;
+  width: fit-content;
+  margin-top: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.22s ease;
+
+  &:hover {
+    background: #1a3a5e;
+    color: #ffffff;
+    transform: translateY(-2px);
+  }
+}
+
+// ── Carousel Navigation Dots ────────────────────────────────────────────────
+.mpb-nav {
+  position: absolute;
+  bottom: 16px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  z-index: 5;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  padding: 6px 14px;
+  border-radius: 999px;
+}
+
+.mpb-nav__dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.mpb-nav__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  &.active {
+    background: #ffffff;
+    width: 20px;
+    border-radius: 999px;
+  }
+}
+
+// ── Skeleton ─────────────────────────────────────────────────────────────────
+.mpb-skeleton {
+  flex: 1;
+  height: 500px;
+  border-radius: 24px;
+  background: linear-gradient(90deg, #f0f0f5 25%, #e8e8ee 50%, #f0f0f5 75%);
+  background-size: 1200px 100%;
+  animation: mpb-shimmer 1.6s linear infinite;
+}
+
+@keyframes mpb-shimmer {
+  0% {
+    background-position: -1200px 0;
+  }
+
+  100% {
+    background-position: 1200px 0;
+  }
+}

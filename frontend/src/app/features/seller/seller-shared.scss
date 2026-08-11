@@ -1,0 +1,38 @@
+/* ────────────────────────────────────────────────────────────────
+   Seller Shared Styles — Inherits admin design system (light palette).
+   ──────────────────────────────────────────────────────────────── */
+
+@import '../admin/admin-shared.scss';
+
+// ── Seller-specific token aliases on .seller-shell ───────────────
+.seller-shell {
+  // Inherit all admin tokens from .admin-shell (defined in admin-shared.scss),
+  // re-scoped here so .seller-shell resolves them correctly.
+  --admin-brand:        #0B0B0B;
+  --admin-brand-strong: #000000;
+  --admin-brand-soft:   rgba(11, 11, 11, 0.07);
+
+  --admin-accent:       #f59e0b;
+  --admin-accent-dark:  #d97706;
+  --admin-accent-soft:  rgba(245, 158, 11, 0.15);
+
+  --admin-ink:        #0B0B0B;
+  --admin-ink-2:      #1F1F1F;
+  --admin-muted:      #767676;
+  --admin-line:       #E5E1D6;
+  --admin-line-soft:  #F1ECE0;
+  --admin-bg:         #F5F4EF;
+  --admin-card:       #ffffff;
+
+  --admin-r-lg: 20px;
+  --admin-r-md: 14px;
+  --admin-r-sm: 10px;
+
+  --admin-shadow-sm:      0 1px 2px rgba(0, 0, 0, 0.04);
+  --admin-shadow-md:      0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --admin-shadow-lg:      0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --admin-shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.06), 0 10px 10px -5px rgba(0, 0, 0, 0.03);
+
+  background: var(--admin-bg);
+  color: var(--admin-ink);
+}

@@ -1,0 +1,47 @@
+<div class="variant-selector">
+  @if (colors.length > 0) {
+    <div class="variant-group">
+      <p class="variant-group__label">
+        Color
+        @if (selectedColor) { <span class="variant-group__value">: {{ selectedColor }}</span> }
+      </p>
+      <div class="variant-group__swatches">
+        @for (c of colors; track c) {
+          <button
+            type="button"
+            class="swatch"
+            [class.swatch--selected]="isColorSelected(c)"
+            [class.swatch--unavailable]="!isColorAvailable(c)"
+            [title]="c"
+            [disabled]="!isColorAvailable(c)"
+            (click)="pickColor(c)">
+            <span class="swatch__dot" [style.background]="c.toLowerCase()"></span>
+            <span class="swatch__name">{{ c }}</span>
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  @if (sizes.length > 0) {
+    <div class="variant-group">
+      <p class="variant-group__label">
+        Size
+        @if (selectedSize) { <span class="variant-group__value">: {{ selectedSize }}</span> }
+      </p>
+      <div class="variant-group__options">
+        @for (s of sizes; track s) {
+          <button
+            type="button"
+            class="size-chip"
+            [class.size-chip--selected]="isSizeSelected(s)"
+            [class.size-chip--unavailable]="!isSizeAvailable(s)"
+            [disabled]="!isSizeAvailable(s)"
+            (click)="pickSize(s)">
+            {{ s }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

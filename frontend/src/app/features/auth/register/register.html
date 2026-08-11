@@ -1,0 +1,163 @@
+<div class="auth-wrapper" 
+     [class.role-buyer]="role.value === 'Buyer'" 
+     [class.role-seller]="role.value === 'Seller'">
+
+  <!-- Animated Background Elements -->
+  <div class="auth-bg-anim">
+    <i class="fas fa-shopping-cart float-icon" style="top: 15%; left: 15%; font-size: 7rem; --dur: 26s;"></i>
+    <i class="fas fa-shopping-bag float-icon blue" style="top: 65%; left: 25%; font-size: 5rem; --dur: 31s;"></i>
+    <i class="fas fa-box-open float-icon green" style="top: 25%; left: 75%; font-size: 6rem; --dur: 23s;"></i>
+    <i class="fas fa-tags float-icon" style="top: 75%; left: 75%; font-size: 4rem; --dur: 29s;"></i>
+    <i class="fas fa-gift float-icon blue" style="top: 45%; left: 45%; font-size: 8rem; --dur: 36s;"></i>
+    <i class="fas fa-truck float-icon green" style="top: 5%; left: 40%; font-size: 5.5rem; --dur: 42s;"></i>
+    <i class="fas fa-percent float-icon" style="top: 85%; left: 90%; font-size: 4.5rem; --dur: 38s;"></i>
+  </div>
+  <!-- Left: Hero Illustration -->
+  <div class="auth-hero" [class.seller]="role.value === 'Seller'">
+    <div class="auth-hero__content">
+      <h1 class="slide-in">{{ currentHero.title }}</h1>
+      <p class="slide-in" style="animation-delay: 0.1s;">{{ currentHero.subtitle }}</p>
+    </div>
+    <div class="auth-hero__visual slide-in" style="animation-delay: 0.3s;">
+      <img [src]="currentHero.image" alt="Hero Illustration">
+    </div>
+  </div>
+
+  <!-- Right: Form -->
+  <div class="auth-form-container">
+    <div class="auth-form-card animate-in wide">
+      <div class="auth-mobile-brand" routerLink="/">
+        <div class="brand-icon">M</div>
+        <span>MerxoSell</span>
+      </div>
+      
+      <div class="auth-header">
+        <h2>Create Account</h2>
+        <p>Join millions of users on MerxoSell</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <!-- Role Selector -->
+        <div class="role-grid">
+          <label class="role-item">
+            <input type="radio" value="Buyer" formControlName="role">
+            <div class="role-box">
+              <i class="fas fa-user"></i>
+              <span>Buyer</span>
+            </div>
+          </label>
+          <label class="role-item">
+            <input type="radio" value="Seller" formControlName="role">
+            <div class="role-box">
+              <i class="fas fa-store"></i>
+              <span>Seller</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>Full Name</label>
+          <div class="input-wrap">
+            <i class="fas fa-user"></i>
+            <input type="text" formControlName="fullName" placeholder="Jane Doe" [class.is-invalid]="fullName.invalid && fullName.touched">
+          </div>
+          <div class="error-msg" *ngIf="fullName.invalid && fullName.touched">
+            <span *ngIf="fullName.errors?.['required']">Full Name is required</span>
+            <span *ngIf="fullName.errors?.['maxlength']">Name is too long</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <div class="input-wrap">
+            <i class="fas fa-envelope"></i>
+            <input type="email" formControlName="email" placeholder="jane@example.com" [class.is-invalid]="email.invalid && email.touched">
+          </div>
+          <div class="error-msg" *ngIf="email.invalid && email.touched">
+            <span *ngIf="email.errors?.['required']">Email Address is required</span>
+            <span *ngIf="email.errors?.['email']">Please enter a valid email address</span>
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="role.value === 'Seller'">
+          <label>Store Name</label>
+          <div class="input-wrap">
+            <i class="fas fa-store"></i>
+            <input type="text" formControlName="storeName" placeholder="My Awesome Store" [class.is-invalid]="storeName.invalid && storeName.touched">
+          </div>
+          <div class="error-msg" *ngIf="storeName.invalid && storeName.touched">
+            <span *ngIf="storeName.errors?.['required']">Store Name is required for Sellers</span>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group" style="position: relative;">
+            <label>Password</label>
+            <div class="input-wrap">
+              <i class="fas fa-lock"></i>
+              <input 
+                [type]="showPassword() ? 'text' : 'password'" 
+                formControlName="password" 
+                placeholder="••••••••"
+                (focus)="passwordFocus.set(true)"
+                (blur)="passwordFocus.set(false)"
+                [class.is-invalid]="password.invalid && password.touched">
+              <button type="button" class="toggle-pass" (click)="togglePassword()">
+                <i class="fas" [class.fa-eye]="!showPassword()" [class.fa-eye-slash]="showPassword()"></i>
+              </button>
+            </div>
+            <div class="error-msg" *ngIf="password.invalid && password.touched">
+              <span *ngIf="password.errors?.['required']">Password is required</span>
+              <span *ngIf="password.errors?.['minlength']">Password must be at least 8 characters</span>
+              <span *ngIf="password.errors?.['noUppercase'] && !password.errors?.['minlength']">Missing uppercase letter</span>
+            </div>
+
+            <!-- Password Strength Meter (Floating Model) -->
+            <div class="strength-meter slide-in" *ngIf="showStrength">
+              <div class="strength-label">Password Strength: <strong>{{ strengthLabel | titlecase }}</strong></div>
+              <div class="strength-bar">
+                <div class="bar-fill" [class]="strengthLabel" [style.width.%]="strengthScore * 20"></div>
+              </div>
+              <ul class="strength-reqs">
+                <li [class.met]="hasMinLength"><i class="fas" [class.fa-check-circle]="hasMinLength" [class.fa-circle]="!hasMinLength"></i> 8+ Characters</li>
+                <li [class.met]="hasUppercase"><i class="fas" [class.fa-check-circle]="hasUppercase" [class.fa-circle]="!hasUppercase"></i> Uppercase</li>
+                <li [class.met]="hasLowercase"><i class="fas" [class.fa-check-circle]="hasLowercase" [class.fa-circle]="!hasLowercase"></i> Lowercase</li>
+                <li [class.met]="hasDigit"><i class="fas" [class.fa-check-circle]="hasDigit" [class.fa-circle]="!hasDigit"></i> Number</li>
+                <li [class.met]="hasSpecial"><i class="fas" [class.fa-check-circle]="hasSpecial" [class.fa-circle]="!hasSpecial"></i> Special Char</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <div class="input-wrap">
+              <i class="fas fa-shield-check"></i>
+              <input [type]="showPassword() ? 'text' : 'password'" formControlName="confirmPassword" placeholder="••••••••" [class.is-invalid]="confirmPassword.invalid && confirmPassword.touched || form.errors?.['mismatch'] && confirmPassword.touched">
+            </div>
+            <div class="error-msg" *ngIf="(confirmPassword.invalid || form.errors?.['mismatch']) && confirmPassword.touched">
+              <span *ngIf="confirmPassword.errors?.['required']">Please confirm your password</span>
+              <span *ngIf="form.errors?.['mismatch'] && !confirmPassword.errors?.['required']">Passwords do not match</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="error-msg server-error" *ngIf="errorMessage()">
+          <i class="fas fa-exclamation-triangle"></i>
+          {{ errorMessage() }}
+        </div>
+
+        <button type="submit" class="btn-primary auth-btn" [disabled]="loading()">
+          <span *ngIf="!loading()">Create My Account</span>
+          <span *ngIf="loading()">
+            <i class="fas fa-circle-notch fa-spin"></i>
+            Registering...
+          </span>
+        </button>
+
+        <p class="auth-footer">
+          Already have an account? <a routerLink="/auth/login">Log in here</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>

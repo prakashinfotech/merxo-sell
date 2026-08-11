@@ -1,0 +1,65 @@
+<a class="tc-pc" [routerLink]="['/products', product.productId]">
+  <div class="tc-pc__img">
+    <img
+      [src]="product.primaryImageUrl || '/assets/images/white-tshirt.png'"
+      [alt]="product.name"
+      (error)="onImgError($event)"
+      loading="lazy" />
+
+    <button class="tc-pc__heart" [class.on]="wishlist" (click)="toggleWishlist($event)" [attr.aria-label]="wishlist ? 'Remove from favourites' : 'Add to favourites'">
+      <i class="fas" [class.fa-heart]="wishlist" [class.fa-heart]="!wishlist"></i>
+    </button>
+
+    @if (product.isFeatured || product.isNew) {
+      <span class="tc-pc__top-item">{{ product.isNew ? 'New' : 'Top item' }}</span>
+    }
+
+    <div class="tc-pc__badges">
+      @if (product.isOnSale) {
+        <span class="tc-badge tc-badge--sale">SALE</span>
+      }
+    </div>
+  </div>
+
+  <div class="tc-pc__body">
+    <span class="tc-pc__name">{{ product.name }}</span>
+
+    <div class="tc-pc__pricing">
+      @if (product.isOnSale && product.salePrice != null) {
+        <button class="tc-pc__buy tc-pc__buy--orig" (click)="$event.preventDefault()">
+          <span>{{ product.basePrice | appCurrency:(cs.selectedCurrency$ | async) }}</span>
+        </button>
+        <button class="tc-pc__buy" (click)="onAddToCart($event)" [class.added]="added">
+          <i class="fas" [class.fa-shopping-bag]="!added" [class.fa-check]="added"></i>
+          {{ added ? 'Added' : (product.salePrice | appCurrency:(cs.selectedCurrency$ | async)) }}
+        </button>
+      } @else {
+        <button class="tc-pc__buy" (click)="onAddToCart($event)" [class.added]="added">
+          <i class="fas" [class.fa-shopping-bag]="!added" [class.fa-check]="added"></i>
+          {{ added ? 'Added' : (product.basePrice | appCurrency:(cs.selectedCurrency$ | async)) }}
+        </button>
+      }
+    </div>
+
+    <div class="tc-pc__meta">
+      <div class="tc-stars">
+        <i class="fas fa-star" [class.active]="product.rating >= 1"></i>
+        <i class="fas fa-star" [class.active]="product.rating >= 2"></i>
+        <i class="fas fa-star" [class.active]="product.rating >= 3"></i>
+        <i class="fas fa-star" [class.active]="product.rating >= 4"></i>
+        <i class="fas fa-star" [class.active]="product.rating >= 5"></i>
+        <span class="tc-stars__val">{{ product.rating | number:'1.1-1' }}</span>
+      </div>
+      @if (isAdmin) {
+        <div class="tc-pc__admin-actions">
+          <button class="btn-card-action btn-card-action--edit" (click)="onEdit($event)" title="Edit product">
+            <i class="fas fa-pen"></i>
+          </button>
+          <button class="btn-card-action btn-card-action--delete" (click)="onDelete($event)" title="Deactivate product">
+            <i class="fas fa-eye-slash"></i>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</a>

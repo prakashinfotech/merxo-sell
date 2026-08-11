@@ -1,0 +1,328 @@
+<div class="admin-page">
+  <!-- Page Header -->
+  <div class="admin-page__header">
+    <div class="header-main">
+      <h1 class="admin-page__title">
+        <div class="title-icon title-icon--banners"><i class="fas fa-images"></i></div>
+        <span>Offer Banners</span>
+      </h1>
+      <p class="admin-page__subtitle">Create and schedule promotional banners for Hero, Mid-Left, Mid-Right, and Strip zones.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" (click)="openCreate()">
+        <i class="fas fa-plus"></i> New Banner
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="banner-summary">
+    <div class="summary-card summary-card--brand">
+      <div class="summary-card__icon"><i class="fas fa-images"></i></div>
+      <div>
+        <span class="summary-card__label">Total</span>
+        <div class="summary-card__value">{{ totalCount }}</div>
+      </div>
+    </div>
+    <div class="summary-card summary-card--green">
+      <div class="summary-card__icon"><i class="fas fa-circle-check"></i></div>
+      <div>
+        <span class="summary-card__label">Active</span>
+        <div class="summary-card__value">{{ activeCount }}</div>
+      </div>
+    </div>
+    <div class="summary-card summary-card--amber">
+      <div class="summary-card__icon"><i class="fas fa-star"></i></div>
+      <div>
+        <span class="summary-card__label">Hero Slot</span>
+        <div class="summary-card__value">{{ heroCount }}</div>
+      </div>
+    </div>
+    <div class="summary-card summary-card--navy">
+      <div class="summary-card__icon"><i class="fas fa-th-large"></i></div>
+      <div>
+        <span class="summary-card__label">Mid Slots</span>
+        <div class="summary-card__value">{{ midCount }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="admin-content-card section-toolbar">
+    <!-- Slot filter chips -->
+    <div class="filter-chips">
+      <button class="chip" [class.is-active]="slotFilter === 'all'"      (click)="slotFilter = 'all'">All Slots</button>
+      <button class="chip" [class.is-active]="slotFilter === 'Hero'"     (click)="slotFilter = 'Hero'">
+        <i class="fas fa-star"></i> Hero
+      </button>
+      <button class="chip" [class.is-active]="slotFilter === 'MidLeft'"  (click)="slotFilter = 'MidLeft'">Mid-Left</button>
+      <button class="chip" [class.is-active]="slotFilter === 'MidRight'" (click)="slotFilter = 'MidRight'">Mid-Right</button>
+      <button class="chip" [class.is-active]="slotFilter === 'Strip'"    (click)="slotFilter = 'Strip'">Strip</button>
+    </div>
+    <!-- Status filter -->
+    <div class="filter-chips filter-chips--status">
+      <button class="chip" [class.is-active]="statusFilter === 'all'"      (click)="statusFilter = 'all'">All</button>
+      <button class="chip" [class.is-active]="statusFilter === 'active'"   (click)="statusFilter = 'active'">Active</button>
+      <button class="chip" [class.is-active]="statusFilter === 'inactive'" (click)="statusFilter = 'inactive'">Inactive</button>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn-refresh" (click)="load()" title="Refresh">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="admin-content-card">
+    <div class="table-overflow">
+      @if (loading) {
+        <div class="admin-loading-state">
+          <div class="premium-spinner"></div>
+          <p>Loading banners...</p>
+        </div>
+      } @else if (!filteredBanners.length) {
+        <div class="empty-state">
+          <div class="empty-illustration"><i class="fas fa-images"></i></div>
+          <h3>No banners {{ slotFilter !== 'all' || statusFilter !== 'all' ? 'match your filters' : 'yet' }}</h3>
+          @if (slotFilter === 'all' && statusFilter === 'all') {
+            <button class="btn-primary btn-small" (click)="openCreate()">
+              <i class="fas fa-plus"></i> Create first banner
+            </button>
+          }
+        </div>
+      } @else {
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>Preview</th>
+              <th>Slot</th>
+              <th>Title / Badge</th>
+              <th>Window</th>
+              <th>Sort</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of filteredBanners; track b.bannerId) {
+              <tr class="animate-in" [style.animation-delay]="($index * 0.04) + 's'">
+                <!-- Preview thumbnail -->
+                <td class="thumb-col">
+                  @if (b.imageUrl) {
+                    <img class="banner-thumb" [src]="b.imageUrl" [alt]="b.title" loading="lazy">
+                  } @else {
+                    <div class="banner-thumb banner-thumb--empty"><i class="fas fa-image"></i></div>
+                  }
+                </td>
+                <!-- Slot chip -->
+                <td>
+                  <span class="slot-pill slot-pill--{{ b.slot | lowercase }}">
+                    {{ slotLabel(b.slot) }}
+                  </span>
+                </td>
+                <!-- Title + badge -->
+                <td>
+                  <div class="banner-cell">
+                    <strong class="banner-title">{{ b.title }}</strong>
+                    @if (b.badgeText) {
+                      <span class="offer-tag-pill">{{ b.badgeText }}</span>
+                    }
+                    @if (b.subtitle) {
+                      <small class="muted ellipsis">{{ b.subtitle }}</small>
+                    }
+                  </div>
+                </td>
+                <!-- Window -->
+                <td>
+                  <span class="window-label">{{ windowLabel(b) }}</span>
+                </td>
+                <!-- Sort order -->
+                <td>
+                  <span class="order-badge">#{{ b.sortOrder }}</span>
+                </td>
+                <!-- Status -->
+                <td>
+                  @switch (statusOf(b)) {
+                    @case ('active')    { <span class="status-pill status-pill--active">Active</span> }
+                    @case ('scheduled') { <span class="status-pill status-pill--pending">Scheduled</span> }
+                    @case ('expired')   { <span class="status-pill status-pill--expired">Expired</span> }
+                    @default            { <span class="status-pill status-pill--inactive">Inactive</span> }
+                  }
+                </td>
+                <!-- Actions -->
+                <td class="text-right">
+                  <div class="action-set">
+                    <button class="btn-action edit"   (click)="openEdit(b)"  title="Edit">
+                      <i class="fas fa-pen"></i>
+                    </button>
+                    <button class="btn-action toggle" (click)="toggle(b)"
+                            [title]="b.isActive ? 'Deactivate' : 'Activate'">
+                      <i class="fas" [class.fa-eye]="!b.isActive" [class.fa-eye-slash]="b.isActive"></i>
+                    </button>
+                    <button class="btn-action hide"   (click)="remove(b)"   title="Delete">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- ── Create / Edit Modal ───────────────────────────────────────────────── -->
+@if (showForm) {
+  <div class="admin-modal-overlay" (click)="closeForm()">
+    <div class="admin-modal admin-modal--wide animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="timeline-head">
+          <div class="title-icon title-icon--banners"><i class="fas fa-images"></i></div>
+          <div>
+            <h3 class="modal-title">{{ editing ? 'Edit Banner' : 'Create Banner' }}</h3>
+            <span class="modal-subtitle">{{ editing ? 'Update banner content, images, and schedule.' : 'Define content, images, slot, and display schedule.' }}</span>
+          </div>
+        </div>
+        <button class="modal-close" (click)="closeForm()" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="modal-body">
+        @if (error) { <div class="alert alert-error">{{ error }}</div> }
+
+        <div class="form-grid">
+          <!-- Slot + Sort Order -->
+          <div class="form-group">
+            <label>Slot *</label>
+            <select name="slot" [(ngModel)]="form.slot">
+              @for (s of slotOptions; track s) {
+                <option [value]="s">{{ slotLabel(s) }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Sort Order</label>
+            <input type="number" name="sortOrder" [(ngModel)]="form.sortOrder" min="0">
+          </div>
+
+          <!-- Title + Subtitle -->
+          <div class="form-group">
+            <label>Title *</label>
+            <input type="text" name="title" [(ngModel)]="form.title" placeholder="e.g. Summer Polo Sale" maxlength="200">
+          </div>
+          <div class="form-group">
+            <label>Subtitle</label>
+            <input type="text" name="subtitle" [(ngModel)]="form.subtitle" placeholder="e.g. Get 50% off today" maxlength="300">
+          </div>
+
+          <!-- Badge Text -->
+          <div class="form-group">
+            <label>Badge Text <span class="muted">(pill overlay)</span></label>
+            <input type="text" name="badgeText" [(ngModel)]="form.badgeText" placeholder="e.g. 50% OFF" maxlength="40">
+          </div>
+
+          <!-- Background + Text Color -->
+          <div class="form-group color-row">
+            <label>Background Color</label>
+            <div class="color-input-wrap">
+              <input type="color" name="backgroundColor" [(ngModel)]="form.backgroundColor">
+              <input type="text"  name="backgroundColorText" [(ngModel)]="form.backgroundColor" placeholder="#fff8eb" maxlength="20">
+            </div>
+          </div>
+
+          <!-- Main image upload -->
+          <div class="form-group span-2">
+            <label>Banner Image * <span class="muted">(recommended 1920×600 for Hero, 940×420 for Mid)</span></label>
+            <div class="upload-field">
+              <label class="upload-btn" [class.uploading]="uploading">
+                <input type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                       (change)="onImageFileChange($event)" hidden>
+                <i class="fas" [class.fa-upload]="!uploading"
+                   [class.fa-spinner]="uploading" [class.fa-spin]="uploading"></i>
+                {{ uploading ? 'Uploading…' : 'Choose Image' }}
+              </label>
+              <span class="upload-or">or</span>
+              <input type="url" name="imageUrl" [(ngModel)]="form.imageUrl"
+                     placeholder="Paste URL…" class="upload-url-input">
+            </div>
+            @if (form.imageUrl) {
+              <img [src]="form.imageUrl" alt="Preview" class="banner-preview-img">
+            }
+          </div>
+
+          <!-- Side image upload (Hero only) -->
+          @if (form.slot === 'Hero') {
+            <div class="form-group span-2">
+              <label>Side Image <span class="muted">(small thumbnail in Hero right column)</span></label>
+              <div class="upload-field">
+                <label class="upload-btn" [class.uploading]="uploadingSide">
+                  <input type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                         (change)="onSideImageFileChange($event)" hidden>
+                  <i class="fas" [class.fa-upload]="!uploadingSide"
+                     [class.fa-spinner]="uploadingSide" [class.fa-spin]="uploadingSide"></i>
+                  {{ uploadingSide ? 'Uploading…' : 'Choose Side Image' }}
+                </label>
+                <span class="upload-or">or</span>
+                <input type="url" name="sideImageUrl" [(ngModel)]="form.sideImageUrl"
+                       placeholder="Paste URL…" class="upload-url-input">
+              </div>
+            </div>
+          }
+
+          <!-- CTA Primary -->
+          <div class="form-group">
+            <label>Primary CTA Label</label>
+            <input type="text" name="ctaLabel" [(ngModel)]="form.ctaLabel" placeholder="e.g. Discover the Collection" maxlength="60">
+          </div>
+          <div class="form-group">
+            <label>Primary CTA URL</label>
+            <input type="text" name="ctaUrl" [(ngModel)]="form.ctaUrl" placeholder="/products/123 or https://…" maxlength="500">
+          </div>
+
+          <!-- CTA Secondary -->
+          <div class="form-group">
+            <label>Secondary Label</label>
+            <input type="text" name="secondaryLabel" [(ngModel)]="form.secondaryLabel" placeholder="e.g. Preview" maxlength="60">
+          </div>
+          <div class="form-group">
+            <label>Secondary URL</label>
+            <input type="text" name="secondaryUrl" [(ngModel)]="form.secondaryUrl" placeholder="/products" maxlength="500">
+          </div>
+
+          <!-- Date window -->
+          <div class="form-group">
+            <label>Starts At <span class="muted">(optional)</span></label>
+            <input type="datetime-local" name="startsAt" [(ngModel)]="form.startsAt">
+          </div>
+          <div class="form-group">
+            <label>Ends At <span class="muted">(optional)</span></label>
+            <input type="datetime-local" name="endsAt" [(ngModel)]="form.endsAt">
+          </div>
+
+          <!-- Active toggle -->
+          <div class="form-group span-2 status-toggle-col">
+            <div class="status-toggle-box">
+              <label class="toggle-switch">
+                <input type="checkbox" name="isActive" [(ngModel)]="form.isActive">
+                <span class="slider"></span>
+              </label>
+              <div class="toggle-text">
+                <span class="toggle-label">Active &amp; published</span>
+                <span class="toggle-desc">Inactive banners are hidden from the storefront.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-cancel" (click)="closeForm()">Cancel</button>
+        <button type="button" class="btn-modal-save" (click)="save()" [disabled]="saving">
+          <i class="fas" [class.fa-save]="!saving" [class.fa-spinner]="saving" [class.fa-spin]="saving"></i>
+          {{ editing ? 'Update Banner' : 'Create Banner' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

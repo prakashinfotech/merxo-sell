@@ -1,0 +1,253 @@
+<div class="admin-page">
+  <!-- Header -->
+  <div class="admin-page__header">
+    <div class="header-main">
+      <h1 class="admin-page__title">
+        <div class="title-icon title-icon--customers"><i class="fas fa-users"></i></div>
+        <span>Customers</span>
+      </h1>
+      <p class="admin-page__subtitle">Manage buyer accounts, order history, and account access.</p>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="admin-toolbar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="applyFilters()"
+        placeholder="Search by name or email..."
+        aria-label="Search customers" />
+    </div>
+    <div class="filter-actions">
+      <mat-form-field appearance="outline" class="mat-dd">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="statusFilter" (selectionChange)="applyFilters()">
+          <mat-option value="">All statuses</mat-option>
+          <mat-option value="true">Active</mat-option>
+          <mat-option value="false">Inactive</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button class="btn-refresh" (click)="resetFilters()" title="Reset filters">
+        <i class="fas fa-filter-circle-xmark"></i>
+      </button>
+      <button class="btn-refresh" (click)="load()" title="Refresh list">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- VIEW Modal -->
+  @if (viewing || viewingLoading) {
+    <div class="admin-modal-overlay" (click)="closeView()">
+      <div class="admin-modal view-modal animate-slide-up" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <h3 class="modal-title">Customer Details</h3>
+            @if (viewing) { <span class="modal-subtitle">User ID: #{{ viewing.userId }}</span> }
+          </div>
+          <button class="modal-close" (click)="closeView()">&times;</button>
+        </div>
+        <div class="modal-body">
+          @if (viewingLoading) {
+            <div class="loading-state">
+              <div class="loader"></div>
+              <span>Loading customer profile...</span>
+            </div>
+          } @else if (viewing) {
+            <div class="view-info-side">
+              <div class="customer-hero">
+                <div class="customer-hero__avatar">
+                  <img [src]="avatarFor(viewing)" [alt]="viewing.fullName + ' avatar'" />
+                </div>
+                <div class="customer-hero__meta">
+                  <div class="customer-hero__name">{{ viewing.fullName }}</div>
+                  <div class="customer-hero__email">{{ viewing.email }}</div>
+                  <span class="status-pill"
+                        [class.status-pill--active]="viewing.isActive"
+                        [class.status-pill--paused]="!viewing.isActive">
+                    {{ viewing.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-group">
+                  <label>Email</label>
+                  <div class="info-value">{{ viewing.email }}</div>
+                </div>
+                <div class="info-group">
+                  <label>Phone</label>
+                  <div class="info-value">{{ viewing.phone || 'N/A' }}</div>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-group">
+                  <label>Preferred Currency</label>
+                  <div class="info-value">{{ viewing.preferredCurrency }}</div>
+                </div>
+                <div class="info-group">
+                  <label>Status</label>
+                  <div class="info-value">
+                    <span class="status-indicator" [class.active]="viewing.isActive">
+                      {{ viewing.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <h4 class="section-heading">Activity</h4>
+              <div class="metrics-grid">
+                <div class="metric-card">
+                  <div class="metric-label">Orders</div>
+                  <div class="metric-value">{{ viewing.orderCount }}</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-label">Total Spent</div>
+                  <div class="metric-value">CA${{ viewing.totalSpentCAD | number:'1.2-2' }}</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-label">Addresses</div>
+                  <div class="metric-value">{{ viewing.addressCount }}</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-label">Last Order</div>
+                  <div class="metric-value sm">
+                    @if (viewing.lastOrderAt) {
+                      {{ viewing.lastOrderAt | date:'mediumDate' }}
+                      <span class="metric-tag">{{ viewing.lastOrderStatus }}</span>
+                    } @else { — }
+                  </div>
+                </div>
+              </div>
+
+              @if (viewing.addresses.length) {
+                <h4 class="section-heading">Addresses</h4>
+                <div class="address-list">
+                  @for (a of viewing.addresses; track a.addressId) {
+                    <div class="address-card">
+                      <div class="address-card__head">
+                        <span class="address-name">{{ a.fullName }}</span>
+                        @if (a.isDefault) { <span class="address-badge">Default</span> }
+                      </div>
+                      <div class="address-line">{{ a.addressLine1 }}{{ a.addressLine2 ? ', ' + a.addressLine2 : '' }}</div>
+                      <div class="address-line">
+                        {{ a.city }}{{ a.state ? ', ' + a.state : '' }} {{ a.postalCode }}
+                      </div>
+                      <div class="address-line muted">{{ a.country }} · {{ a.phone }}</div>
+                    </div>
+                  }
+                </div>
+              }
+
+              <div class="info-group">
+                <label>Joined</label>
+                <div class="info-value">{{ viewing.createdAt | date:'mediumDate' }}</div>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn-modal-cancel" (click)="closeView()">Close</button>
+        </div>
+      </div>
+    </div>
+  }
+
+
+  <!-- Data Table -->
+  <div class="admin-content-card">
+    @if (loading) {
+      <div class="loading-state">
+        <div class="loader"></div>
+        <span>Loading customers...</span>
+      </div>
+    } @else if (!customers.length) {
+      <div class="empty-state">
+        <div class="empty-illustration"><i class="fas fa-user-slash"></i></div>
+        <h3>No Customers Found</h3>
+        <p>No buyer accounts match the current filters.</p>
+        <button class="btn-primary" (click)="resetFilters()">Reset Filters</button>
+      </div>
+    } @else {
+      <div class="table-overflow">
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Contact</th>
+              <th>Currency</th>
+              <th>Orders</th>
+              <th>Total Spent</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of pagedCustomers; track trackById($index, c)) {
+              <tr [class.row-inactive]="!c.isActive">
+                <td>
+                  <div class="customer-info">
+                    <div class="avatar">
+                      <img
+                        [src]="avatarFor(c)"
+                        [alt]="c.fullName + ' avatar'"
+                        loading="lazy" />
+                    </div>
+                    <div>
+                      <span class="name">{{ c.fullName }}</span>
+                      <span class="id">ID: #{{ c.userId }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="contact-stack">
+                    <span class="email">{{ c.email }}</span>
+                    <span class="phone">{{ c.phone || '—' }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="currency-pill">{{ c.preferredCurrency }}</span>
+                </td>
+                <td>
+                  <span class="count-pill">{{ c.orderCount }}</span>
+                </td>
+                <td>
+                  <span class="amount">CA${{ c.totalSpentCAD | number:'1.2-2' }}</span>
+                </td>
+                <td>
+                  <span class="status-indicator" [class.active]="c.isActive">
+                    {{ c.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-set">
+                    <button class="btn-action view" (click)="openView(c)" title="View profile">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button
+                      class="btn-action toggle"
+                      [class.is-active]="c.isActive"
+                      (click)="toggleStatus(c)"
+                      [title]="c.isActive ? 'Deactivate account' : 'Activate account'">
+                      <i class="fas" [class.fa-pause]="c.isActive" [class.fa-play]="!c.isActive"></i>
+                    </button>
+                    <button class="btn-action hide" (click)="delete(c)" title="Soft-delete (deactivate)">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-pagination
+        [page]="page"
+        [pageSize]="pageSize"
+        [totalCount]="customers.length"
+        (pageChange)="goPage($event)">
+      </app-pagination>
+    }
+  </div>
+</div>

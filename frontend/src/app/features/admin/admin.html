@@ -1,0 +1,145 @@
+<!-- Branch: bugfix/admin-portal-ui-fixes -->
+<div class="admin-shell" [class.sidebar-collapsed]="isSidebarCollapsed">
+  <!-- Sidebar Overlay (Mobile Only) -->
+  <div class="sidebar-overlay" (click)="toggleSidebar()" *ngIf="!isSidebarCollapsed"></div>
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <div class="admin-brand">
+        <div class="brand-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Admin</span>
+          <span class="brand-sub">Platform Control</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <label>Main Navigation</label>
+        <a routerLink="dashboard" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-th-large"></i></div>
+          <span>Dashboard</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <label>Product Catalog</label>
+        <a routerLink="products" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-box"></i></div>
+          <span>All Products</span>
+        </a>
+        <a routerLink="categories" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-sitemap"></i></div>
+          <span>Categories</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <label>Management</label>
+        <a routerLink="sellers" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-store"></i></div>
+          <span>Sellers</span>
+        </a>
+        <a routerLink="customers" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-users"></i></div>
+          <span>Customers</span>
+        </a>
+        <a routerLink="orders" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-shopping-bag"></i></div>
+          <span>Global Orders</span>
+        </a>
+        <a routerLink="reviews" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-star"></i></div>
+          <span>Reviews</span>
+        </a>
+        <a routerLink="coupons" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-ticket-alt"></i></div>
+          <span>Coupons</span>
+        </a>
+        <a routerLink="banners" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-images"></i></div>
+          <span>Offer Banners</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <label>Moderation</label>
+        <a routerLink="moderation/products" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-clipboard-check"></i></div>
+          <span>Pending Products</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <label>Settings</label>
+        <a routerLink="currencies" routerLinkActive="active" class="nav-item">
+          <div class="nav-icon"><i class="fas fa-dollar-sign"></i></div>
+          <span>Currencies</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="admin-user-card">
+        <div class="user-avatar-wrapper">
+          <img src="/assets/images/auth/auth-admin.png" alt="Admin" class="user-avatar-img">
+          <div class="status-indicator"></div>
+        </div>
+        <div class="user-info">
+          <span class="user-name">Super Admin</span>
+          <span class="user-role">Platform Lead</span>
+        </div>
+      </div>
+      <button (click)="logout()" class="btn-logout-sidebar">
+        <i class="fas fa-sign-out-alt"></i> <span>Logout Session</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Header -->
+  <header class="portal-header">
+    <div class="header-left">
+      <button class="btn-toggle-sidebar" (click)="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="portal-header-title">
+        <span class="portal-breadcrumb">Admin <strong>Management Portal</strong></span>
+      </div>
+    </div>
+    
+    <div class="header-right">
+      <div class="portal-logo-mini">
+        <svg width="28" height="28" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="aMsGradMain" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#0284c7"/>
+              <stop offset="100%" stop-color="#0f172a"/>
+            </linearGradient>
+            <linearGradient id="aMsGradAccent" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#ff7e00"/>
+              <stop offset="100%" stop-color="#f59e0b"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="34" height="34" rx="9" fill="url(#aMsGradMain)"/>
+          <path d="M14 11 C14 8, 24 8, 24 11" stroke="url(#aMsGradAccent)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <path d="M10 27 V15 L19 22.5 L28 15 V27" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M24 22 L28 18 L32 22" stroke="url(#aMsGradAccent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <span class="portal-brand-text">Merxo<strong>Sell</strong></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content Area -->
+  <main class="admin-main-container">
+    <!-- Branch: bugfix/admin-portal-ui-fixes -->
+    <div class="admin-page-container">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>
+

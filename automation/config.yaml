@@ -1,0 +1,42 @@
+environment:
+  # Change to "production" when running against a live server
+  active: development
+
+development:
+  api_base_url: "http://localhost:5000/api"
+  frontend_url: "http://localhost:4200"
+  backend_project: "../backend"
+  backend_tests_project: "../backend/MerxoSell.Tests"
+  frontend_project: "../frontend"
+
+production:
+  api_base_url: "https://your-production-api.com/api"
+  frontend_url: "https://your-production-site.com"
+  backend_project: "../backend"
+  backend_tests_project: "../backend/MerxoSell.Tests"
+  frontend_project: "../frontend"
+
+# Credentials used for API test suites
+test_credentials:
+  admin:
+    email: "admin@MerxoSell.com"
+    password: "Admin@123"
+  seller:
+    email: "seller@MerxoSell.com"
+    password: "Seller@123"
+  buyer:
+    email: "emma.johnson@example.com"
+    password: "Sample@123"
+
+# Timeouts (seconds)
+timeouts:
+  api_request: 30
+  dotnet_build: 120
+  dotnet_test: 300
+  ng_build: 180
+  ng_test: 120
+
+# Report output settings
+reports:
+  output_dir: "./reports"
+  keep_last_n: 10

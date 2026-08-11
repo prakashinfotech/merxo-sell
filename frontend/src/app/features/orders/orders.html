@@ -1,0 +1,284 @@
+<div class="page-container">
+  <div class="orders-header">
+    <h1 class="page-title">My Orders</h1>
+    <p class="page-sub">Track every order, see its current status, and request cancellation while it's still pending.</p>
+  </div>
+
+  @if (loading) {
+    <div class="skeleton-container">
+      @for (s of [1,2,3]; track s) {
+        <div class="skeleton-order-card"></div>
+      }
+    </div>
+  } @else if (error) {
+    <div class="alert alert-error">
+      Failed to load orders. <button class="btn-link" (click)="loadOrders()">Try Again</button>
+    </div>
+  } @else {
+    @if (orders.length > 0) {
+      <div class="orders-list">
+        @for (order of orders; track trackByOrderId($index, order)) {
+          <div class="order-card">
+            <div class="order-card__header">
+              <div class="header-main">
+                <div class="info-group">
+                  <span class="info-label">Order Placed</span>
+                  <span class="info-value">{{ order.createdAt | date:'mediumDate' }}</span>
+                </div>
+                <div class="info-group">
+                  <span class="info-label">Total</span>
+                  <span class="info-value">{{ order.totalAmountCAD | appCurrency:(currencyService.selectedCurrency$ | async) }}</span>
+                </div>
+                <div class="info-group">
+                  <span class="info-label">Status</span>
+                  <span class="status-pill" [attr.data-status]="statusVariant(order.status)">{{ order.status }}</span>
+                </div>
+              </div>
+              <div class="header-side">
+                <span class="order-id">Order #{{ order.orderId }}</span>
+              </div>
+            </div>
+
+            @if (order.cancellationReason) {
+              <div class="cancel-banner">
+                <i class="fas fa-circle-info"></i>
+                <div>
+                  <strong>Cancellation reason</strong>
+                  <div>{{ order.cancellationReason }}</div>
+                </div>
+              </div>
+            }
+
+            <div class="order-card__body">
+              <div class="order-items">
+                @for (item of order.items; track item.orderItemId) {
+                  <div class="order-item">
+                    <div class="order-item__image">
+                      @if (item.primaryImageUrl) {
+                        <img [src]="item.primaryImageUrl" [alt]="item.productName">
+                      } @else {
+                        <div class="placeholder"><i class="fas fa-box"></i></div>
+                      }
+                    </div>
+                    <div class="order-item__info">
+                      <h4 class="order-item__name">{{ item.productName }}</h4>
+                      <p class="order-item__variant" *ngIf="item.variantInfo">{{ item.variantInfo }}</p>
+                      <p class="order-item__qty">Qty: {{ item.quantity }}</p>
+                      <p class="order-item__price">{{ item.unitPriceCAD | appCurrency:(currencyService.selectedCurrency$ | async) }}</p>
+                    </div>
+                    <div class="order-item__actions">
+                      <button class="btn-secondary btn-sm" [routerLink]="['/products', item.productId]">Buy it Again</button>
+                      @if (canReview(order)) {
+                        <button class="btn-secondary btn-sm review-btn" (click)="openReviewModal(item)">
+                          <i class="fas fa-star"></i> Write Review
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="order-card__footer">
+              <button class="btn-track-package" (click)="openTimeline(order)">
+                <i class="fas fa-stream"></i> Track package
+              </button>
+              @if (canCancel(order)) {
+                <button class="btn-cancel-order" (click)="openCancelModal(order)">
+                  <i class="fas fa-ban"></i> Cancel order
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-shopping-bag"></i></div>
+        <div class="empty-title">No orders found</div>
+        <p class="empty-desc">You haven't placed any orders yet.</p>
+        <br>
+        <a routerLink="/products" class="btn-primary start-shopping-btn">Start Shopping</a>
+      </div>
+    }
+  }
+</div>
+
+<!-- Timeline modal -->
+@if (timelineOpen) {
+  <div class="admin-modal-overlay" (click)="closeTimeline()">
+    <div class="admin-modal admin-modal--timeline animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="timeline-head">
+          <div class="title-icon title-icon--timeline"><i class="fas fa-route"></i></div>
+          <div>
+            <h3 class="modal-title">Order Timeline</h3>
+            <span class="modal-subtitle">Order #{{ timelineForOrderId }} · {{ timeline.length }} {{ timeline.length === 1 ? 'event' : 'events' }}</span>
+          </div>
+        </div>
+        <button class="modal-close" (click)="closeTimeline()" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        @if (loadingTimeline) {
+          <div class="loading-state"><div class="loader"></div><span>Loading order history…</span></div>
+        } @else if (!timeline.length) {
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-history"></i></div>
+            <p>No history entries yet for this order.</p>
+          </div>
+        } @else {
+          <ol class="ord-timeline">
+            @for (h of timeline; track trackHistory($index, h); let isLast = $last) {
+              <li class="ord-step" [attr.data-status]="statusVariant(h.toStatus)" [class.is-latest]="isLast">
+                <div class="ord-step__dot">
+                  <i class="fas" [class.fa-circle-check]="statusVariant(h.toStatus) === 'delivered'"
+                                  [class.fa-truck]="statusVariant(h.toStatus) === 'shipped'"
+                                  [class.fa-clock]="statusVariant(h.toStatus) === 'pending'"
+                                  [class.fa-spinner]="statusVariant(h.toStatus) === 'progress'"
+                                  [class.fa-ban]="statusVariant(h.toStatus) === 'cancelled'"
+                                  [class.fa-rotate-left]="statusVariant(h.toStatus) === 'refunded'"></i>
+                </div>
+                <div class="ord-step__body">
+                  <div class="ord-step__head">
+                    <span class="status-pill" [class]="'status-pill--' + statusVariant(h.toStatus)">{{ h.toStatus }}</span>
+                    @if (h.fromStatus && h.fromStatus !== h.toStatus) {
+                      <span class="ord-step__from"><i class="fas fa-arrow-right"></i> from {{ h.fromStatus }}</span>
+                    }
+                    @if (isLast) { <span class="ord-step__latest">LATEST</span> }
+                  </div>
+                  @if (h.note) {
+                    <div class="ord-step__note"><i class="fas fa-quote-left"></i> {{ h.note }}</div>
+                  }
+                  <div class="ord-step__meta">
+                    <span>
+                      <i class="fas fa-user"></i>
+                      {{ h.changedByName || 'System' }}<span *ngIf="h.changedByRole"> · {{ h.changedByRole }}</span>
+                    </span>
+                    <span><i class="far fa-clock"></i> {{ h.createdAt | date:'medium' }}</span>
+                  </div>
+                </div>
+              </li>
+            }
+          </ol>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" (click)="closeTimeline()">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Cancel modal -->
+@if (cancelOpen) {
+  <div class="modal-overlay" (click)="closeCancelModal()">
+    <div class="modal-card animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-head border-none">
+        <div class="head-brand">
+          <div class="brand-visual bg-red"><i class="fas fa-ban"></i></div>
+          <div class="brand-text">
+            <h2>Order Cancellation</h2>
+            <p>Requesting cancellation for #{{ cancelOrderId }}</p>
+          </div>
+        </div>
+        <button class="head-close" (click)="closeCancelModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="premium-alert warning">
+          <div class="alert-icon"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="alert-msg">
+            Cancelling is permanent. Once requested, the process cannot be reversed. 
+            Funds will be returned to your original payment method.
+          </div>
+        </div>
+
+        <div class="form-section mt-24">
+          <label class="premium-label">Reason for Cancellation <span class="req">*</span></label>
+          <div class="premium-input-wrap">
+            <textarea class="premium-textarea" rows="4" 
+                      [(ngModel)]="cancelReason"
+                      placeholder="Help us understand why you're cancelling..."></textarea>
+            <div class="input-hint">Maximum 1000 characters allowed.</div>
+          </div>
+        </div>
+
+        @if (cancelError) {
+          <div class="premium-alert error mt-16">
+            <i class="fas fa-times-circle"></i> {{ cancelError }}
+          </div>
+        }
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn-premium-secondary" (click)="closeCancelModal()" [disabled]="cancelling">
+          Stay with Order
+        </button>
+        <button class="btn-premium-danger" (click)="confirmCancel()" [disabled]="cancelling || !cancelReason.trim()">
+          @if (cancelling) {
+            <i class="fas fa-circle-notch fa-spin"></i> Processing...
+          } @else {
+            <i class="fas fa-check-circle"></i> Confirm Cancellation
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Review modal -->
+@if (reviewOpen && reviewItem) {
+  <div class="modal-overlay" (click)="closeReviewModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h2>Write a review</h2>
+        <button class="head-close" (click)="closeReviewModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="review-product">
+          <div class="review-thumb">
+            @if (reviewItem.primaryImageUrl) {
+              <img [src]="reviewItem.primaryImageUrl" [alt]="reviewItem.productName">
+            } @else {
+              <div class="placeholder"><i class="fas fa-box"></i></div>
+            }
+          </div>
+          <div>
+            <div class="review-product-name">{{ reviewItem.productName }}</div>
+            <div class="review-product-meta">Qty: {{ reviewItem.quantity }}</div>
+          </div>
+        </div>
+
+        <label class="form-label">Your rating <span class="req">*</span></label>
+        <div class="rating-picker" role="radiogroup" aria-label="Rating">
+          @for (i of [1,2,3,4,5]; track starsTrack(i)) {
+            <button type="button"
+                    class="rating-star"
+                    [class.is-on]="i <= reviewRating"
+                    (click)="setReviewRating(i)"
+                    [attr.aria-label]="i + ' star' + (i === 1 ? '' : 's')">
+              <i class="fas fa-star"></i>
+            </button>
+          }
+          <span class="rating-text">{{ reviewRating }} / 5</span>
+        </div>
+
+        <label class="form-label">Comments (optional)</label>
+        <textarea class="modern-input" rows="4" maxlength="1000"
+                  [(ngModel)]="reviewComment"
+                  placeholder="What did you like or dislike about this product?"></textarea>
+
+        @if (reviewError) { <div class="alert alert-error">{{ reviewError }}</div> }
+      </div>
+      <div class="modal-foot">
+        <button class="btn-secondary" (click)="closeReviewModal()" [disabled]="reviewSubmitting">Cancel</button>
+        <button class="btn-primary review-submit" (click)="submitReview()"
+                [disabled]="reviewSubmitting || reviewRating < 1">
+          <i class="fas" [class.fa-spinner]="reviewSubmitting" [class.fa-spin]="reviewSubmitting" [class.fa-paper-plane]="!reviewSubmitting"></i>
+          {{ reviewSubmitting ? 'Posting…' : 'Post review' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+

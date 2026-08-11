@@ -1,0 +1,123 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Design Tokens — single source of truth for all portals (buyer, admin, seller)
+// Import this file anywhere you need access to shared variables / mixins.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Buyer-portal palette (CSS custom properties, live on :root) ──────────────
+// These are declared in styles.scss :root block; listed here for reference.
+// $token-primary:       #008ecc;
+// $token-accent:        #00bcd4;
+// $token-bg-page:       #f5f7fa;
+// $token-text-primary:  #000000;
+// $token-success:       #10b981;
+// $token-error:         #ef4444;
+
+// ── Admin / Seller palette (Sass variables — consumed by admin-shared.scss) ──
+$admin-brand:       #ff6000;
+$admin-brand-dark:  #e55600;
+$admin-brand-soft:  rgba(255, 96, 0, 0.10);
+
+$admin-ink:         #111827;
+$admin-ink-2:       #1f2937;
+$admin-muted:       #6b7280;
+$admin-line:        #e5e7eb;
+$admin-line-soft:   #f3f4f6;
+$admin-bg:          #f9fafb;
+$admin-card:        #ffffff;
+
+// ── Radii ────────────────────────────────────────────────────────────────────
+$r-xs:   6px;
+$r-sm:   10px;
+$r-md:   14px;
+$r-lg:   20px;
+$r-xl:   24px;
+$r-full: 9999px;
+
+// ── Shadows ──────────────────────────────────────────────────────────────────
+$shadow-sm:      0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-md:      0 4px 6px -1px rgba(0, 0, 0, 0.10), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg:      0 10px 15px -3px rgba(0, 0, 0, 0.10), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.10), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+// ── Transitions ──────────────────────────────────────────────────────────────
+$ease-out-expo:  cubic-bezier(0.16, 1, 0.30, 1);
+$ease-standard:  cubic-bezier(0.40, 0, 0.20, 1);
+$transition-base: 0.25s $ease-standard;
+$transition-slow: 0.35s $ease-out-expo;
+
+// ── Typography ────────────────────────────────────────────────────────────────
+$font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+$font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+// ── Status colour maps ───────────────────────────────────────────────────────
+// Used by status-pill mixin to generate pill variants.
+$status-colors: (
+  'active':      (#dcfce7, #166534, #bbf7d0),
+  'approved':    (#dcfce7, #166534, #bbf7d0),
+  'delivered':   (#dcfce7, #166534, #bbf7d0),
+  'success':     (#dcfce7, #166534, #bbf7d0),
+  'pending':     (#fef3c7, #92400e, #fde68a),
+  'awaiting':    (#fef3c7, #92400e, #fde68a),
+  'progress':    (#dbeafe, #1e40af, #bfdbfe),
+  'processing':  (#dbeafe, #1e40af, #bfdbfe),
+  'shipped':     (#ede9fe, #5b21b6, #ddd6fe),
+  'draft':       (#f1f5f9, #475569, #e2e8f0),
+  'inactive':    (#f1f5f9, #475569, #e2e8f0),
+  'paused':      (#f1f5f9, #475569, #e2e8f0),
+  'cancelled':   (#fee2e2, #991b1b, #fecaca),
+  'rejected':    (#fee2e2, #991b1b, #fecaca),
+  'expired':     (#fee2e2, #991b1b, #fecaca),
+  'flagged':     (#fff7ed, #c2410c, #fed7aa),
+  'warn':        (#fff7ed, #c2410c, #fed7aa),
+);
+
+// ── Breakpoints ──────────────────────────────────────────────────────────────
+$bp-mobile: 480px;
+$bp-tablet: 768px;
+$bp-laptop: 1024px;
+$bp-wide:   1280px;
+
+// ── Mixins ───────────────────────────────────────────────────────────────────
+
+@mixin respond-to($bp) {
+  @media (max-width: $bp) { @content; }
+}
+
+// Generates all .status-pill--{variant} rules from $status-colors map.
+@mixin status-pill-variants {
+  @each $name, $colors in $status-colors {
+    $bg:     nth($colors, 1);
+    $text:   nth($colors, 2);
+    $border: nth($colors, 3);
+    &--#{$name} { background: $bg; color: $text; border-color: $border; }
+  }
+}
+
+// Card container with premium shadow.
+@mixin premium-card {
+  background: $admin-card;
+  border-radius: $r-lg;
+  border: 1px solid $admin-line;
+  box-shadow: $shadow-premium;
+}
+
+// Skeleton shimmer animation for loading placeholders.
+@mixin skeleton-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 1200px 100%;
+  animation: skeletonShimmer 1.6s linear infinite;
+}
+
+@keyframes skeletonShimmer {
+  0%   { background-position: -1200px 0; }
+  100% { background-position:  1200px 0; }
+}
+
+// Focus ring that preserves accessibility while matching the design.
+@mixin focus-ring($color: $admin-brand) {
+  &:focus-visible {
+    outline: 3px solid $color;
+    outline-offset: 2px;
+    border-radius: $r-sm;
+  }
+}

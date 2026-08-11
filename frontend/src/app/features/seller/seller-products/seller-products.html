@@ -1,0 +1,134 @@
+<div class="admin-page">
+  <div class="dashboard-welcome mb-40">
+    <div class="welcome-text">
+      <h1 class="welcome-title">My Products <span class="title-badge">{{ products.length }} Total</span></h1>
+      <p class="welcome-subtitle">Manage your inventory, pricing, and product visibility across the marketplace.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-premium" (click)="goNew()">
+        <i class="fas fa-plus-circle"></i> Add New Product
+      </button>
+    </div>
+  </div>
+
+  @if (error) {
+  <div class="alert alert-error mb-20 animate-in">
+    <i class="fas fa-exclamation-circle me-2"></i>
+    <span>{{ error }}</span>
+    <button class="close-alert" (click)="error = ''">&times;</button>
+  </div>
+  }
+
+  <div class="inventory-card">
+    <!-- Search & Filters Toolbar -->
+    <div class="inventory-toolbar">
+      <div class="search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" [(ngModel)]="searchTerm" (keyup.enter)="applyFilters()"
+          placeholder="Search by product name, slug or ID..." class="modern-input">
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-filter" (click)="applyFilters()" [disabled]="loading">
+          <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Inventory Table -->
+    <div class="inventory-table-container">
+      @if (loading) {
+      <div class="loading-state">
+        <div class="premium-spinner"></div>
+        <p>Retrieving your inventory data...</p>
+      </div>
+      } @else {
+      <table class="premium-inventory-table">
+        <thead>
+          <tr>
+            <th>Product Details</th>
+            <th>Category</th>
+            <th>Pricing</th>
+            <th>Stock Level</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of pagedProducts; track p.productId) {
+          <tr class="product-row animate-in" [style.animation-delay]="($index * 0.05) + 's'">
+            <td>
+              <div class="product-cell">
+                <div class="product-visual">
+                  <img [src]="p.primaryImageUrl || 'assets/images/placeholder-product.png'" alt="Product">
+                </div>
+                <div class="product-details">
+                  <span class="product-name">{{ p.name }}</span>
+                  <span class="product-sub">ID: #{{ p.productId }} · {{ p.viewCount }} views</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="category-badge">{{ p.categoryName }}</span>
+            </td>
+            <td>
+              <div class="price-stack">
+                <span class="base-price">CA${{ p.basePrice | number:'1.2-2' }}</span>
+                @if (p.salePrice) {
+                <span class="sale-price text-success">Sale: CA${{ p.salePrice | number:'1.2-2' }}</span>
+                }
+              </div>
+            </td>
+            <td>
+              <div class="stock-indicator">
+                <span class="stock-pill" [class.low]="isLowStock(p)" [class.out]="p.stock === 0">
+                  {{ p.stock }} Units
+                </span>
+                @if (isLowStock(p)) {
+                <i class="fas fa-exclamation-triangle stock-alert" title="Low stock alert"></i>
+                }
+              </div>
+            </td>
+            <td>
+              <span class="status-badge" [attr.data-status]="statusVariant(p.status)">
+                {{ p.status }}
+              </span>
+            </td>
+            <td class="text-right">
+              <div class="action-set">
+                <button class="btn-row-action" (click)="goEdit(p)" title="Edit Product">
+                  <i class="fas fa-pen"></i>
+                </button>
+                <button class="btn-row-action delete" (click)="delete(p)" title="Delete Product">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <i class="fas fa-boxes"></i>
+                <h3>No Products Found</h3>
+                <p>You haven't added any products yet or no products match your search.</p>
+                <button class="btn-primary" (click)="goNew()">Add Your First Product</button>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      @if (products.length) {
+      <app-pagination
+        [page]="page"
+        [pageSize]="pageSize"
+        [totalCount]="products.length"
+        (pageChange)="goPage($event)">
+      </app-pagination>
+      }
+      }
+    </div>
+  </div>
+</div>

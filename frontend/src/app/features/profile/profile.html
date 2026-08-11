@@ -1,0 +1,809 @@
+<div class="profile-page" *ngIf="!loading; else loadingTpl">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+  <aside class="profile-sidebar">
+    <!-- User Card -->
+    <div class="user-card">
+      <div class="avatar">{{ profile?.fullName?.[0]?.toUpperCase() || 'U' }}</div>
+      <div class="user-meta">
+        <div class="user-name">{{ profile?.fullName }}</div>
+        <div class="user-email">{{ profile?.email }}</div>
+        <span class="role-badge">{{ authService.getRole() }}</span>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="sidebar-nav">
+      @for (item of navItems; track item.tab) {
+        <button
+          class="nav-item"
+          [class.active]="activeTab === item.tab"
+          (click)="switchTab(item.tab)">
+          <span class="nav-icon"><i class="fas {{ item.icon }}"></i></span>
+          <span class="nav-label">{{ item.label }}</span>
+          <i class="fas fa-chevron-right nav-arrow"></i>
+        </button>
+      }
+    </nav>
+  </aside>
+
+  <!-- ── Main Content ───────────────────────────────────────────────────── -->
+  <main class="profile-main">
+    <!-- 1. Profile Info -->
+    @if (activeTab === 'info') {
+      <section class="content-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">My Profile</h2>
+            <p class="section-sub">Manage your personal information</p>
+          </div>
+        </div>
+        <form [formGroup]="profileForm" (ngSubmit)="updateProfile()" class="pf-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" formControlName="fullName" placeholder="Enter your full name">
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" [value]="profile?.email || ''" readonly class="readonly-input">
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" formControlName="phone" placeholder="+1 (555) 000-0000">
+            </div>
+            <div class="form-group">
+              <label>Member Since</label>
+              <input type="text" [value]="(profile?.createdAt | date:'mediumDate') || ''" readonly class="readonly-input">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" [disabled]="profileForm.invalid || submitting">
+              <i class="fas fa-save"></i> {{ submitting ? 'Saving…' : 'Save Changes' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+
+    <!-- 2. Orders -->
+    @if (activeTab === 'orders') {
+      <section class="content-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">My Orders</h2>
+            <p class="section-sub">Track and manage your purchases</p>
+          </div>
+        </div>
+        @if (loadingOrders) {
+          <div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Loading orders…</div>
+        } @else if (orders.length === 0) {
+          <div class="empty-state">
+            <i class="fas fa-shopping-bag empty-icon"></i>
+            <h3>No Orders Yet</h3>
+            <p>You haven't placed any orders. Start shopping!</p>
+            <a routerLink="/" class="btn-primary">Browse Products</a>
+          </div>
+        } @else {
+          <div class="orders-list">
+            @for (order of orders; track order.orderId) {
+              <div class="order-card-premium">
+                <div class="order-card-header">
+                  <div class="header-left">
+                    <span class="order-number">Order #{{ order.orderId }}</span>
+                    <span class="order-date">{{ order.createdAt | date:'mediumDate' }}</span>
+                  </div>
+                  <div class="header-right">
+                    <span class="status-pill" [attr.data-status]="statusVariant(order.status)">
+                      {{ order.status }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="order-card-body">
+                  <div class="order-items-list">
+                    @for (item of order.items; track item.orderItemId) {
+                      <div class="item-row">
+                        <div class="item-visual">
+                          <img *ngIf="item.primaryImageUrl" [src]="item.primaryImageUrl" [alt]="item.productName">
+                          <div class="visual-placeholder" *ngIf="!item.primaryImageUrl"><i class="fas fa-box"></i></div>
+                        </div>
+                        <div class="item-detail">
+                          <div class="item-name">{{ item.productName }}</div>
+                          <div class="item-meta">
+                            <span class="price">{{ item.unitPriceCAD | appCurrency:(currencyService.selectedCurrency$ | async) }}</span>
+                            <span class="dot"></span>
+                            <span class="qty">Qty: {{ item.quantity }}</span>
+                          </div>
+                        </div>
+                        <div class="item-actions">
+                          <button class="btn-action-ghost" [routerLink]="['/products', item.productId]">
+                            <i class="fas fa-redo"></i> Buy Again
+                          </button>
+                          @if (canReview(order)) {
+                            <button class="btn-action-solid" (click)="openReviewModal(item)">
+                              <i class="fas fa-star"></i> Write Review
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <div class="order-card-footer">
+                  <div class="footer-left">
+                    <button class="btn-text-track" (click)="openTimeline(order)">
+                      <i class="fas fa-map-marker-alt"></i> Track Package
+                    </button>
+                  </div>
+                  <div class="footer-right">
+                    <span class="total-label">Total Amount</span>
+                    <span class="total-value">{{ order.totalAmountCAD | appCurrency:(currencyService.selectedCurrency$ | async) }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- 3. Reviews -->
+    @if (activeTab === 'reviews') {
+      <section class="content-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">My Reviews</h2>
+            <p class="section-sub">View and manage your product reviews</p>
+          </div>
+        </div>
+        @if (loadingReviews) {
+          <div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Loading reviews…</div>
+        } @else if (reviews.length === 0) {
+          <div class="empty-state">
+            <i class="fas fa-star empty-icon"></i>
+            <h3>No Reviews Yet</h3>
+            <p>You haven't reviewed any products yet.</p>
+          </div>
+        } @else {
+          <div class="reviews-list">
+            @for (review of reviews; track review.reviewId) {
+              <div class="review-card">
+                @if (editingReviewId === review.reviewId) {
+                  <form [formGroup]="reviewForm" (ngSubmit)="saveReview()">
+                    <div class="form-group">
+                      <label>Rating</label>
+                      <select formControlName="rating" class="pf-select">
+                        @for (n of [1,2,3,4,5]; track n) {
+                          <option [value]="n">{{ n }} ★</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Comment</label>
+                      <textarea formControlName="comment" placeholder="Your review…" class="pf-textarea"></textarea>
+                    </div>
+                    <div class="form-actions gap-sm">
+                      <button type="button" class="btn-ghost" (click)="cancelEditReview()">Cancel</button>
+                      <button type="submit" class="btn-primary" [disabled]="reviewForm.invalid || submitting">Save</button>
+                    </div>
+                  </form>
+                } @else {
+                  <div class="review-top">
+                    <div class="review-product-mini">
+                      @if (review.productImageUrl) {
+                        <img [src]="review.productImageUrl" [alt]="review.productName">
+                      } @else {
+                        <div class="review-product-placeholder"><i class="fas fa-box"></i></div>
+                      }
+                      <div>
+                        <div class="review-product-title">{{ review.productName }}</div>
+                        <div class="stars">
+                          @for (s of stars(5); track s) {
+                            <i class="fas fa-star" [class.filled]="s <= review.rating"></i>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                    <div class="review-actions">
+                      <button class="icon-btn" (click)="startEditReview(review)" title="Edit"><i class="fas fa-pencil-alt"></i></button>
+                      <button class="icon-btn danger" (click)="deleteReview(review.reviewId)" title="Delete"><i class="fas fa-trash"></i></button>
+                    </div>
+                  </div>
+                  <p class="review-comment">{{ review.comment || 'No comment.' }}</p>
+                  <div class="review-meta">{{ review.createdAt | date:'mediumDate' }}</div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- Browsing History -->
+    @if (activeTab === 'history') {
+      <section class="content-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Browsing History</h2>
+            <p class="section-sub">Products you viewed recently organized by timeline</p>
+          </div>
+          @if (history.length) {
+            <button class="btn-secondary danger-ghost" type="button" (click)="clearHistory()">
+              <i class="fas fa-trash-alt"></i> Clear All History
+            </button>
+          }
+        </div>
+
+        @if (loadingHistory && !history.length) {
+          <div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Loading history...</div>
+        } @else if (!history.length) {
+          <div class="empty-state">
+            <i class="fas fa-history empty-icon"></i>
+            <h3>No Recently Viewed Products</h3>
+            <p>Open product details to build your browsing history.</p>
+            <a routerLink="/" class="btn-primary">Browse Products</a>
+          </div>
+        } @else {
+          <!-- Filter Tabs -->
+          <div class="history-filter-bar">
+            <button 
+              type="button" 
+              class="history-tab-btn" 
+              [class.active]="historyFilter === 'all'" 
+              (click)="setHistoryFilter('all')">
+              <i class="fas fa-layer-group"></i> All ({{ history.length }})
+            </button>
+            <button 
+              type="button" 
+              class="history-tab-btn" 
+              [class.active]="historyFilter === 'today'" 
+              (click)="setHistoryFilter('today')">
+              <i class="fas fa-calendar-day"></i> Today
+            </button>
+            <button 
+              type="button" 
+              class="history-tab-btn" 
+              [class.active]="historyFilter === 'yesterday'" 
+              (click)="setHistoryFilter('yesterday')">
+              <i class="fas fa-history"></i> Yesterday
+            </button>
+            <button 
+              type="button" 
+              class="history-tab-btn" 
+              [class.active]="historyFilter === 'week'" 
+              (click)="setHistoryFilter('week')">
+              <i class="fas fa-calendar-week"></i> Last 7 Days
+            </button>
+            <button 
+              type="button" 
+              class="history-tab-btn" 
+              [class.active]="historyFilter === 'month'" 
+              (click)="setHistoryFilter('month')">
+              <i class="fas fa-calendar-alt"></i> Last 30 Days
+            </button>
+          </div>
+
+          <!-- Grouped Timeline Sections -->
+          <div class="history-timeline-container">
+            @for (group of groupedHistory; track group.id) {
+              <div class="history-period-group">
+                <div class="history-period-header">
+                  <div class="period-title-wrap">
+                    <span class="period-icon-pill" [ngClass]="group.badgeClass">
+                      <i class="fas" [ngClass]="group.icon"></i>
+                    </span>
+                    <h3 class="period-title">{{ group.title }}</h3>
+                    <span class="period-count-pill">{{ group.items.length }} {{ group.items.length === 1 ? 'product' : 'products' }}</span>
+                  </div>
+                  <div class="period-line"></div>
+                </div>
+
+                <div class="history-grid">
+                  @for (item of group.items; track item.browsingHistoryId) {
+                    <article class="history-card">
+                      <a [routerLink]="['/products', item.productId]" class="history-image">
+                        @if (item.primaryImageUrl) {
+                          <img [src]="item.primaryImageUrl" [alt]="item.productName">
+                        } @else {
+                          <div class="visual-placeholder"><i class="fas fa-box"></i></div>
+                        }
+                      </a>
+                      <div class="history-info">
+                        <a [routerLink]="['/products', item.productId]" class="history-title" [title]="item.productName">
+                          {{ item.productName }}
+                        </a>
+                        <div class="history-price">
+                          {{ (item.salePrice || item.basePrice) | appCurrency:(currencyService.selectedCurrency$ | async) }}
+                        </div>
+                        <div class="history-time">
+                          <i class="far fa-clock"></i> {{ item.viewedAt | date:'shortTime' }}
+                        </div>
+                      </div>
+                      <div class="history-actions">
+                        <a [routerLink]="['/products', item.productId]" class="history-view-btn" title="View details">
+                          <i class="fas fa-arrow-right"></i>
+                        </a>
+                        <button class="icon-btn danger" type="button" (click)="removeHistoryItem(item.browsingHistoryId)" title="Remove item">
+                          <i class="fas fa-trash-alt"></i>
+                        </button>
+                      </div>
+                    </article>
+                  }
+                </div>
+              </div>
+            } @empty {
+              <div class="empty-group-state">
+                <i class="fas fa-filter"></i>
+                <p>No products viewed in this time period.</p>
+                <button type="button" class="btn-secondary-sm" (click)="setHistoryFilter('all')">Show All History</button>
+              </div>
+            }
+          </div>
+
+          @if (history.length >= historyPage * 24) {
+            <div class="form-actions mt-6">
+              <button class="btn-secondary" type="button" (click)="loadHistory(historyPage + 1)" [disabled]="loadingHistory">
+                {{ loadingHistory ? 'Loading...' : 'Load More History' }}
+              </button>
+            </div>
+          }
+        }
+      </section>
+    }
+
+    <!-- 4. Addresses -->
+    @if (activeTab === 'addresses') {
+      <section class="content-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Addresses</h2>
+            <p class="section-sub">Manage your shipping addresses</p>
+          </div>
+          <button class="btn-secondary" (click)="toggleAddressForm()" *ngIf="!showAddressForm">
+            <i class="fas fa-plus"></i> Add Address
+          </button>
+        </div>
+
+        @if (showAddressForm) {
+          <div class="address-form-box">
+            <h3>{{ editingAddressId ? 'Edit' : 'New' }} Address</h3>
+            <form [formGroup]="addressForm" (ngSubmit)="saveAddress()" class="pf-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Full Name</label>
+                  <input type="text" formControlName="fullName">
+                </div>
+                <div class="form-group">
+                  <label>Phone</label>
+                  <input type="tel" formControlName="phone">
+                </div>
+                <div class="form-group span-2">
+                  <label>Address Line 1</label>
+                  <input type="text" formControlName="addressLine1">
+                </div>
+                <div class="form-group span-2">
+                  <label>Address Line 2 <span class="optional">(Optional)</span></label>
+                  <input type="text" formControlName="addressLine2">
+                </div>
+                <div class="form-group">
+                  <label>City</label>
+                  <input type="text" formControlName="city">
+                </div>
+                <div class="form-group">
+                  <label>State / Province</label>
+                  <input type="text" formControlName="state">
+                </div>
+                <div class="form-group">
+                  <label>Postal Code</label>
+                  <input type="text" formControlName="postalCode">
+                </div>
+                <div class="form-group">
+                  <label>Country</label>
+                  <select formControlName="country" class="pf-select">
+                    @for (c of countries; track c) { <option [value]="c">{{ c }}</option> }
+                  </select>
+                </div>
+                <div class="form-group span-2 checkbox-row">
+                  <input type="checkbox" formControlName="isDefault" id="isDefault">
+                  <label for="isDefault">Set as default address</label>
+                </div>
+              </div>
+              <div class="form-actions gap-sm">
+                <button type="button" class="btn-ghost" (click)="toggleAddressForm()">Cancel</button>
+                <button type="submit" class="btn-primary" [disabled]="addressForm.invalid || submitting">
+                  {{ submitting ? 'Saving…' : 'Save Address' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        }
+
+        <div class="address-grid">
+          @if (profile?.addresses?.length === 0 && !showAddressForm) {
+            <div class="empty-state">
+              <i class="fas fa-map-marker-alt empty-icon"></i>
+              <h3>No Addresses</h3>
+              <p>Add an address for faster checkout.</p>
+            </div>
+          }
+          @for (addr of profile?.addresses; track addr.addressId) {
+            <div class="address-card" [class.is-default]="addr.isDefault">
+              @if (addr.isDefault) { <span class="default-badge">Default</span> }
+              <div class="addr-name">{{ addr.fullName }}</div>
+              <div class="addr-line">{{ addr.addressLine1 }}</div>
+              @if (addr.addressLine2) { <div class="addr-line">{{ addr.addressLine2 }}</div> }
+              <div class="addr-line">{{ addr.city }}, {{ addr.state }} {{ addr.postalCode }}</div>
+              <div class="addr-line">{{ addr.country }}</div>
+              @if (addr.phone) { <div class="addr-phone"><i class="fas fa-phone"></i> {{ addr.phone }}</div> }
+              <div class="addr-actions">
+                <button class="icon-btn" (click)="toggleAddressForm(addr.addressId)"><i class="fas fa-edit"></i></button>
+                <button class="icon-btn" (click)="setDefaultAddress(addr.addressId)" *ngIf="!addr.isDefault" title="Set Default"><i class="fas fa-check-circle"></i></button>
+                <button class="icon-btn danger" (click)="deleteAddress(addr.addressId)"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- 5. Currency & Country -->
+    @if (activeTab === 'currency') {
+      <section class="content-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Currency & Country</h2>
+            <p class="section-sub">Set your preferred currency and region</p>
+          </div>
+        </div>
+        <form [formGroup]="currencyForm" (ngSubmit)="saveCurrency()" class="pf-form">
+          <div class="form-grid">
+            <div class="form-group span-2">
+              <label>Preferred Currency</label>
+              <mat-form-field appearance="outline" class="portal-select-field">
+                <mat-label>Preferred Currency</mat-label>
+                <mat-select formControlName="preferredCurrency">
+                  @for (c of currencies; track c.code) {
+                    <mat-option [value]="c.code">{{ c.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="form-group">
+              <label>Country / Region</label>
+              <mat-form-field appearance="outline" class="portal-select-field">
+                <mat-label>Country / Region</mat-label>
+                <mat-select formControlName="country">
+                  @for (c of countries; track c) { <mat-option [value]="c">{{ c }}</mat-option> }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" [disabled]="currencyForm.invalid || submitting">
+              <i class="fas fa-save"></i> {{ submitting ? 'Saving…' : 'Save Preferences' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+
+    <!-- 6. Payment -->
+    @if (activeTab === 'payment') {
+      <section class="content-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Payment Methods</h2>
+            <p class="section-sub">Manage your secure payment options and digital wallets.</p>
+          </div>
+        </div>
+
+        <div class="payment-method-grid">
+          <!-- Cards Section -->
+          <div class="payment-card-panel">
+            <div class="panel-head">
+              <div class="panel-title">
+                <i class="fas fa-credit-card"></i>
+                <span>Credit / Debit Cards</span>
+              </div>
+              <button class="btn-add-mini" type="button" (click)="openPaymentForm('Card')" *ngIf="!showPaymentForm || paymentFormType !== 'Card'">
+                <i class="fas fa-plus"></i> Add Card
+              </button>
+            </div>
+
+            @if (showPaymentForm && paymentFormType === 'Card') {
+              <div class="payment-form-box animate-in">
+                <form [formGroup]="paymentForm" (ngSubmit)="savePaymentMethod()" class="pf-form-mini">
+                  <div class="form-group">
+                    <label>Card Number</label>
+                    <div class="input-with-icon">
+                      <i class="fas fa-credit-card"></i>
+                      <input type="text" formControlName="label" placeholder="1234 5678 9101 1121" maxlength="16">
+                    </div>
+                    <div class="field-error" *ngIf="paymentForm.get('label')?.touched && paymentForm.get('label')?.invalid">
+                      <span *ngIf="paymentForm.get('label')?.errors?.['required']">Card number is required</span>
+                      <span *ngIf="paymentForm.get('label')?.errors?.['pattern']">Please enter 16 digits</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Expiry Date</label>
+                    <div class="input-with-icon">
+                      <i class="fas fa-calendar-alt"></i>
+                      <input type="text" formControlName="subLabel" placeholder="MM/YY" maxlength="5">
+                    </div>
+                    <div class="field-error" *ngIf="paymentForm.get('subLabel')?.touched && paymentForm.get('subLabel')?.invalid">
+                      <span *ngIf="paymentForm.get('subLabel')?.errors?.['required']">Expiry is required</span>
+                      <span *ngIf="paymentForm.get('subLabel')?.errors?.['pattern']">Use MM/YY format</span>
+                    </div>
+                  </div>
+                  <div class="form-actions-mini">
+                    <button type="button" class="btn-cancel-mini" (click)="closePaymentForm()">Cancel</button>
+                    <button type="submit" class="btn-save-mini" [disabled]="paymentForm.invalid || submitting">Save Card</button>
+                  </div>
+                </form>
+              </div>
+            }
+
+            <div class="methods-list">
+              @for (pm of cards; track pm.id) {
+                <div class="premium-pm-card" [class.default]="pm.isDefault">
+                  <div class="pm-brand-icon"><i class="fab fa-cc-visa"></i></div>
+                  <div class="pm-details">
+                    <div class="pm-number">Card ending in {{ pm.label.slice(-4) }}</div>
+                    <div class="pm-expiry">Expires {{ pm.subLabel }}</div>
+                  </div>
+                  <div class="pm-ctrl">
+                    <button class="action-btn" (click)="setDefaultPayment(pm.id)" *ngIf="!pm.isDefault" title="Set Default"><i class="fas fa-check"></i></button>
+                    <button class="action-btn danger" (click)="deletePayment(pm.id)" title="Remove"><i class="fas fa-trash-alt"></i></button>
+                  </div>
+                  <div class="default-pill" *ngIf="pm.isDefault">Primary</div>
+                </div>
+              } @empty {
+                @if (!showPaymentForm || paymentFormType !== 'Card') {
+                  <div class="empty-panel-state">
+                    <i class="fas fa-credit-card"></i>
+                    <p>No cards saved yet.</p>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+
+          <!-- UPI Section -->
+          <div class="payment-card-panel">
+            <div class="panel-head">
+              <div class="panel-title">
+                <i class="fas fa-mobile-alt"></i>
+                <span>UPI IDs</span>
+              </div>
+              <button class="btn-add-mini" type="button" (click)="openPaymentForm('UPI')" *ngIf="!showPaymentForm || paymentFormType !== 'UPI'">
+                <i class="fas fa-plus"></i> Add UPI
+              </button>
+            </div>
+
+            @if (showPaymentForm && paymentFormType === 'UPI') {
+              <div class="payment-form-box animate-in">
+                <form [formGroup]="paymentForm" (ngSubmit)="savePaymentMethod()" class="pf-form-mini">
+                  <div class="form-group">
+                    <label>UPI ID (VPA)</label>
+                    <div class="input-with-icon">
+                      <i class="fas fa-bolt"></i>
+                      <input type="text" formControlName="label" placeholder="username@bank">
+                    </div>
+                    <div class="field-error" *ngIf="paymentForm.get('label')?.touched && paymentForm.get('label')?.invalid">
+                      <span *ngIf="paymentForm.get('label')?.errors?.['required']">UPI ID is required</span>
+                      <span *ngIf="paymentForm.get('label')?.errors?.['pattern']">Format: username@bank</span>
+                    </div>
+                  </div>
+                  <div class="form-actions-mini">
+                    <button type="button" class="btn-cancel-mini" (click)="closePaymentForm()">Cancel</button>
+                    <button type="submit" class="btn-save-mini" [disabled]="paymentForm.invalid || submitting">Save UPI</button>
+                  </div>
+                </form>
+              </div>
+            }
+
+            <div class="methods-list">
+              @for (pm of upis; track pm.id) {
+                <div class="premium-pm-card upi" [class.default]="pm.isDefault">
+                  <div class="pm-brand-icon"><i class="fas fa-bolt"></i></div>
+                  <div class="pm-details">
+                    <div class="pm-number">{{ pm.label }}</div>
+                    <div class="pm-expiry">UPI Payment</div>
+                  </div>
+                  <div class="pm-ctrl">
+                    <button class="action-btn" (click)="setDefaultPayment(pm.id)" *ngIf="!pm.isDefault" title="Set Default"><i class="fas fa-check"></i></button>
+                    <button class="action-btn danger" (click)="deletePayment(pm.id)" title="Remove"><i class="fas fa-trash-alt"></i></button>
+                  </div>
+                  <div class="default-pill" *ngIf="pm.isDefault">Primary</div>
+                </div>
+              } @empty {
+                @if (!showPaymentForm || paymentFormType !== 'UPI') {
+                  <div class="empty-panel-state">
+                    <i class="fas fa-mobile-alt"></i>
+                    <p>No UPI IDs saved.</p>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- 7. Security -->
+    @if (activeTab === 'security') {
+      <section class="content-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Password & Security</h2>
+            <p class="section-sub">Keep your account secure</p>
+          </div>
+        </div>
+        <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()" class="pf-form">
+          <div class="form-grid">
+            <div class="form-group span-2">
+              <label>Current Password</label>
+              <input type="password" formControlName="currentPassword" placeholder="••••••••">
+            </div>
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" formControlName="newPassword" placeholder="Min 6 characters">
+            </div>
+            <div class="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" formControlName="confirmPassword" placeholder="Repeat new password">
+            </div>
+            @if (passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.dirty) {
+              <div class="form-error span-2"><i class="fas fa-exclamation-circle"></i> Passwords do not match.</div>
+            }
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" [disabled]="passwordForm.invalid || submitting">
+              <i class="fas fa-lock"></i> {{ submitting ? 'Updating…' : 'Update Password' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+
+  </main>
+</div>
+
+@if (timelineOpen) {
+  <div class="admin-modal-overlay" (click)="closeTimeline()">
+    <div class="admin-modal admin-modal--timeline animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="timeline-head">
+          <div class="title-icon title-icon--timeline"><i class="fas fa-route"></i></div>
+          <div>
+            <h3 class="modal-title">Order Timeline</h3>
+            <span class="modal-subtitle">Order #{{ timelineForOrderId }} · {{ timeline.length }} {{ timeline.length === 1 ? 'event' : 'events' }}</span>
+          </div>
+        </div>
+        <button class="modal-close" (click)="closeTimeline()" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        @if (loadingTimeline) {
+          <div class="loading-state"><div class="loader"></div><span>Loading order history…</span></div>
+        } @else if (!timeline.length) {
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-history"></i></div>
+            <p>No history entries yet for this order.</p>
+          </div>
+        } @else {
+          <ol class="ord-timeline">
+            @for (h of timeline; track trackHistory($index, h); let isLast = $last) {
+              <li class="ord-step" [attr.data-status]="statusVariant(h.toStatus)" [class.is-latest]="isLast">
+                <div class="ord-step__dot">
+                  <i class="fas" [class.fa-circle-check]="statusVariant(h.toStatus) === 'delivered'"
+                                  [class.fa-truck]="statusVariant(h.toStatus) === 'shipped'"
+                                  [class.fa-clock]="statusVariant(h.toStatus) === 'pending'"
+                                  [class.fa-spinner]="statusVariant(h.toStatus) === 'progress'"
+                                  [class.fa-ban]="statusVariant(h.toStatus) === 'cancelled'"
+                                  [class.fa-rotate-left]="statusVariant(h.toStatus) === 'refunded'"></i>
+                </div>
+                <div class="ord-step__body">
+                  <div class="ord-step__head">
+                    <span class="status-pill" [class]="'status-pill--' + statusVariant(h.toStatus)">{{ h.toStatus }}</span>
+                    @if (h.fromStatus && h.fromStatus !== h.toStatus) {
+                      <span class="ord-step__from"><i class="fas fa-arrow-right"></i> from {{ h.fromStatus }}</span>
+                    }
+                    @if (isLast) { <span class="ord-step__latest">LATEST</span> }
+                  </div>
+                  @if (h.note) {
+                    <div class="ord-step__note"><i class="fas fa-quote-left"></i> {{ h.note }}</div>
+                  }
+                  <div class="ord-step__meta">
+                    <span>
+                      <i class="fas fa-user"></i>
+                      {{ h.changedByName || 'System' }}<span *ngIf="h.changedByRole"> · {{ h.changedByRole }}</span>
+                    </span>
+                    <span><i class="far fa-clock"></i> {{ h.createdAt | date:'medium' }}</span>
+                  </div>
+                </div>
+              </li>
+            }
+          </ol>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" (click)="closeTimeline()">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (reviewOpen && reviewItem) {
+  <div class="review-modal-overlay" (click)="closeReviewModal()">
+    <div class="review-modal-card modern" (click)="$event.stopPropagation()">
+      <div class="review-modal-header">
+        <div>
+          <h2 class="review-modal-title">Share Your Experience</h2>
+          <p class="review-modal-subtitle">Your feedback helps millions of shoppers</p>
+        </div>
+        <button type="button" class="close-btn-circle" (click)="closeReviewModal()"><i class="fas fa-times"></i></button>
+      </div>
+      
+      <div class="review-modal-body">
+        <div class="review-product-preview">
+          <div class="product-visual">
+            <img *ngIf="reviewItem.primaryImageUrl" [src]="reviewItem.primaryImageUrl" [alt]="reviewItem.productName">
+            <div class="visual-placeholder" *ngIf="!reviewItem.primaryImageUrl"><i class="fas fa-box"></i></div>
+          </div>
+          <div class="product-details">
+            <h4 class="product-title">{{ reviewItem.productName }}</h4>
+            <div class="product-meta">
+              <span>Quantity: {{ reviewItem.quantity }}</span>
+              <span class="dot"></span>
+              <span>Verified Purchase</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rating-picker-section">
+          <label class="picker-label">Overall Rating</label>
+          <div class="star-rating-row">
+            @for (i of [1,2,3,4,5]; track i) {
+              <button type="button" class="star-interactive" [class.active]="i <= reviewRating" (click)="setReviewRating(i)">
+                <i class="fas fa-star"></i>
+              </button>
+            }
+            <span class="rating-indicator" *ngIf="reviewRating > 0">{{ reviewRating }} / 5</span>
+          </div>
+        </div>
+
+        <div class="review-text-section">
+          <label class="text-label">Your Review</label>
+          <textarea 
+            class="modern-textarea" 
+            rows="6" 
+            [(ngModel)]="reviewComment" 
+            placeholder="Tell us what you liked or disliked. Was the quality as expected?">
+          </textarea>
+          <div class="text-footer">
+            <span class="char-count">{{ reviewComment.length }} / 1000</span>
+          </div>
+          @if (reviewError) {
+            <div class="review-alert-error"><i class="fas fa-exclamation-circle"></i> {{ reviewError }}</div>
+          }
+        </div>
+      </div>
+
+      <div class="review-modal-footer">
+        <button class="btn-outline" type="button" (click)="closeReviewModal()" [disabled]="reviewSubmitting">Skip for now</button>
+        <button class="btn-solid-primary" type="button" (click)="submitOrderReview()" [disabled]="reviewSubmitting || reviewRating === 0">
+          <i class="fas" [class.fa-paper-plane]="!reviewSubmitting" [class.fa-spinner]="reviewSubmitting" [class.fa-spin]="reviewSubmitting"></i>
+          {{ reviewSubmitting ? 'Submitting...' : 'Post Review' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<ng-template #loadingTpl>
+  <div class="profile-loading">
+    <i class="fas fa-spinner fa-spin"></i> Loading your account…
+  </div>
+</ng-template>

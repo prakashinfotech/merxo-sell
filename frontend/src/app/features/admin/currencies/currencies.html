@@ -1,0 +1,273 @@
+<div class="admin-page">
+  <!-- Header -->
+  <div class="admin-page__header">
+    <div class="header-main">
+      <h1 class="admin-page__title">
+        <div class="title-icon title-icon--currencies"><i class="fas fa-coins"></i></div>
+        <span>Currencies</span>
+      </h1>
+      <p class="admin-page__subtitle">Manage exchange rates against the CAD base currency. Buyer prices update instantly when rates change.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" (click)="openCreate()">
+        <i class="fas fa-plus"></i> Add Currency
+      </button>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="admin-toolbar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        [(ngModel)]="searchTerm"
+        (input)="onSearchChange()"
+        placeholder="Search by currency code or name..."
+        aria-label="Search currencies" />
+    </div>
+    <div class="filter-actions">
+      <button class="btn-refresh" (click)="resetSearch()" title="Clear search">
+        <i class="fas fa-filter-circle-xmark"></i>
+      </button>
+      <button class="btn-refresh" (click)="load()" title="Refresh list">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- VIEW Modal -->
+  @if (viewing) {
+    <div class="admin-modal-overlay" (click)="closeView()">
+      <div class="admin-modal animate-slide-up" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <h3 class="modal-title">{{ viewing.currencyCode }} — {{ viewing.currencyName }}</h3>
+            <span class="modal-subtitle">Rate snapshot · last updated {{ viewing.lastUpdated | date:'medium' }}</span>
+          </div>
+          <button class="modal-close" (click)="closeView()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="view-info-side">
+            <div class="rate-hero">
+              <div class="rate-hero__symbol">{{ viewing.symbol }}</div>
+              <div class="rate-hero__main">
+                <div class="rate-hero__pair">CA$1 =</div>
+                <div class="rate-hero__value">{{ viewing.rateToCad | number:'1.4-6' }} {{ viewing.currencyCode }}</div>
+              </div>
+              <div class="rate-hero__status">
+                <span class="status-indicator" [class.active]="viewing.isActive">
+                  {{ viewing.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-group">
+                <label>Currency Code</label>
+                <div class="info-value bold">{{ viewing.currencyCode }}</div>
+              </div>
+              <div class="info-group">
+                <label>Symbol</label>
+                <div class="info-value bold">{{ viewing.symbol }}</div>
+              </div>
+            </div>
+            <div class="info-group">
+              <label>Currency Name</label>
+              <div class="info-value">{{ viewing.currencyName }}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-group">
+                <label>Rate to CAD</label>
+                <div class="info-value">CA$1 = {{ viewing.rateToCad | number:'1.4-6' }}</div>
+              </div>
+              <div class="info-group">
+                <label>Inverse Rate</label>
+                <div class="info-value">1 {{ viewing.currencyCode }} = CA${{ (1 / viewing.rateToCad) | number:'1.4-6' }}</div>
+              </div>
+            </div>
+            <div class="info-group">
+              <label>Last Updated</label>
+              <div class="info-value">{{ viewing.lastUpdated | date:'medium' }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-modal-cancel" (click)="closeView()">Close</button>
+          <button class="btn-modal-save" (click)="closeView(); openEdit(viewing)">
+            <i class="fas fa-pen"></i> Edit Rate
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- CREATE / EDIT Modal -->
+  @if (showForm) {
+    <div class="admin-modal-overlay" (click)="cancelForm()">
+      <div class="admin-modal animate-slide-up" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <h3 class="modal-title">{{ editing ? 'Edit Currency' : 'Add Currency' }}</h3>
+            <span class="modal-subtitle">{{ editing ? 'Update rate, symbol or status' : 'Register a new display currency' }}</span>
+          </div>
+          <button class="modal-close" (click)="cancelForm()">&times;</button>
+        </div>
+        <div class="modal-body">
+          @if (error) { <div class="alert alert-error mb-20">{{ error }}</div> }
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Currency Code</label>
+              <input
+                [(ngModel)]="form.currencyCode"
+                [disabled]="!!editing"
+                maxlength="10"
+                placeholder="USD"
+                style="text-transform: uppercase" />
+            </div>
+            <div class="form-group">
+              <label>Symbol</label>
+              <input [(ngModel)]="form.symbol" maxlength="10" placeholder="$" />
+            </div>
+            <div class="form-group span-2">
+              <label>Currency Name</label>
+              <input [(ngModel)]="form.currencyName" maxlength="100" placeholder="US Dollar" />
+            </div>
+            <div class="form-group span-2">
+              <label>Rate (1 CAD equals)</label>
+              <input
+                [(ngModel)]="form.rateToCad"
+                type="number"
+                min="0.000001"
+                step="0.000001"
+                [disabled]="!!editing && editing.currencyCode === 'CAD'" />
+              <small class="form-hint">All product prices are stored in CAD; this rate is used for buyer-side display conversion.</small>
+            </div>
+            <div class="form-group span-2">
+              <div class="status-toggle-box">
+                <label class="toggle-switch">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="form.isActive"
+                    [disabled]="!!editing && editing.currencyCode === 'CAD'" />
+                  <span class="slider round"></span>
+                </label>
+                <div class="toggle-text">
+                  <span class="toggle-label">Active</span>
+                  <span class="toggle-desc">Inactive currencies are hidden from the buyer-side currency selector.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-modal-cancel" (click)="cancelForm()">Discard</button>
+          <button class="btn-modal-save" (click)="save()" [disabled]="saving">
+            <i class="fas fa-{{ saving ? 'spinner fa-spin' : 'save' }}"></i>
+            {{ saving ? 'Saving...' : (editing ? 'Save Changes' : 'Add Currency') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Data Table -->
+  <div class="admin-content-card">
+    @if (loading) {
+      <div class="loading-state">
+        <div class="loader"></div>
+        <span>Loading currencies...</span>
+      </div>
+    } @else if (!filteredCurrencies.length) {
+      <div class="empty-state">
+        <div class="empty-illustration"><i class="fas fa-money-bill-wave"></i></div>
+        <h3>No Currencies Found</h3>
+        <p>{{ searchTerm ? 'No currencies match your search.' : 'Add your first display currency to get started.' }}</p>
+        @if (searchTerm) {
+          <button class="btn-primary" (click)="resetSearch()">Clear Search</button>
+        } @else {
+          <button class="btn-primary" (click)="openCreate()">Add Currency</button>
+        }
+      </div>
+    } @else {
+      <div class="table-overflow">
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Currency</th>
+              <th>Symbol</th>
+              <th>Rate (1 CAD =)</th>
+              <th>Inverse</th>
+              <th>Last Updated</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of pagedCurrencies; track trackByCode($index, c)) {
+              <tr [class.row-inactive]="!c.isActive">
+                <td>
+                  <div class="brand-info">
+                    <span class="name">{{ c.currencyCode }}</span>
+                    @if (isBase(c)) { <span class="base-tag">BASE</span> }
+                  </div>
+                </td>
+                <td>
+                  <span class="currency-name">{{ c.currencyName }}</span>
+                </td>
+                <td>
+                  <span class="symbol-badge">{{ c.symbol }}</span>
+                </td>
+                <td>
+                  <span class="amount">{{ c.rateToCad | number:'1.4-6' }} {{ c.currencyCode }}</span>
+                </td>
+                <td>
+                  <span class="amount muted">CA${{ (1 / c.rateToCad) | number:'1.4-6' }}</span>
+                </td>
+                <td>
+                  <span class="date-cell">{{ c.lastUpdated | date:'mediumDate' }}</span>
+                </td>
+                <td>
+                  <span class="status-indicator" [class.active]="c.isActive">
+                    {{ c.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-set">
+                    <button class="btn-action view" (click)="openView(c)" title="View details">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-action edit" (click)="openEdit(c)" title="Edit currency">
+                      <i class="fas fa-pen"></i>
+                    </button>
+                    <button
+                      class="btn-action toggle"
+                      [class.is-active]="c.isActive"
+                      (click)="toggleActive(c)"
+                      [disabled]="isBase(c)"
+                      [title]="isBase(c) ? 'Base currency cannot be toggled' : (c.isActive ? 'Deactivate' : 'Activate')">
+                      <i class="fas" [class.fa-pause]="c.isActive" [class.fa-play]="!c.isActive"></i>
+                    </button>
+                    <button
+                      class="btn-action hide"
+                      (click)="delete(c)"
+                      [disabled]="isBase(c)"
+                      [title]="isBase(c) ? 'Base currency cannot be removed' : 'Soft-delete (deactivate)'">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-pagination
+        [page]="page"
+        [pageSize]="pageSize"
+        [totalCount]="filteredCurrencies.length"
+        (pageChange)="goPage($event)">
+      </app-pagination>
+    }
+  </div>
+</div>

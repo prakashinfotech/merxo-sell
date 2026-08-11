@@ -1,0 +1,57 @@
+// StripBanner — thin full-width announcement bar between sections
+:host { display: block; }
+
+.strip-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 28px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+
+  &:hover { opacity: 0.92; }
+}
+
+.strip-badge {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.strip-title {
+  font-weight: 800;
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+.strip-subtitle {
+  font-size: 0.88rem;
+  opacity: 0.8;
+}
+
+.strip-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  color: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  padding: 7px 18px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.18s;
+  white-space: nowrap;
+
+  &:hover { background: rgba(255, 255, 255, 0.35); }
+}

@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.pyo
+reports/*.html
+reports/screenshots/*.png
+reports/screenshots/*.jpg

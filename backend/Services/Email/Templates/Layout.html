@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{Subject}}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+        .btn:hover { background-color: #ff8c00 !important; transform: translateY(-2px); }
+        @media screen and (max-width: 600px) { 
+            .content { padding: 48px 24px !important; }
+            .main { border-radius: 0 !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f1f5f9; padding: 40px 0 80px;">
+        <tr>
+            <td align="center">
+                <table class="main" width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; width: 100%; max-width: 600px; color: #0f172a; border-radius: 48px; overflow: hidden; box-shadow: 0 40px 100px -20px rgba(15, 23, 42, 0.1);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: #0f172a; padding: 60px 0; text-align: center;">
+                            <a href="{{AppUrl}}" style="color: #ffffff; font-size: 32px; font-weight: 900; text-decoration: none; letter-spacing: -1.5px;">Merxo<span style="color: #0284c7;">Sell</span></a>
+                            <div style="font-size: 11px; color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; margin-top: 8px;">Premium Marketplace</div>
+                        </td>
+                    </tr>
+                    <!-- Body -->
+                    <tr>
+                        <td class="content" style="padding: 64px 48px;">
+                            {{Body}}
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background: #f8fafc; padding: 60px 48px; text-align: center; color: #64748b; font-size: 14px; line-height: 1.8; border-top: 1px solid #f1f5f9;">
+                            <a href="{{AppUrl}}" style="color: #0f172a; font-size: 24px; font-weight: 800; text-decoration: none; display: block; margin-bottom: 24px;">Merxo<span style="color: #0284c7;">Sell</span></a>
+                            <div style="margin-bottom: 32px;">
+                                <a href="{{AppUrl}}/shop" style="color: #64748b; text-decoration: none; margin: 0 12px; font-weight: 600; font-size: 14px;">Shop</a>
+                                <a href="{{AppUrl}}/profile" style="color: #64748b; text-decoration: none; margin: 0 12px; font-weight: 600; font-size: 14px;">Account</a>
+                                <a href="{{AppUrl}}/support" style="color: #64748b; text-decoration: none; margin: 0 12px; font-weight: 600; font-size: 14px;">Help</a>
+                            </div>
+                            <p style="margin: 0;">&copy; {{Year}} MerxoSell. All Rights Reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

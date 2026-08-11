@@ -1,0 +1,109 @@
+<div class="auth-wrapper" 
+     [class.role-buyer]="role() === 'buyer'" 
+     [class.role-seller]="role() === 'seller'" 
+     [class.role-admin]="role() === 'admin'">
+     
+  <!-- Animated Background Elements -->
+  <div class="auth-bg-anim">
+    <i class="fas fa-shopping-cart float-icon" style="top: 10%; left: 10%; font-size: 8rem; --dur: 25s;"></i>
+    <i class="fas fa-shopping-bag float-icon blue" style="top: 60%; left: 20%; font-size: 6rem; --dur: 30s;"></i>
+    <i class="fas fa-box-open float-icon green" style="top: 20%; left: 80%; font-size: 7rem; --dur: 22s;"></i>
+    <i class="fas fa-tags float-icon" style="top: 70%; left: 70%; font-size: 5rem; --dur: 28s;"></i>
+    <i class="fas fa-gift float-icon blue" style="top: 40%; left: 40%; font-size: 9rem; --dur: 35s;"></i>
+    <i class="fas fa-star float-icon green" style="top: 80%; left: 10%; font-size: 4rem; --dur: 18s;"></i>
+    <i class="fas fa-percent float-icon blue" style="top: 30%; left: 90%; font-size: 5rem; --dur: 40s;"></i>
+    <i class="fas fa-truck float-icon green" style="top: 10%; left: 50%; font-size: 6rem; --dur: 45s;"></i>
+    <i class="fas fa-wallet float-icon" style="top: 85%; left: 45%; font-size: 4rem; --dur: 32s;"></i>
+  </div>
+  <!-- Left: Hero Illustration -->
+  <div class="auth-hero" [class.seller]="role() === 'seller'">
+    <div class="auth-hero__content">
+      <h1 class="slide-in">{{ currentHero.title }}</h1>
+      <p class="slide-in" style="animation-delay: 0.1s;">{{ currentHero.subtitle }}</p>
+    </div>
+    <div class="auth-hero__visual slide-in" style="animation-delay: 0.3s;">
+      <img [src]="currentHero.image" alt="Hero Illustration">
+    </div>
+  </div>
+
+  <!-- Right: Form -->
+  <div class="auth-form-container">
+    <div class="auth-form-card animate-in">
+      <div class="auth-mobile-brand" routerLink="/">
+        <div class="brand-icon">M</div>
+        <span>MerxoSell</span>
+      </div>
+      
+      @if (role() === 'buyer') {
+      <a routerLink="/" class="auth-back-home">
+        <i class="fas fa-arrow-left"></i> Back to Home
+      </a>
+      }
+
+      <div class="auth-header">
+        <h2>
+          @if (role() === 'admin') { Platform Governance }
+          @else if (role() === 'seller') { Seller Login }
+          @else { Welcome Back }
+        </h2>
+        <p>
+          @if (role() === 'admin') { Authorized administrative access only }
+          @else if (role() === 'seller') { Manage your store and sales }
+          @else { Access your marketplace account }
+        </p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-group">
+          <label>Email Address</label>
+          <div class="input-wrap">
+            <i class="fas fa-envelope"></i>
+            <input type="email" formControlName="email" [placeholder]="role() === 'admin' ? 'Admin@merxosell.com' : (role() === 'seller' ? 'seller@merxosell.com' : 'buyer@merxosell.com')" autocomplete="email">
+          </div>
+          <div class="error-msg" *ngIf="email.touched && email.invalid">
+            <span *ngIf="email.errors?.['required']">Email is required</span>
+            <span *ngIf="email.errors?.['email']">Please enter a valid email</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row">
+            <label>Password</label>
+            <a routerLink="/auth/forgot-password" class="forgot-link">Forgot Password?</a>
+          </div>
+          <div class="input-wrap">
+            <i class="fas fa-lock"></i>
+            <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="••••••••" autocomplete="current-password">
+            <button type="button" class="toggle-pass" (click)="showPassword = !showPassword">
+              <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+            </button>
+          </div>
+          <div class="error-msg" *ngIf="password.touched && password.invalid">
+            Password is required to login
+          </div>
+        </div>
+
+        <div class="error-msg server-error" *ngIf="errorMessage()">
+          <i class="fas fa-exclamation-circle"></i>
+          {{ errorMessage() }}
+        </div>
+
+        <button type="submit" class="btn-primary auth-btn" [disabled]="loading()">
+          <span *ngIf="!loading()">Login to Account</span>
+          <span *ngIf="loading()">
+            <i class="fas fa-circle-notch fa-spin"></i>
+            Authenticating...
+          </span>
+        </button>
+
+
+        <p class="auth-footer" *ngIf="role() === 'buyer'">
+          New to MerxoSell? <a routerLink="/auth/register">Create an account</a>
+        </p>
+        <p class="auth-footer" *ngIf="role() === 'seller'">
+          Interested in selling? <a routerLink="/auth/register" [queryParams]="{role: 'Seller'}">Apply for a store</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>

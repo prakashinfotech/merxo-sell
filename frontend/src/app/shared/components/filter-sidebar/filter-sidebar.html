@@ -1,0 +1,104 @@
+<aside class="tc-side">
+
+  <!-- Price Range card -->
+  <div class="tc-fcard">
+    <div class="tc-fcard__head">
+      <h4>Price Range</h4>
+      <span class="tc-fcard__reset" (click)="resetPrice()">Reset</span>
+    </div>
+    <div class="tc-fcard__lead">Set your budget (CAD)</div>
+    <div class="tc-price-histogram">
+      <svg viewBox="0 0 240 60" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="pgrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#C7F542" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#C7F542" stop-opacity="0.05"/>
+          </linearGradient>
+        </defs>
+        <path d="M 0 50 L 20 42 L 40 36 L 55 28 L 70 18 L 85 8 L 100 22 L 120 14 L 140 30 L 160 22 L 180 36 L 200 28 L 220 40 L 240 36 L 240 60 L 0 60 Z" fill="url(#pgrad)"/>
+        <path d="M 0 50 L 20 42 L 40 36 L 55 28 L 70 18 L 85 8 L 100 22 L 120 14 L 140 30 L 160 22 L 180 36 L 200 28 L 220 40 L 240 36" stroke="#0B0B0B" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <input type="range" class="tc-range-slider" min="0" max="5000" step="10" [value]="maxPrice"
+      (input)="onMaxPrice($any($event.target).value)" />
+    <div class="tc-price-labels">
+      <span>CA${{ minPrice }}</span>
+      <span>CA${{ maxPrice }}</span>
+    </div>
+  </div>
+
+  <!-- Sort by -->
+  <div class="tc-fcard">
+    <h4 class="tc-fcard__title">Sort by</h4>
+    <div class="tc-sort-btns">
+      @for (opt of sortOptions; track opt.value) {
+        <button class="tc-sort-btn" [class.on]="sortBy === opt.value"
+          (click)="onSortChange(opt.value)">{{ opt.label }}</button>
+      }
+    </div>
+  </div>
+
+  <!-- Star Rating -->
+  <div class="tc-fcard">
+    <h4 class="tc-fcard__title">Min Rating</h4>
+    <div class="tc-stars-filter">
+      @for (star of [4, 3, 2, 1]; track star) {
+        <button class="tc-star-row" [class.on]="minRating === star" (click)="setRating(star)">
+          @for (i of [1,2,3,4,5]; track i) {
+            <i class="fas fa-star" [class.lit]="i <= star"></i>
+          }
+          <span class="tc-star-row__lbl">{{ star }}+ Stars</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Categories -->
+  <div class="tc-fcard">
+    <div class="tc-fcard__head">
+      <h4>Category</h4>
+      @if (selectedCategoryId) {
+        <span class="tc-fcard__reset" (click)="toggleCategory(selectedCategoryId!)">Clear</span>
+      }
+    </div>
+    @for (cat of categories; track cat.categoryId) {
+      <div class="tc-cat-row" [class.on]="selectedCategoryId === cat.categoryId"
+        (click)="toggleCategory(cat.categoryId)">
+        <div class="tc-cat-mark">{{ cat.name.charAt(0).toUpperCase() }}</div>
+        <span class="tc-cat-name">{{ cat.name }}</span>
+        <div class="tc-cb" [class.off]="selectedCategoryId !== cat.categoryId">
+          <i class="fas fa-check"></i>
+        </div>
+      </div>
+      @if (cat.children && cat.children.length > 0 && selectedCategoryId === cat.categoryId) {
+        @for (sub of cat.children; track sub.categoryId) {
+          <div class="tc-cat-row tc-cat-row--sub" [class.on]="selectedCategoryId === sub.categoryId"
+            (click)="toggleCategory(sub.categoryId)">
+            <span class="tc-cat-name">{{ sub.name }}</span>
+            <div class="tc-cb" [class.off]="selectedCategoryId !== sub.categoryId">
+              <i class="fas fa-check"></i>
+            </div>
+          </div>
+        }
+      }
+    }
+    @if (categories.length === 0) {
+      <p class="tc-fcard__empty">Loading…</p>
+    }
+  </div>
+
+  <!-- Delivery / Stock Options -->
+  <div class="tc-fcard">
+    <h4 class="tc-fcard__title">Availability</h4>
+    <div class="tc-toggle">
+      <button class="tc-toggle__btn" [class.on]="!inStockOnly" (click)="setInStock(false)">All Items</button>
+      <button class="tc-toggle__btn" [class.on]="inStockOnly" (click)="setInStock(true)">In Stock</button>
+    </div>
+  </div>
+
+  <!-- Reset all -->
+  <button class="tc-reset-all" (click)="reset()">
+    <i class="fas fa-rotate-left"></i> Reset All Filters
+  </button>
+
+</aside>
