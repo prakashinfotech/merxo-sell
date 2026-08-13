@@ -40,6 +40,8 @@ graph TD
 ```
 
 ### Key Highlights & Recent Enhancements
+- **Razorpay Payment Gateway Integration**: Unified payment gateway supporting Cards, UPI, NetBanking, and Wallets via Razorpay Checkout JS modal. Configured with user email `suthary980@gmail.com`.
+- **Payment Reference Tracking & Admin Cross-Verification**: Automatically captures and records Razorpay Payment Transaction IDs (e.g. `pay_TPA3SXiKMUDRYH`) upon order completion and displays them in the Admin Orders dashboard for verification.
 - **Dynamic Offer Banner Engine**: Support for `Hero`, `MidLeft`, `MidRight`, and `Strip` slots with auto-scrolling carousels, customizable indicator controls, hover-pause, and direct product-link redirection.
 - **Local Asset Management & Robust Image Fallbacks**: Automated backend image upload processing (`/uploads/`) with frontend `(error)` image fallback protection to eliminate broken links.
 - **Role-Based Access Control (RBAC)**: Fine-grained security policies for `SuperAdmin`, `Seller`, and `Buyer` roles powered by BCrypt and JWT.
@@ -109,6 +111,19 @@ dotnet ef database update
 # Launch the API server (Runs on http://localhost:5000)
 dotnet run
 ```
+
+#### 💳 Razorpay Configuration Setup
+To enable live/test payment processing via Razorpay, update the `"Razorpay"` section in `backend/appsettings.json`:
+
+```json
+"Razorpay": {
+  "KeyId": "YOUR_RAZORPAY_KEY_ID",
+  "KeySecret": "YOUR_RAZORPAY_KEY_SECRET",
+  "AccountEmail": "suthary980@gmail.com",
+  "AccountPassword": "YOUR_RAZORPAY_ACCOUNT_PASSWORD"
+}
+```
+*Note: Replace `YOUR_RAZORPAY_KEY_ID` and `YOUR_RAZORPAY_KEY_SECRET` with your API keys from the [Razorpay Dashboard](https://dashboard.razorpay.com/).*
 
 ---
 

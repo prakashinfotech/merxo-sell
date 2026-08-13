@@ -67,7 +67,7 @@ export class RazorpayPaymentService {
       }
 
       const options = {
-        key: orderData.keyId || 'rzp_test_TP9tlmRU4ERzrX',
+        key: orderData.keyId,
         amount: orderData.amountInSubunits,
         currency: orderData.currency || 'INR',
         name: 'MerxoSell Marketplace',
