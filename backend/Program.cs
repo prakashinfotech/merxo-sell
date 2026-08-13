@@ -153,6 +153,10 @@ builder.Services.AddScoped<IReviewService,    ReviewService>();
 builder.Services.AddScoped<IAddressRepository, AddressRepository>();
 builder.Services.AddScoped<IProfileService,    ProfileService>();
 
+// ── Razorpay module ───────────────────────────────────────────
+builder.Services.Configure<RazorpaySettings>(builder.Configuration.GetSection("Razorpay"));
+builder.Services.AddHttpClient<IRazorpayService, RazorpayService>();
+
 // ── Sellers module ─────────────────────────────────────────────
 builder.Services.AddScoped<ISellerRepository,        SellerRepository>();
 builder.Services.AddScoped<ISellerProductRepository, SellerProductRepository>();

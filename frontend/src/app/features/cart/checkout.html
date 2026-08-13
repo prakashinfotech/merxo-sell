@@ -219,14 +219,25 @@
         <!-- 4. Payment Method -->
         <div class="co-card">
           <div class="co-card__head">
-            <div class="co-card__icon co-card__icon--green"><i class="fas fa-credit-card"></i></div>
+            <div class="co-card__icon co-card__icon--green"><i class="fas fa-shield-alt"></i></div>
             <div>
               <h2 class="co-card__title">Payment Method</h2>
-              <p class="co-card__sub">How would you like to pay?</p>
+              <p class="co-card__sub">Powered by Razorpay Secure Gateway</p>
             </div>
           </div>
 
           <div class="co-pay-grid">
+            <div class="co-pay-card" [class.on]="selectedPaymentId === 'razorpay'" (click)="selectPayment('razorpay')">
+              <div class="co-pay-card__icon" style="color: #0c2340; font-weight: 700; font-size: 1.2rem;">
+                <i class="fas fa-bolt" style="color: #3395ff;"></i>
+              </div>
+              <div class="co-pay-card__info">
+                <span style="font-weight: 600;">Razorpay Gateway</span>
+                <small>Cards, NetBanking, UPI, Wallets (suthary980&#64;gmail.com)</small>
+              </div>
+              <div class="co-radio" [class.on]="selectedPaymentId === 'razorpay'"></div>
+            </div>
+
             <div class="co-pay-card" [class.on]="selectedPaymentId === 'cod'" (click)="selectPayment('cod')">
               <div class="co-pay-card__icon"><i class="fas fa-wallet"></i></div>
               <div class="co-pay-card__info">
@@ -235,37 +246,11 @@
               </div>
               <div class="co-radio" [class.on]="selectedPaymentId === 'cod'"></div>
             </div>
-
-            @for (card of savedCards; track card.id) {
-              <div class="co-pay-card" [class.on]="selectedPaymentId === card.id" (click)="selectPayment(card.id)">
-                <div class="co-pay-card__icon"><i class="fas fa-credit-card"></i></div>
-                <div class="co-pay-card__info">
-                  <span>{{ card.label }}</span>
-                  <small>{{ card.subLabel }}</small>
-                </div>
-                <div class="co-radio" [class.on]="selectedPaymentId === card.id"></div>
-              </div>
-            }
-
-            @for (upi of savedUpis; track upi.id) {
-              <div class="co-pay-card" [class.on]="selectedPaymentId === upi.id" (click)="selectPayment(upi.id)">
-                <div class="co-pay-card__icon"><i class="fas fa-mobile-alt"></i></div>
-                <div class="co-pay-card__info">
-                  <span>{{ upi.label }}</span>
-                  <small>{{ upi.subLabel }}</small>
-                </div>
-                <div class="co-radio" [class.on]="selectedPaymentId === upi.id"></div>
-              </div>
-            }
           </div>
 
-          <div class="co-pay-actions">
-            <a routerLink="/profile" [queryParams]="{ tab: 'payment', action: 'add-card' }" class="co-btn co-btn--ghost co-btn--sm">
-              <i class="fas fa-plus"></i> Add Card
-            </a>
-            <a routerLink="/profile" [queryParams]="{ tab: 'payment', action: 'add-upi' }" class="co-btn co-btn--ghost co-btn--sm">
-              <i class="fas fa-plus"></i> Add UPI
-            </a>
+          <div style="margin-top: 14px; padding: 10px 14px; background: #f8fafc; border-radius: 8px; font-size: 0.85rem; color: #475569; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-lock" style="color: #16a34a;"></i>
+            <span>All major cards, UPI apps, and net banking options are securely processed via Razorpay.</span>
           </div>
         </div>
 
