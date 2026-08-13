@@ -11,80 +11,82 @@ namespace MerxoSell.API.Services;
 
 public class RazorpayService : IRazorpayService
 {
-    private readonly RazorpaySettings _settings;
+    private readonly IOptionsMonitor<RazorpaySettings> _settingsMonitor;
     private readonly HttpClient _httpClient;
     private readonly ILogger<RazorpayService> _logger;
 
+    private RazorpaySettings Settings => _settingsMonitor.CurrentValue;
+
     public RazorpayService(
-        IOptions<RazorpaySettings> settings,
+        IOptionsMonitor<RazorpaySettings> settingsMonitor,
         HttpClient httpClient,
         ILogger<RazorpayService> logger)
     {
-        _settings = settings.Value;
+        _settingsMonitor = settingsMonitor;
         _httpClient = httpClient;
         _logger = logger;
     }
 
     public async Task<CreateRazorpayOrderResponseDto> CreateOrderAsync(CreateRazorpayOrderRequestDto dto)
     {
+        var settings = Settings;
+        if (string.IsNullOrWhiteSpace(settings.KeyId) || string.IsNullOrWhiteSpace(settings.KeySecret))
+        {
+            throw new InvalidOperationException("Razorpay API KeyId and KeySecret are not configured in backend appsettings.json.");
+        }
+
         // Convert amount to smallest currency unit (e.g. paise / cents)
         long amountInSubunits = Convert.ToInt64(Math.Round(dto.Amount * 100, 0));
         string currency = string.IsNullOrWhiteSpace(dto.Currency) ? "INR" : dto.Currency.ToUpper();
         string receipt = dto.Receipt ?? $"rcpt_{DateTime.UtcNow.Ticks}";
 
-        string razorpayOrderId = $"order_{Guid.NewGuid().ToString("N")[..14]}";
+        var requestUrl = "https://api.razorpay.com/v1/orders";
+        var authBytes = Encoding.UTF8.GetBytes($"{settings.KeyId}:{settings.KeySecret}");
+        var authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(authBytes));
 
-        try
+        var payload = new
         {
-            if (!string.IsNullOrEmpty(_settings.KeyId) && !string.IsNullOrEmpty(_settings.KeySecret))
+            amount = amountInSubunits,
+            currency,
+            receipt,
+            notes = new
             {
-                var requestUrl = "https://api.razorpay.com/v1/orders";
-                var authBytes = Encoding.UTF8.GetBytes($"{_settings.KeyId}:{_settings.KeySecret}");
-                var authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(authBytes));
-
-                var payload = new
-                {
-                    amount = amountInSubunits,
-                    currency,
-                    receipt,
-                    notes = new
-                    {
-                        email = _settings.AccountEmail,
-                        merchant = "MerxoSell Marketplace"
-                    }
-                };
-
-                using var request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
-                request.Headers.Authorization = authHeader;
-                request.Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-
-                var response = await _httpClient.SendAsync(request);
-                if (response.IsSuccessStatusCode)
-                {
-                    var responseJson = await response.Content.ReadAsStringAsync();
-                    using var doc = JsonDocument.Parse(responseJson);
-                    if (doc.RootElement.TryGetProperty("id", out var idProp))
-                    {
-                        razorpayOrderId = idProp.GetString() ?? razorpayOrderId;
-                    }
-                }
-                else
-                {
-                    _logger.LogWarning("Razorpay API request returned status {StatusCode}, using generated order ID", response.StatusCode);
-                }
+                email = settings.AccountEmail,
+                merchant = "MerxoSell Marketplace"
             }
-        }
-        catch (Exception ex)
+        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+        request.Headers.Authorization = authHeader;
+        request.Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.SendAsync(request);
+        var responseJson = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
         {
-            _logger.LogError(ex, "Error creating order via Razorpay API, falling back to generated order ID");
+            _logger.LogError("Razorpay API order creation failed ({StatusCode}): {Response}", response.StatusCode, responseJson);
+            throw new InvalidOperationException($"Razorpay Order Creation Failed ({response.StatusCode}): {responseJson}");
+        }
+
+        string razorpayOrderId = string.Empty;
+        using var doc = JsonDocument.Parse(responseJson);
+        if (doc.RootElement.TryGetProperty("id", out var idProp))
+        {
+            razorpayOrderId = idProp.GetString() ?? string.Empty;
+        }
+
+        if (string.IsNullOrEmpty(razorpayOrderId))
+        {
+            throw new InvalidOperationException("Failed to obtain Order ID from Razorpay response.");
         }
 
         return new CreateRazorpayOrderResponseDto(
             RazorpayOrderId: razorpayOrderId,
-            KeyId: _settings.KeyId,
+            KeyId: settings.KeyId,
             AmountInSubunits: amountInSubunits,
             Currency: currency,
-            AccountEmail: _settings.AccountEmail
+            AccountEmail: settings.AccountEmail
         );
     }
 
@@ -100,7 +102,7 @@ public class RazorpayService : IRazorpayService
         try
         {
             string payload = $"{dto.RazorpayOrderId}|{dto.RazorpayPaymentId}";
-            string keySecret = _settings.KeySecret;
+            string keySecret = Settings.KeySecret;
 
             using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(keySecret));
             byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(payload));
@@ -126,9 +128,10 @@ public class RazorpayService : IRazorpayService
 
     public RazorpayConfigDto GetConfig()
     {
+        var settings = Settings;
         return new RazorpayConfigDto(
-            KeyId: _settings.KeyId,
-            AccountEmail: _settings.AccountEmail
+            KeyId: settings.KeyId,
+            AccountEmail: settings.AccountEmail
         );
     }
 }
