@@ -14,7 +14,9 @@ public record AdminOrderListDto(
     string   BuyerName,
     string   BuyerEmail,
     DateTime CreatedAt,
-    DateTime? UpdatedAt
+    DateTime? UpdatedAt,
+    string?  PaymentMethod = null,
+    string?  PaymentTransactionId = null
 );
 
 public record AdminOrderItemDto(
@@ -56,7 +58,9 @@ public record AdminOrderDetailDto(
     string   BuyerEmail,
     string?  BuyerPhone,
     AdminOrderShippingAddressDto? ShippingAddress,
-    IEnumerable<AdminOrderItemDto> Items
+    IEnumerable<AdminOrderItemDto> Items,
+    string?  PaymentMethod = null,
+    string?  PaymentTransactionId = null
 );
 
 public record UpdateOrderStatusDto(

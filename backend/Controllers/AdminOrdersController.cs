@@ -67,7 +67,9 @@ public class AdminOrdersController : ControllerBase
                 o.User.FullName,
                 o.User.Email,
                 o.CreatedAt,
-                o.UpdatedAt
+                o.UpdatedAt,
+                o.PaymentMethod ?? "Razorpay",
+                o.PaymentTransactionId
             ))
             .ToListAsync();
 
@@ -123,7 +125,9 @@ public class AdminOrdersController : ControllerBase
             o.CurrencyCode ?? "CAD",
             o.Notes, o.CreatedAt, o.UpdatedAt,
             o.UserId, o.User.FullName, o.User.Email, o.User.Phone,
-            addrDto, items);
+            addrDto, items,
+            o.PaymentMethod ?? "Razorpay",
+            o.PaymentTransactionId);
 
         return Ok(dto);
     }

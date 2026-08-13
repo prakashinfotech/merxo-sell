@@ -240,7 +240,12 @@ export class Checkout implements OnInit {
                 razorpaySignature: payResponse.razorpay_signature
               }).subscribe({
                 next: () => {
-                  this.finalizeOrderCreation(createOrderDto);
+                  const finalDto: CreateOrderDto = {
+                    ...createOrderDto,
+                    paymentMethod: 'Razorpay',
+                    paymentTransactionId: payResponse.razorpay_payment_id
+                  };
+                  this.finalizeOrderCreation(finalDto);
                 },
                 error: (vErr) => {
                   this.submitting = false;
@@ -261,8 +266,13 @@ export class Checkout implements OnInit {
           }
         });
       } else {
-        // Direct COD or standard flow
-        this.finalizeOrderCreation(createOrderDto);
+        // Direct COD flow
+        const codDto: CreateOrderDto = {
+          ...createOrderDto,
+          paymentMethod: 'COD',
+          paymentTransactionId: undefined
+        };
+        this.finalizeOrderCreation(codDto);
       }
     });
   }

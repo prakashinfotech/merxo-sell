@@ -24,7 +24,9 @@ public record OrderDto(
     string   CurrencyCode,
     DateTime CreatedAt,
     string?  CancellationReason,
-    IEnumerable<OrderItemDto> Items
+    IEnumerable<OrderItemDto> Items,
+    string?  PaymentMethod = null,
+    string?  PaymentTransactionId = null
 );
 
 public record CreateOrderDto(
@@ -34,7 +36,9 @@ public record CreateOrderDto(
     decimal ShippingAmount,
     decimal DiscountAmount,
     [MaxLength(50)] string? CouponCode,
-    IList<CreateOrderItemDto>? Items = null
+    IList<CreateOrderItemDto>? Items = null,
+    [MaxLength(50)] string? PaymentMethod = "Razorpay",
+    [MaxLength(100)] string? PaymentTransactionId = null
 );
 
 public record CreateOrderItemDto(

@@ -142,6 +142,8 @@ public class OrderService : IOrderService
                 CouponCode     = normalizedCouponCode,
                 DisplayTotal   = payableCad,
                 CurrencyCode   = dto.CurrencyCode,
+                PaymentMethod  = dto.PaymentMethod ?? "Razorpay",
+                PaymentTransactionId = dto.PaymentTransactionId,
                 Status         = "Pending",
                 Items          = orderItems,
             };
@@ -379,6 +381,8 @@ public class OrderService : IOrderService
             order.CurrencyCode ?? "CAD",
             order.CreatedAt,
             order.CancellationReason,
-            items);
+            items,
+            order.PaymentMethod,
+            order.PaymentTransactionId);
     }
 }

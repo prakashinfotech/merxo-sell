@@ -288,6 +288,8 @@ public class AppDbContext : DbContext
             e.Property(o => o.DiscountAmount).HasColumnType("decimal(18,2)");
             e.Property(o => o.DisplayTotal).HasColumnType("decimal(18,2)");
             e.Property(o => o.CurrencyCode).HasMaxLength(10);
+            e.Property(o => o.PaymentMethod).HasMaxLength(50);
+            e.Property(o => o.PaymentTransactionId).HasMaxLength(100);
             e.Property(o => o.CancellationReason).HasMaxLength(1000);
             e.HasIndex(o => o.Status);
 

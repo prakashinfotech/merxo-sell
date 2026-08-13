@@ -21,6 +21,8 @@ export interface AdminOrderListDto {
   cancellationReason?: string;
   createdAt: string;
   updatedAt?: string;
+  paymentMethod?: string;
+  paymentTransactionId?: string;
 }
 
 export interface AdminOrderItemDto {
@@ -63,6 +65,8 @@ export interface AdminOrderDetailDto {
   buyerPhone?: string;
   shippingAddress?: AdminOrderShippingAddressDto;
   items: AdminOrderItemDto[];
+  paymentMethod?: string;
+  paymentTransactionId?: string;
 }
 
 @Injectable({ providedIn: 'root' })
