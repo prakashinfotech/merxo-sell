@@ -499,133 +499,44 @@
           </div>
         </div>
 
-        <div class="payment-method-grid">
-          <!-- Cards Section -->
-          <div class="payment-card-panel">
-            <div class="panel-head">
-              <div class="panel-title">
-                <i class="fas fa-credit-card"></i>
-                <span>Credit / Debit Cards</span>
-              </div>
-              <button class="btn-add-mini" type="button" (click)="openPaymentForm('Card')" *ngIf="!showPaymentForm || paymentFormType !== 'Card'">
-                <i class="fas fa-plus"></i> Add Card
-              </button>
-            </div>
-
-            @if (showPaymentForm && paymentFormType === 'Card') {
-              <div class="payment-form-box animate-in">
-                <form [formGroup]="paymentForm" (ngSubmit)="savePaymentMethod()" class="pf-form-mini">
-                  <div class="form-group">
-                    <label>Card Number</label>
-                    <div class="input-with-icon">
-                      <i class="fas fa-credit-card"></i>
-                      <input type="text" formControlName="label" placeholder="1234 5678 9101 1121" maxlength="16">
-                    </div>
-                    <div class="field-error" *ngIf="paymentForm.get('label')?.touched && paymentForm.get('label')?.invalid">
-                      <span *ngIf="paymentForm.get('label')?.errors?.['required']">Card number is required</span>
-                      <span *ngIf="paymentForm.get('label')?.errors?.['pattern']">Please enter 16 digits</span>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label>Expiry Date</label>
-                    <div class="input-with-icon">
-                      <i class="fas fa-calendar-alt"></i>
-                      <input type="text" formControlName="subLabel" placeholder="MM/YY" maxlength="5">
-                    </div>
-                    <div class="field-error" *ngIf="paymentForm.get('subLabel')?.touched && paymentForm.get('subLabel')?.invalid">
-                      <span *ngIf="paymentForm.get('subLabel')?.errors?.['required']">Expiry is required</span>
-                      <span *ngIf="paymentForm.get('subLabel')?.errors?.['pattern']">Use MM/YY format</span>
-                    </div>
-                  </div>
-                  <div class="form-actions-mini">
-                    <button type="button" class="btn-cancel-mini" (click)="closePaymentForm()">Cancel</button>
-                    <button type="submit" class="btn-save-mini" [disabled]="paymentForm.invalid || submitting">Save Card</button>
-                  </div>
-                </form>
-              </div>
-            }
-
-            <div class="methods-list">
-              @for (pm of cards; track pm.id) {
-                <div class="premium-pm-card" [class.default]="pm.isDefault">
-                  <div class="pm-brand-icon"><i class="fab fa-cc-visa"></i></div>
-                  <div class="pm-details">
-                    <div class="pm-number">Card ending in {{ pm.label.slice(-4) }}</div>
-                    <div class="pm-expiry">Expires {{ pm.subLabel }}</div>
-                  </div>
-                  <div class="pm-ctrl">
-                    <button class="action-btn" (click)="setDefaultPayment(pm.id)" *ngIf="!pm.isDefault" title="Set Default"><i class="fas fa-check"></i></button>
-                    <button class="action-btn danger" (click)="deletePayment(pm.id)" title="Remove"><i class="fas fa-trash-alt"></i></button>
-                  </div>
-                  <div class="default-pill" *ngIf="pm.isDefault">Primary</div>
+        <div class="payment-method-grid" style="grid-template-columns: 1fr;">
+          <div class="payment-card-panel" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px;">
+            <div class="panel-head" style="border-bottom: 1px solid #edf2f7; padding-bottom: 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+              <div class="panel-title" style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; background: #e0f2fe; color: #0284c7; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                  <i class="fas fa-bolt"></i>
                 </div>
-              } @empty {
-                @if (!showPaymentForm || paymentFormType !== 'Card') {
-                  <div class="empty-panel-state">
-                    <i class="fas fa-credit-card"></i>
-                    <p>No cards saved yet.</p>
-                  </div>
-                }
-              }
-            </div>
-          </div>
-
-          <!-- UPI Section -->
-          <div class="payment-card-panel">
-            <div class="panel-head">
-              <div class="panel-title">
-                <i class="fas fa-mobile-alt"></i>
-                <span>UPI IDs</span>
-              </div>
-              <button class="btn-add-mini" type="button" (click)="openPaymentForm('UPI')" *ngIf="!showPaymentForm || paymentFormType !== 'UPI'">
-                <i class="fas fa-plus"></i> Add UPI
-              </button>
-            </div>
-
-            @if (showPaymentForm && paymentFormType === 'UPI') {
-              <div class="payment-form-box animate-in">
-                <form [formGroup]="paymentForm" (ngSubmit)="savePaymentMethod()" class="pf-form-mini">
-                  <div class="form-group">
-                    <label>UPI ID (VPA)</label>
-                    <div class="input-with-icon">
-                      <i class="fas fa-bolt"></i>
-                      <input type="text" formControlName="label" placeholder="username@bank">
-                    </div>
-                    <div class="field-error" *ngIf="paymentForm.get('label')?.touched && paymentForm.get('label')?.invalid">
-                      <span *ngIf="paymentForm.get('label')?.errors?.['required']">UPI ID is required</span>
-                      <span *ngIf="paymentForm.get('label')?.errors?.['pattern']">Format: username@bank</span>
-                    </div>
-                  </div>
-                  <div class="form-actions-mini">
-                    <button type="button" class="btn-cancel-mini" (click)="closePaymentForm()">Cancel</button>
-                    <button type="submit" class="btn-save-mini" [disabled]="paymentForm.invalid || submitting">Save UPI</button>
-                  </div>
-                </form>
-              </div>
-            }
-
-            <div class="methods-list">
-              @for (pm of upis; track pm.id) {
-                <div class="premium-pm-card upi" [class.default]="pm.isDefault">
-                  <div class="pm-brand-icon"><i class="fas fa-bolt"></i></div>
-                  <div class="pm-details">
-                    <div class="pm-number">{{ pm.label }}</div>
-                    <div class="pm-expiry">UPI Payment</div>
-                  </div>
-                  <div class="pm-ctrl">
-                    <button class="action-btn" (click)="setDefaultPayment(pm.id)" *ngIf="!pm.isDefault" title="Set Default"><i class="fas fa-check"></i></button>
-                    <button class="action-btn danger" (click)="deletePayment(pm.id)" title="Remove"><i class="fas fa-trash-alt"></i></button>
-                  </div>
-                  <div class="default-pill" *ngIf="pm.isDefault">Primary</div>
+                <div>
+                  <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0;">Razorpay Payment Gateway</h3>
+                  <p style="font-size: 0.85rem; color: #64748b; margin: 2px 0 0 0;">Unified Payment Integration Active</p>
                 </div>
-              } @empty {
-                @if (!showPaymentForm || paymentFormType !== 'UPI') {
-                  <div class="empty-panel-state">
-                    <i class="fas fa-mobile-alt"></i>
-                    <p>No UPI IDs saved.</p>
-                  </div>
-                }
-              }
+              </div>
+              <span style="background: #dcfce7; color: #15803d; font-size: 0.8rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fas fa-check-circle"></i> Active Gateway
+              </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 16px;">
+              <div style="background: #ffffff; padding: 14px 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 600; letter-spacing: 0.5px;">Registered Email</div>
+                <div style="font-size: 0.95rem; font-weight: 600; color: #1e293b; margin-top: 4px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fas fa-envelope" style="color: #38bdf8;"></i> suthary980&#64;gmail.com
+                </div>
+              </div>
+
+              <div style="background: #ffffff; padding: 14px 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 600; letter-spacing: 0.5px;">Supported Payment Modes</div>
+                <div style="font-size: 0.85rem; font-weight: 500; color: #334155; margin-top: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px;"><i class="fas fa-credit-card"></i> Cards</span>
+                  <span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px;"><i class="fas fa-mobile-alt"></i> UPI</span>
+                  <span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px;"><i class="fas fa-university"></i> NetBanking</span>
+                  <span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px;"><i class="fas fa-wallet"></i> Wallets</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 20px; padding: 12px 16px; background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 0 8px 8px 0; font-size: 0.85rem; color: #1e40af;">
+              <i class="fas fa-info-circle"></i> Direct card and UPI entries have been consolidated into Razorpay's PCI-DSS compliant checkout popup for enhanced security.
             </div>
           </div>
         </div>

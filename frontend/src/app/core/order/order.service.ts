@@ -26,6 +26,8 @@ export interface OrderDto {
   createdAt: string;
   cancellationReason?: string;
   items: OrderItemDto[];
+  paymentMethod?: string;
+  paymentTransactionId?: string;
 }
 
 export interface CreateOrderDto {
@@ -35,11 +37,8 @@ export interface CreateOrderDto {
   shippingAmount: number;
   discountAmount: number;
   couponCode?: string;
-  /**
-   * Explicit cart snapshot sent at checkout so the server can build the
-   * order from buyer intent rather than re-reading the cart row. Optional —
-   * when omitted the server falls back to the persisted cart.
-   */
+  paymentMethod?: string;
+  paymentTransactionId?: string;
   items?: CreateOrderItemDto[];
 }
 

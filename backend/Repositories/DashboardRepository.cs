@@ -128,10 +128,15 @@ public class DashboardRepository : IDashboardRepository
             .ToListAsync();
 
         var productIds = groups.Select(g => g.ProductId).ToList();
-        var images = await _db.ProductImages
-            .AsNoTracking()
-            .Where(img => productIds.Contains(img.ProductId) && img.IsPrimary)
-            .ToDictionaryAsync(img => img.ProductId, img => img.ImageUrl);
+        var images = productIds.Count == 0
+            ? new Dictionary<int, string>()
+            : await _db.ProductImages
+                .AsNoTracking()
+                .Where(img => productIds.Contains(img.ProductId))
+                .OrderByDescending(img => img.IsPrimary)
+                .GroupBy(img => img.ProductId)
+                .Select(g => new { ProductId = g.Key, ImageUrl = g.First().ImageUrl })
+                .ToDictionaryAsync(img => img.ProductId, img => img.ImageUrl);
 
         return groups.Select(g => new TopProductData(
             g.ProductId, g.ProductName,

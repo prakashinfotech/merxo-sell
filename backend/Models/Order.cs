@@ -15,6 +15,8 @@ public class Order
     public int?      CouponId       { get; set; }
     public string?   CouponCode     { get; set; }
     public string?   Notes          { get; set; }
+    public string?   PaymentMethod  { get; set; } = "Razorpay";
+    public string?   PaymentTransactionId { get; set; }
 
     /// <summary>Filled when the order is cancelled — required so admins can audit.</summary>
     public string?   CancellationReason { get; set; }

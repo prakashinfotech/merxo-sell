@@ -9,6 +9,7 @@ import {
 } from '../../core/order/order.service';
 import { CurrencyService } from '../../core/currency/currency.service';
 import { CouponService, CouponSummaryDto, CouponValidationResultDto } from '../../core/coupon/coupon.service';
+import { RazorpayPaymentService } from '../../core/payment/razorpay.service';
 
 @Component({
   selector: 'app-checkout',
@@ -21,7 +22,7 @@ export class Checkout implements OnInit {
   addresses: AddressDto[] = [];
   paymentMethods: PaymentMethodDto[] = [];
   selectedAddressId: number | null = null;
-  selectedPaymentId: string | number = 'cod';
+  selectedPaymentId: string | number = 'razorpay';
   loading = true;
   submitting = false;
   error = '';
@@ -36,9 +37,6 @@ export class Checkout implements OnInit {
   savingAddress = false;
   newAddressError = '';
   newAddress: AddressCreateUpdateDto = this.blankAddress();
-
-  get savedCards() { return this.paymentMethods.filter(pm => pm.type === 'Card'); }
-  get savedUpis() { return this.paymentMethods.filter(pm => pm.type === 'UPI'); }
 
   private blankAddress(): AddressCreateUpdateDto {
     return {
@@ -89,6 +87,7 @@ export class Checkout implements OnInit {
     private orderService: OrderService,
     private couponService: CouponService,
     public  currencyService: CurrencyService,
+    private razorpayService: RazorpayPaymentService,
     private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -105,9 +104,6 @@ export class Checkout implements OnInit {
         this.selectedAddressId = defaultAddr?.addressId
           ?? this.addresses[0]?.addressId
           ?? null;
-
-        const defaultPayment = this.paymentMethods.find(pm => pm.isDefault);
-        if (defaultPayment) this.selectedPaymentId = defaultPayment.id;
       }),
       switchMap(() => this.cartService.fetchCart().pipe(catchError(() => of(null)))),
     ).subscribe({
@@ -211,7 +207,9 @@ export class Checkout implements OnInit {
       const shippingFee = this.cartService.shippingAmountCAD;
       const payableTotal = Math.max(0, total + shippingFee - (this.appliedCoupon?.discountAmount || 0));
 
-      const dto: CreateOrderDto = {
+      const selectedAddress = this.addresses.find(a => a.addressId === this.selectedAddressId);
+
+      const createOrderDto: CreateOrderDto = {
         addressId:       this.selectedAddressId!,
         currencyCode:    this.currencyService.currentCurrency,
         displayTotal:    payableTotal,
@@ -221,26 +219,82 @@ export class Checkout implements OnInit {
         items:           orderItems,
       };
 
-      this.orderService.createOrder(dto).pipe(
-        switchMap(order =>
-          // Best-effort cart clear — backend cleared its own cart; this
-          // refreshes the local BehaviorSubject so the badge resets.
-          this.cartService.clearCart().pipe(
-            catchError(() => of(null)),
-            tap(() => order),
-          )),
-      ).subscribe({
-        next: () => {
-          this.submitting = false;
-          this.router.navigate(['/orders']);
-        },
-        error: err => {
-          this.submitting = false;
-          this.error = err?.error?.error
-            ?? 'Failed to place order. Please review your cart and try again.';
-          this.cdr.markForCheck();
-        },
-      });
+      if (this.selectedPaymentId === 'razorpay') {
+        // Trigger Razorpay Payment Flow
+        this.razorpayService.createOrder({
+          amount: payableTotal,
+          currency: this.currencyService.currentCurrency || 'INR',
+          receipt: `rcpt_order_${Date.now()}`
+        }).subscribe({
+          next: (rzpOrder) => {
+            this.razorpayService.openRazorpayCheckout(
+              rzpOrder,
+              'suthary980@gmail.com',
+              selectedAddress?.fullName || 'Customer',
+              selectedAddress?.phone || ''
+            ).then(payResponse => {
+              // Verify Payment Signature
+              this.razorpayService.verifyPayment({
+                razorpayOrderId: payResponse.razorpay_order_id,
+                razorpayPaymentId: payResponse.razorpay_payment_id,
+                razorpaySignature: payResponse.razorpay_signature
+              }).subscribe({
+                next: () => {
+                  const finalDto: CreateOrderDto = {
+                    ...createOrderDto,
+                    paymentMethod: 'Razorpay',
+                    paymentTransactionId: payResponse.razorpay_payment_id
+                  };
+                  this.finalizeOrderCreation(finalDto);
+                },
+                error: (vErr) => {
+                  this.submitting = false;
+                  this.error = vErr?.error?.error || 'Payment verification failed. Please try again.';
+                  this.cdr.markForCheck();
+                }
+              });
+            }).catch(err => {
+              this.submitting = false;
+              this.error = err?.message || 'Payment was not completed.';
+              this.cdr.markForCheck();
+            });
+          },
+          error: (err) => {
+            this.submitting = false;
+            this.error = err?.error?.error || 'Could not initialize Razorpay payment. Please try again.';
+            this.cdr.markForCheck();
+          }
+        });
+      } else {
+        // Direct COD flow
+        const codDto: CreateOrderDto = {
+          ...createOrderDto,
+          paymentMethod: 'COD',
+          paymentTransactionId: undefined
+        };
+        this.finalizeOrderCreation(codDto);
+      }
+    });
+  }
+
+  private finalizeOrderCreation(dto: CreateOrderDto): void {
+    this.orderService.createOrder(dto).pipe(
+      switchMap(order =>
+        this.cartService.clearCart().pipe(
+          catchError(() => of(null)),
+          tap(() => order),
+        )),
+    ).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.router.navigate(['/orders']);
+      },
+      error: err => {
+        this.submitting = false;
+        this.error = err?.error?.error
+          ?? 'Failed to place order. Please review your cart and try again.';
+        this.cdr.markForCheck();
+      },
     });
   }
 }

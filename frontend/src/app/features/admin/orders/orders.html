@@ -90,6 +90,22 @@
                 </div>
               </div>
 
+              <h4 class="section-heading">Payment Information</h4>
+              <div class="info-row">
+                <div class="info-group">
+                  <label>Method</label>
+                  <div class="info-value">
+                    <span class="status-pill status-pill--confirmed">{{ viewing.paymentMethod || 'Razorpay' }}</span>
+                  </div>
+                </div>
+                <div class="info-group">
+                  <label>Razorpay Payment ID</label>
+                  <div class="info-value bold" style="color: #0284c7; font-family: monospace; font-size: 0.9rem;">
+                    <i class="fas fa-receipt" style="margin-right: 4px;"></i>{{ viewing.paymentTransactionId || 'N/A' }}
+                  </div>
+                </div>
+              </div>
+
               <h4 class="section-heading">Buyer</h4>
               <div class="info-row">
                 <div class="info-group">
@@ -261,7 +277,13 @@
                 <td>
                   <div class="order-info">
                     <span class="name">#{{ o.orderId }}</span>
-                    <span class="id">ID: {{ o.orderId }}</span>
+                    <!-- @if (o.paymentTransactionId) {
+                      <span class="id" style="color: #0284c7; font-weight: 600; font-family: monospace; font-size: 0.78rem;">
+                        <i class="fas fa-receipt"></i> {{ o.paymentTransactionId }}
+                      </span>
+                    } @else {
+                      <span class="id">ID: {{ o.orderId }}</span>
+                    } -->
                   </div>
                 </td>
                 <td>
