@@ -1,64 +1,89 @@
-# 🛍️ MerxoSell — Advanced Full-Stack E-Commerce Platform
+![MerxoSell Banner](docs/assets/merxosell_hero_banner.jpg)
 
-[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen)](#-testing)
-[![Frontend](https://img.shields.io/badge/Frontend-Angular_19-red)](frontend)
-[![Backend](https://img.shields.io/badge/Backend-.NET_9.0_Web_API-blue)](backend)
-[![Database](https://img.shields.io/badge/Database-SQL_Server_/_EF_Core-lightgrey)](database)
+# 🛍️ MerxoSell — Multi-Vendor E-Commerce Platform
 
-Welcome to **MerxoSell**, a modern, high-performance e-commerce marketplace platform built with **ASP.NET Core 9.0 Web API** and **Angular 19**.
+**Zero Commission. All Verified. Global Reach.**
+
+A modern, high-performance, full-stack e-commerce marketplace platform built with **ASP.NET Core 9.0 Web API** and **Angular 19**. MerxoSell empowers buyers, sellers, and administrators with direct seller contact, instant payment processing via Razorpay, dynamic promotional banners, real-time inventory tracking, and role-based management.
+
+[![Frontend](https://img.shields.io/badge/Frontend-Angular_19-red?style=flat-square&logo=angular)](frontend)
+[![Backend](https://img.shields.io/badge/Backend-.NET_9.0_Web_API-blue?style=flat-square&logo=dotnet)](backend)
+[![Database](https://img.shields.io/badge/Database-SQL_Server_/_EF_Core-lightgrey?style=flat-square&logo=microsoftsqlserver)](database)
+[![Payments](https://img.shields.io/badge/Payments-Razorpay_Gateway-blueviolet?style=flat-square)](https://razorpay.com)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+
+---
+
+## ⚡ The Problem & The Solution
+
+### ❌ The Problem
+Traditional e-commerce platforms charge exorbitant seller commission fees, impose complex payout delays, suffer from unverified product listings, lack transparent transaction tracking, and deliver fragmented mobile and web experiences.
+
+### ✅ The Solution
+**MerxoSell** solves these challenges by providing:
+- **Zero-Commission Marketplace**: Enables independent sellers to retain 100% of their earnings with direct seller onboarding and management.
+- **Automated Payment Tracking**: Direct Razorpay payment integration with automated reference capture and admin verification.
+- **Dynamic Merchandising Engine**: High-converting offer banners, carousel controls, product categorizations, and flash deal engines.
+- **Cross-Device Optimization**: Designed ground-up for pixel-perfect web and mobile experiences.
 
 ---
 
 ## 🏗️ Architecture Overview
 
-The application is engineered using **Clean N-Tier Architecture** and the **Repository Pattern**, decoupling business logic from data access and ensuring seamless scalability.
+MerxoSell is engineered using **Clean N-Tier Architecture** and the **Repository Pattern**, decoupling business logic from data access and ensuring seamless scalability.
 
 ```mermaid
 graph TD
-    subgraph "Frontend Layer (Angular 19)"
-        UI[App Shell / Component Views] --> FM[Feature Modules: Admin / Seller / Buyer]
-        FM --> Core[Core Services / Auth / Currency]
+    subgraph "Frontend Layer (Angular 19 SPA)"
+        UI[App Shell & Component Views] --> FM[Feature Modules: Buyer / Seller / Admin]
+        FM --> Core[Core Services: Auth / Razorpay / Currency]
         Core --> Interceptors[HTTP Interceptors]
         Interceptors --> API_Client[Standardized ApiResponse Handler]
     end
 
-    subgraph "Backend API Layer (.NET 9.0)"
-        Controllers[API Controllers] --> Services[Business Services]
+    subgraph "Backend API Layer (.NET 9.0 Web API)"
+        Controllers[API Controllers] --> Services[Business Logic & Media Handling]
         Services --> Repos[Repository Layer: IProductRepository, ISellerRepository, IOfferBannerRepository]
         Repos --> EFCore[Entity Framework Core / LocalDB]
-        Controllers --> Middleware[Global Exception & Logging Middleware]
+        Controllers --> Middleware[Global Exception & Security Middleware]
     end
 
-    subgraph "Infrastructure & Storage"
-        Uploads[Local Media Service / backend/wwwroot/uploads]
+    subgraph "Infrastructure & Integrations"
+        Razorpay[Razorpay Payment Gateway Modal]
+        Uploads[Local Media Storage / backend/wwwroot/uploads]
         JWT[JWT Authentication & RBAC]
     end
 
     API_Client -.-> Controllers
     Services -.-> Uploads
+    Core -.-> Razorpay
     Controllers -.-> JWT
 ```
 
-### Key Highlights & Recent Enhancements
-- **Razorpay Payment Gateway Integration**: Unified payment gateway supporting Cards, UPI, NetBanking, and Wallets via Razorpay Checkout JS modal. Configured with user email `suthary980@gmail.com`.
-- **Payment Reference Tracking & Admin Cross-Verification**: Automatically captures and records Razorpay Payment Transaction IDs (e.g. `pay_TPA3SXiKMUDRYH`) upon order completion and displays them in the Admin Orders dashboard for verification.
-- **Dynamic Offer Banner Engine**: Support for `Hero`, `MidLeft`, `MidRight`, and `Strip` slots with auto-scrolling carousels, customizable indicator controls, hover-pause, and direct product-link redirection.
-- **Local Asset Management & Robust Image Fallbacks**: Automated backend image upload processing (`/uploads/`) with frontend `(error)` image fallback protection to eliminate broken links.
-- **Role-Based Access Control (RBAC)**: Fine-grained security policies for `SuperAdmin`, `Seller`, and `Buyer` roles powered by BCrypt and JWT.
-- **Comprehensive E-Commerce Capabilities**: Product catalog management, multi-variant options, cart drawer, checkout flow, coupon discounts, order tracking, review moderation, and seller analytics dashboards.
+---
+
+## ✨ Key Highlights & Features
+
+- **💳 Razorpay Payment Gateway**: Built-in support for Cards, UPI, NetBanking, and Wallets via Razorpay Checkout JS modal, configured for account `suthary980@gmail.com`.
+- **🔍 Payment Reference Tracking**: Automatically records Razorpay Payment Transaction IDs (`pay_XXXXXX`) upon order placement for administrative cross-verification.
+- **🎠 Dynamic Offer Banner Engine**: Supports `Hero`, `MidLeft`, `MidRight`, and `Strip` banner placements with auto-scrolling carousels, hover pause, and product routing.
+- **🛡️ Role-Based Access Control (RBAC)**: Enforces granular security policies across `SuperAdmin`, `Seller`, and `Buyer` accounts using JWT and BCrypt hashing.
+- **📦 Multi-Vendor Operations**: Seller management dashboard, product inventory tracking, order status workflows, and sales analytics.
+- **🖼️ Asset Management & Fallbacks**: Automated backend image upload processing (`/uploads/`) with graceful frontend fallback protection.
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Module | Technologies Used |
+| Layer | Technologies & Tools |
 | :--- | :--- |
-| **Frontend** | Angular 19, TypeScript, RxJS, SCSS Theme Architecture, Chart.js |
-| **Backend** | .NET 9.0 Web API, C#, Entity Framework Core 9 |
-| **Database** | Microsoft SQL Server (LocalDB / MSSQLLocalDB) |
-| **Authentication** | JWT (JSON Web Tokens), BCrypt Password Hashing |
-| **Storage & Media** | ASP.NET Core Static Files (`wwwroot/uploads`) |
-| **Testing** | xUnit, Moq, FluentAssertions (Backend) / Vitest & Jasmine (Frontend) |
+| **Frontend Framework** | Angular 19, TypeScript, RxJS, SCSS Design System |
+| **Backend Framework** | ASP.NET Core 9.0 Web API, C#, Entity Framework Core 9 |
+| **Database** | Microsoft SQL Server (LocalDB / `MSSQLLocalDB`) |
+| **Authentication** | JWT (JSON Web Tokens), BCrypt Hashing |
+| **Payment Gateway** | Razorpay JS SDK & Verification API |
+| **Testing** | xUnit, Moq, FluentAssertions (Backend) / Jasmine & Vitest (Frontend) |
+| **Automation** | Python Automated API & UI Test Suites (`pytest`, `playwright`) |
 
 ---
 
@@ -66,23 +91,29 @@ graph TD
 
 ```text
 MerxoSell/
+├── docs/                     # Project documentation & visual assets
+│   └── assets/               # Banner images & UI mockups (merxosell_hero_banner.jpg)
 ├── backend/                  # .NET 9.0 Web API Project
 │   ├── Controllers/          # REST Endpoints (Products, Banners, Seller, Orders, Media)
-│   ├── Services/             # Core Business Logic & Media Handling
-│   ├── Repositories/         # Repository Pattern Data Access Layer
+│   ├── Services/             # Business Logic & Upload Services
+│   ├── Repositories/         # Data Access Layer Implementation
 │   ├── Data/                 # AppDbContext & EF Core Entity Configurations
-│   ├── Models/               # Domain Entity Models
+│   ├── Models/               # Domain Entities
 │   ├── DTOs/                 # Request & Response Contracts
-│   ├── wwwroot/uploads/      # Local Storage for Uploaded Media Assets
-│   └── MerxoSell.Tests/      # Unit and Integration Tests
-├── frontend/                 # Angular 19 Single Page Application (SPA)
+│   ├── wwwroot/uploads/      # Uploaded Product Media Assets
+│   └── MerxoSell.Tests/      # Backend Unit & Integration Tests
+├── frontend/                 # Angular 19 Single Page Application
 │   ├── src/app/features/     # Modular Views (Home, Products, Seller, Admin, Cart, Auth)
-│   ├── src/app/core/         # Services, Guards, Interceptors, and Models
-│   └── src/app/shared/       # Reusable UI Components (OfferBanners, ProductCard, Header)
-├── database/                 # SQL Database Scripts & Schema Definitions
-│   ├── schema/               # DDL Tables & Indexes
-│   └── seed/                 # Seed Data SQL Scripts
-└── automation/               # Automated Python API & UI Test Suite
+│   ├── src/app/core/         # Core Services, Auth, Payment & Interceptors
+│   └── src/app/shared/       # Reusable UI Components & Banner Carousels
+├── database/                 # Database Schema & Seed Data
+│   ├── schema/               # DDL SQL Table Definitions
+│   └── seed/                 # Seed Data SQL Scripts (`001_complete_seed.sql`)
+├── automation/               # Python Automated API & UI Test Suites
+├── CONTRIBUTING.md           # Contribution Guidelines & Code of Conduct
+├── LICENSE                   # MIT Open Source License
+├── SECURITY.md               # Vulnerability Reporting & Security Policies
+└── README.md                 # Project Overview & Setup Instructions
 ```
 
 ---
@@ -96,65 +127,59 @@ MerxoSell/
 
 ---
 
-### 1. Backend Setup & Startup
+### 1. Backend Setup
 
 ```bash
-# Navigate to backend folder
+# Navigate to backend directory
 cd backend
 
 # Restore dependencies
 dotnet restore
 
-# Run EF Core database migrations (creates MerxoSellDb)
+# Apply EF Core migrations to build database schema
 dotnet ef database update
 
-# Launch the API server (Runs on http://localhost:5000)
+# Start backend server (runs on http://localhost:5000)
 dotnet run
 ```
 
-#### 💳 Razorpay Configuration Setup
-To enable live/test payment processing via Razorpay, update the `"Razorpay"` section in `backend/appsettings.json`:
-
+#### 💳 Razorpay Configuration
+To configure live or test API keys, update `backend/appsettings.json`:
 ```json
 "Razorpay": {
   "KeyId": "YOUR_RAZORPAY_KEY_ID",
   "KeySecret": "YOUR_RAZORPAY_KEY_SECRET",
-  "AccountEmail": "suthary980@gmail.com",
-  "AccountPassword": "YOUR_RAZORPAY_ACCOUNT_PASSWORD"
+  "AccountEmail": "suthary980@gmail.com"
 }
 ```
-*Note: Replace `YOUR_RAZORPAY_KEY_ID` and `YOUR_RAZORPAY_KEY_SECRET` with your API keys from the [Razorpay Dashboard](https://dashboard.razorpay.com/).*
 
 ---
 
-### 2. Frontend Setup & Startup
+### 2. Frontend Setup
 
 ```bash
-# Navigate to frontend folder
+# Navigate to frontend directory
 cd frontend
 
-# Install node dependencies
+# Install Node modules
 npm install
 
-# Start the Angular development server
+# Launch Angular development server
 npm run dev
 # Or
 npx ng serve --open
 ```
 
-Open your browser at `http://localhost:4200` to access the application.
+Open browser at **`http://localhost:4200`** to access MerxoSell.
 
 ---
 
-## 🧪 Testing
+## 🧪 Running Tests
 
-### Backend Unit & Integration Tests
+### Backend Tests
 ```bash
-# From repo root — run all test projects
+# Run all unit and integration tests
 dotnet test MerxoSell.sln
-
-# Filter for unit tests
-dotnet test backend/MerxoSell.Tests/MerxoSell.Tests.csproj --filter "FullyQualifiedName!~Integration"
 ```
 
 ### Frontend Tests
@@ -163,11 +188,48 @@ cd frontend
 npm test
 ```
 
+### Automated E2E & API Tests
+```bash
+cd automation
+python run_all.py
+```
+
 ---
 
-## 🔒 Default Accounts
+## 🔒 Default Login Credentials
 
 | Role | Email | Password |
 | :--- | :--- | :--- |
 | **Super Admin** | `admin@MerxoSell.com` | `Admin@123` |
 | **Seller** | `seller@MerxoSell.com` | `Seller@123` |
+
+---
+
+## 👥 Contributors
+
+Thanks to the following people who maintain and contribute to **MerxoSell**:
+
+<a href="https://github.com/prakashinfotech/merxo-sell/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=prakashinfotech/merxo-sell" alt="Contributors List" />
+</a>
+
+- **[Yogesh Suthar](https://github.com/Yogeshsuthar980)** — Lead Full-Stack Developer & Maintainer
+- **[Prakash Infotech](https://github.com/prakashinfotech)** — Project Sponsor & Core Engineering Team
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🛡️ Security
+
+For reporting security vulnerabilities, please refer to our [SECURITY.md](SECURITY.md).
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome! Feel free to check [CONTRIBUTING.md](CONTRIBUTING.md).
