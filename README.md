@@ -12,6 +12,8 @@ A modern, high-performance, full-stack e-commerce marketplace platform built wit
 [![Payments](https://img.shields.io/badge/Payments-Razorpay_Gateway-blueviolet?style=flat-square)](https://razorpay.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
+> ℹ️ **Built and maintained by Prakash Software Solutions Pvt. Ltd. (PSSPL). This repository contains no production credentials or default user passwords.**
+
 ---
 
 ## ⚡ The Problem & The Solution
@@ -214,7 +216,7 @@ Thanks to the following people who maintain and contribute to **MerxoSell**:
 </a>
 
 - **[Yogesh Suthar](https://github.com/psspl-yogesh)** — Lead Full-Stack Developer & Maintainer
-- **[Prakash Infotech](https://github.com/prakashinfotech)** — Project Sponsor & Core Engineering Team
+- **[Prakash Software Solutions Pvt. Ltd. (PSSPL)](https://github.com/prakashinfotech)** — Project Sponsor & Core Engineering Team
 
 ---
 
