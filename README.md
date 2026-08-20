@@ -213,7 +213,7 @@ Thanks to the following people who maintain and contribute to **MerxoSell**:
   <img src="https://contrib.rocks/image?repo=prakashinfotech/merxo-sell" alt="Contributors List" />
 </a>
 
-- **[Yogesh Suthar](https://github.com/Yogeshsuthar980)** — Lead Full-Stack Developer & Maintainer
+- **[Yogesh Suthar](https://github.com/psspl-yogesh)** — Lead Full-Stack Developer & Maintainer
 - **[Prakash Infotech](https://github.com/prakashinfotech)** — Project Sponsor & Core Engineering Team
 
 ---
