@@ -16,7 +16,7 @@ The following versions of **MerxoSell** are currently receiving security updates
 We take the security of **MerxoSell** seriously. If you discover a security vulnerability, please report it responsibly so we can resolve it promptly.
 
 ### How to Report
-- **Email**: Send security vulnerability details to `suthary980@gmail.com` or `security@prakashinfotech.com`.
+- **Email**: Send security vulnerability details to `suthary980@gmail.com` or `security@psspl.com`.
 - **Do NOT** open public GitHub issues for security vulnerabilities.
 
 ### What to Include in Your Report
