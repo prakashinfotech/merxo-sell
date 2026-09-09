@@ -1,222 +1,262 @@
-# Customer / Buyer User Manual
+# 🛍️ Merxo E-Commerce — Customer User Guide
 
-Welcome to the **Merxo E-Commerce Platform** Customer Guide. This user manual provides step-by-step instructions on how to set up your account, browse products, manage your shopping cart, complete orders securely, track shipments, and interact with sellers.
-
----
-
-## Table of Contents
-
-1. [Account Management & Security](#1-account-management--security)
-   - [Registering an Account](#registering-an-account)
-   - [Logging In & Security](#logging-in--security)
-   - [Managing Profiles & Delivery Addresses](#managing-profiles--delivery-addresses)
-   - [Password Reset](#password-reset)
-2. [Browsing & Discovering Products](#2-browsing--discovering-products)
-   - [Homepage Overview & Banners](#homepage-overview--banners)
-   - [Category & Subcategory Browsing](#category--subcategory-browsing)
-   - [Search, Filters & Sorting](#search-filters--sorting)
-   - [Currency Switcher](#currency-switcher)
-3. [Product Details & Customization](#3-product-details--customization)
-   - [Viewing Product Information & Stock](#viewing-product-information--stock)
-   - [Selecting Variants (Size & Color)](#selecting-variants-size--color)
-   - [Seller Information](#seller-information)
-   - [Customer Reviews & Ratings](#customer-reviews--ratings)
-4. [Shopping Cart & Wishlist](#4-shopping-cart--wishlist)
-   - [Adding Items to Cart & Wishlist](#adding-items-to-cart--wishlist)
-   - [Managing Quantity & Removing Items](#managing-quantity--removing-items)
-   - [Applying Coupon Codes](#applying-coupon-codes)
-5. [Checkout & Secure Payments](#5-checkout--secure-payments)
-   - [Address Selection & Shipping Calculation](#address-selection--shipping-calculation)
-   - [Payment Options (Razorpay & Cash on Delivery)](#payment-options-razorpay--cash-on-delivery)
-   - [Order Placement & Receipt](#order-placement--receipt)
-6. [Order Tracking & Management](#6-order-tracking--management)
-   - [Viewing Order History](#viewing-order-history)
-   - [Understanding Order Statuses](#understanding-order-statuses)
-   - [Cancelling an Order](#cancelling-an-order)
-   - [Downloading Invoices](#downloading-invoices)
-7. [Submitting Product Reviews](#7-submitting-product-reviews)
-8. [Frequently Asked Questions (FAQ)](#8-frequently-asked-questions-faq)
+> **Welcome to the Merxo E-Commerce Platform!**  
+> This user guide is designed to provide an interactive, visual walkthrough for discovering products, placing orders, completing payments, tracking shipments, and leaving reviews.
 
 ---
 
-## 1. Account Management & Security
+## 🎯 Quick Navigation & Role Overview
 
-### Registering an Account
-1. Click the **Register** button located in the top navigation bar.
-2. Select **Customer Account**.
-3. Enter your **Full Name**, **Email Address**, **Phone Number**, and a strong **Password**.
-4. Click **Create Account**.
-5. Once registered, you will be automatically logged in and redirected to the home page.
+| Attribute | Details |
+| :--- | :--- |
+| **User Role** | Customer / Buyer |
+| **Access URL** | `https://merxo.com` (or local `http://localhost:4200`) |
+| **Supported Devices** | Desktop Web, Tablet, Mobile Browser |
+| **Payment Gateway** | Razorpay (UPI, Credit/Debit Cards, NetBanking) & Cash on Delivery (COD) |
+| **Supported Currencies** | INR (₹), USD ($), EUR (€), GBP (£) |
+
+---
+
+## 🗺️ Customer Journey Overview
+
+```mermaid
+flowchart LR
+    A[🔍 Search / Browse Catalog] --> B[👕 Select Product & Variant]
+    B --> C[🛒 Add to Shopping Cart]
+    C --> D[🎟️ Apply Coupon Code]
+    D --> E[💳 Secure Checkout]
+    E -->|Razorpay / COD| F[📦 Order Placed]
+    F --> G[🚚 Track Shipment Live]
+    G --> H[⭐ Rate & Review Product]
+```
+
+---
+
+## 📌 Table of Contents
+
+1. [Account Setup & Profile Security](#1-account-setup--profile-security)
+2. [Product Discovery & Shopping Experience](#2-product-discovery--shopping-experience)
+3. [Product Detail Page (PDP) & Variants](#3-product-detail-page-pdp--variants)
+4. [Shopping Cart & Coupon Management](#4-shopping-cart--coupon-management)
+5. [Checkout & Secure Payment Flow](#5-checkout--secure-payment-flow)
+6. [Order Tracking & Post-Purchase Services](#6-order-tracking--post-purchase-services)
+7. [Submitting Product Ratings & Reviews](#7-submitting-product-ratings--reviews)
+8. [Customer Support & FAQ](#8-customer-support--faq)
+
+---
+
+## 1. Account Setup & Profile Security
+
+### 📱 Interface Wireframe: Header & User Controls
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 🛍️ MERXO    [ 🔍 Search products, brands, categories...     ] 🔍   [🌐 USD $ ▾]  [🛒 Cart (3)]  [👤 Account ▾] │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│  Electronics  │  Fashion  │  Home & Living  │  Beauty  │  Flash Deals ⚡  │  Coupons 🎟️             │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Step-by-Step Registration & Login
 
 > [!TIP]
-> Use a strong password containing uppercase letters, numbers, and special characters to ensure account safety.
+> **Creating an account unlocks faster 1-click checkout, saved address books, wishlists, and live SMS/Email order updates.**
 
-### Logging In & Security
-1. Click **Sign In** on the top header.
-2. Enter your registered **Email Address** and **Password**.
-3. Click **Login**. Your session will remain secure across tabs.
+1. **Create Account**:
+   - Click **Sign In / Register** in the top navigation header.
+   - Click **Create Customer Account**.
+   - Fill in your **Full Name**, **Email Address**, **Mobile Number**, and **Password**.
+   - Click **Create Account**.
 
-### Managing Profiles & Delivery Addresses
-1. Navigate to **My Account** > **Profile**.
-2. **Personal Info**: Update your name, phone number, or profile picture.
-3. **Address Book**: Click **Add New Address** to save delivery destinations.
-   - Fill in **Full Name**, **Street Address**, **City**, **State**, **Zip/Postal Code**, and **Country**.
-   - Check **Set as Default Address** if you want this address automatically selected during checkout.
+2. **Managing Delivery Addresses**:
+   - Go to **My Account** > **Address Book**.
+   - Click **+ Add New Address**.
+   - Enter your Street, Apartment/Suite, City, State, Postal Code, and Country.
+   - Toggle **Set as Default Shipping Address** for instant 1-click checkout.
 
-### Password Reset
-1. On the login modal, click **Forgot Password?**.
-2. Enter your registered email address to receive reset instructions.
-3. Follow the prompt to set a new secure password.
-
----
-
-## 2. Browsing & Discovering Products
-
-### Homepage Overview & Banners
-- **Hero Banners**: Highlight top promotional campaigns, discount offers, and seasonal sales. Click any banner to view featured products.
-- **Featured Categories**: Quick access to top shopping categories (Electronics, Fashion, Home & Kitchen, Toys, etc.).
-- **Flash Deals & Trending Items**: Dynamic carousels showcasing popular items.
-
-### Category & Subcategory Browsing
-1. Hover over or click the **Categories** menu in the top navigation header.
-2. Click on a main category (e.g., *Electronics*) or subcategory (e.g., *Smartphones*).
-3. The catalog page will display all active, approved items in that category.
-
-### Search, Filters & Sorting
-- **Search Bar**: Type any keyword, brand name, or product title into the global search bar at the top of the page.
-- **Filters (Left Sidebar)**:
-  - **Price Range**: Set minimum and maximum price thresholds.
-  - **Rating**: Filter by minimum star rating (e.g., 4 Stars & Above).
-  - **Category**: Narrow down products by category.
-- **Sorting Dropdown**: Sort products by:
-  - *Newest Arrivals*
-  - *Price: Low to High*
-  - *Price: High to Low*
-  - *Highest Customer Rating*
-
-### Currency Switcher
-- Locate the **Currency Selector** in the header.
-- Choose your preferred currency (e.g., **INR (₹)**, **USD ($)**, **EUR (€)**).
-- All product prices, cart totals, and checkout figures will instantly re-calculate using current live exchange rates.
+3. **Account Recovery**:
+   - Forgot your password? Click **Forgot Password?** on the sign-in modal.
+   - Check your email inbox for a secure verification link to reset your credentials.
 
 ---
 
-## 3. Product Details & Customization
+## 2. Product Discovery & Shopping Experience
 
-### Viewing Product Information & Stock
-Click on any product card to open the **Product Detail Page (PDP)**. Here you will find:
-- High-resolution product image gallery with thumbnail previews.
-- Detailed product title, description, and specifications.
-- **Stock Status**: Indicates *In Stock*, *Low Stock (<5 items left)*, or *Out of Stock*.
+### 🔍 Search, Filter & Sorting Layout
 
-### Selecting Variants (Size & Color)
-- If a product offers options (e.g., T-Shirts with sizes and colors):
-  1. Select your desired **Color** swatch.
-  2. Select your desired **Size** (e.g., S, M, L, XL).
-  3. The displayed price and stock availability will dynamically update based on your selected variant.
+```
+┌───────────────────────────┬────────────────────────────────────────────────────────┐
+│ ⚙️ FILTERS                │  Catalog Products (Showing 1 - 24 of 120)  [Sort By: Popularity ▾]│
+├───────────────────────────┼────────────────────────────────────────────────────────┤
+│ Category                  │  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐ │
+│  ☑️ Electronics (45)      │  │ 🖼️ Product Image │  │ 🖼️ Product Image │  │ 🖼️ Product Image │ │
+│  ☐ Fashion (32)           │  │ Wireless Headset │  │ Smart Watch V2   │  │ Leather Backpack │ │
+│                           │  │ ⭐⭐⭐⭐⭐ (4.8)    │  │ ⭐⭐⭐⭐☆ (4.2)    │  │ ⭐⭐⭐⭐⭐ (5.0)    │ │
+│ Price Range               │  │ $49.99  ~~$69.99~~ │  │ $89.00           │  │ $35.50           │ │
+│  [ $ 10 ] ─── [ $ 200 ]   │  │ [🛒 Add to Cart] │  │ [🛒 Add to Cart] │  │ [🛒 Add to Cart] │ │
+│                           │  └──────────────────┘  └──────────────────┘  └──────────────────┘ │
+│ Rating Filter             │                                                        │
+│  🔴 ⭐ 4.0 & Above        │                                                        │
+└───────────────────────────┴────────────────────────────────────────────────────────┘
+```
 
-### Seller Information
-- Each product detail page displays the **Sold by** seller name and seller rating.
-- Click on the seller name to view their profile, store ratings, and other items sold by them.
+### How to Find Products Quickly
 
-### Customer Reviews & Ratings
-- Scroll down to the **Customer Reviews** section.
-- View overall star rating distribution (1 to 5 stars).
-- Read verified buyer feedback, review titles, full comments, and date of submission.
-
----
-
-## 4. Shopping Cart & Wishlist
-
-### Adding Items to Cart & Wishlist
-- **Add to Cart**: On the product page or product card, click **Add to Cart**. A confirmation toast notification will appear.
-- **Wishlist (Heart Icon)**: Click the **Heart** icon on any product to save it to your personal wishlist for future purchases.
-
-### Managing Quantity & Removing Items
-1. Click the **Cart** icon in the header to open your shopping cart page.
-2. **Adjust Quantity**: Use the `+` and `-` buttons to increase or decrease item quantities.
-3. **Remove Item**: Click the **Trash / Remove** icon next to an item to delete it from your cart.
-4. **Clear Cart**: Click **Clear All** to empty your entire cart.
-
-### Applying Coupon Codes
-1. In the Cart or Checkout page, locate the **Have a Coupon?** field.
-2. Enter a valid promotional coupon code (e.g., `SAVE10` or `WELCOME20`).
-3. Click **Apply**. The discount amount will immediately subtract from your order total.
+* **Global Search Bar**: Type keywords like `"Wireless Headphones"`, `"Nike"`, or SKU numbers into the top search bar.
+* **Category Menu**: Browse hierarchical categories and subcategories from the top header navigation.
+* **Currency Switcher**:
+  - Click the **Currency Selector** dropdown (`USD $`, `INR ₹`, `EUR €`, `GBP £`) in the top right.
+  - All catalog prices, discounts, taxes, and shipping rates immediately adjust using real-time conversion rates.
+* **Flash Sales & Banners**: Click hero promotional banners on the homepage to open curated discount collections.
 
 ---
 
-## 5. Checkout & Secure Payments
+## 3. Product Detail Page (PDP) & Variants
 
-### Address Selection & Shipping Calculation
-1. From the shopping cart, click **Proceed to Checkout**.
-2. Choose a saved address from your Address Book or click **+ Add New Address**.
-3. Select your preferred shipping method. Standard shipping costs will be calculated into your order summary.
+### 🖼️ PDP Interactive Layout
 
-### Payment Options (Razorpay & Cash on Delivery)
-Select your preferred payment mode:
-- **Razorpay Secure Payment Gateway**:
-  - Credit Cards / Debit Cards (Visa, Mastercard, RuPay)
-  - UPI (Google Pay, PhonePe, Paytm, BHIM)
-  - NetBanking across major banks
-  - Digital Wallets
-- **Cash on Delivery (COD)**: Pay cash directly to the courier agent upon receiving your order package.
+```
+┌──────────────────────────────────────────────┬──────────────────────────────────────────────────┐
+│                                              │ 🎧 Wireless Noise-Cancelling Headphones          │
+│   ┌──────────────────────────────────────┐   │ Brand: AudioTech | ⭐ 4.9 (128 Customer Reviews)  │
+│   │                                      │   │ ──────────────────────────────────────────────── │
+│   │                                      │   │ Price: $129.99  ~~$159.99~~  [ 20% OFF ]        │
+│   │        PRIMARY PRODUCT IMAGE         │   │ Stock Status: 🟢 In Stock (Only 4 items left!)    │
+│   │                                      │   │ ──────────────────────────────────────────────── │
+│   │                                      │   │ Select Color:  [⚫ Black] [⚪ Silver] [🔵 Navy]   │
+│   └──────────────────────────────────────┘   │ Select Size:   [ M ]  [ L ]                      │
+│   [📷 Thumbnail 1] [📷 Thumbnail 2] [📷 Thumb 3]│ ──────────────────────────────────────────────── │
+│                                              │ Quantity: [ - ]  1  [ + ]                        │
+│                                              │ [ 🛒 ADD TO CART ]     [ ⚡ BUY NOW ]            │
+│                                              │ [ ❤️ Add to Wishlist ]                           │
+└───────────────────────────┴──────────────────────────────────────────────────┘
+```
 
-### Order Placement & Receipt
-1. Review your order items, delivery address, and final payment amount.
+### Choosing Variants & Inspecting Stock
+1. **Color Selection**: Click a color swatch to update product images and variant-specific pricing.
+2. **Size Selection**: Select your size (e.g., *Small, Medium, Large*).
+3. **Stock Alerts**:
+   - 🟢 **In Stock**: Available for immediate dispatch.
+   - 🟡 **Low Stock (< 5 items)**: High demand item; order soon.
+   - 🔴 **Out of Stock**: Item unavailable; add to wishlist to receive back-in-stock alerts.
+
+---
+
+## 4. Shopping Cart & Coupon Management
+
+```
+┌──────────────────────────────────────────────────────────┬──────────────────────────────────────┐
+│ Shopping Cart (2 Items)                                  │ 🧾 Order Summary                     │
+├──────────────────────────────────────────────────────────┼──────────────────────────────────────┤
+│ 📦 Wireless Headphones (Color: Black, Size: M)           │ Subtotal:                   $129.99 │
+│    Price: $129.99  |  Qty: [ - ] 1 [ + ]                 │ Coupon Discount (SAVE20):   -$20.00 │
+│    [🗑️ Remove]                                           │ Estimated Shipping:           $5.00 │
+│                                                          │ Estimated Tax (5%):           $5.50 │
+│ 🎟️ HAVE A COUPON CODE?                                   │ ──────────────────────────────────── │
+│    [ SAVE20               ]  [ 🎟️ APPLY COUPON ]         │ Total Amount:               $120.49 │
+│    ✅ Coupon 'SAVE20' Applied ($20.00 Off)               │                                      │
+│                                                          │ [ 🔒 PROCEED TO CHECKOUT ]           │
+└──────────────────────────────────────────────────────────┴──────────────────────────────────────┘
+```
+
+### How to Apply Promotional Coupons
+1. Go to your **Shopping Cart** page.
+2. Type your promo code (e.g., `WELCOME10` or `SUMMER20`) into the **Have a Coupon?** input field.
+3. Click **Apply Coupon**.
+4. The discount amount will be subtracted from your order subtotal automatically.
+
+---
+
+## 5. Checkout & Secure Payment Flow
+
+### Step-by-Step Checkout
+
+```
+[ 1. Select Address ] ───> [ 2. Select Payment Method ] ───> [ 3. Review & Place Order ]
+```
+
+> [!IMPORTANT]
+> Merxo utilizes **Razorpay Payment Gateway** with 256-bit SSL encryption to ensure 100% secure payment transactions.
+
+#### Available Payment Methods
+- 💳 **Credit / Debit Cards**: Visa, Mastercard, RuPay, American Express.
+- 📱 **UPI Payments**: Google Pay, PhonePe, Paytm, BHIM UPI ID.
+- 🏦 **NetBanking**: Direct payment from 50+ supported major banks.
+- 💵 **Cash on Delivery (COD)**: Pay cash directly to the delivery agent upon receiving your package.
+
+#### Completing Payment via Razorpay
+1. Select **Razorpay Secure Payment**.
 2. Click **Place Order & Pay**.
-3. For Razorpay payments, complete the OTP / bank verification modal.
-4. Upon successful payment, you will see the **Order Placed Successfully** screen with your unique **Order ID** and order breakdown. An email confirmation is also dispatched.
+3. The secure Razorpay modal opens:
+   - Select **UPI / Card / NetBanking**.
+   - Enter OTP / Bank authentication.
+4. Upon successful payment verification, you will be automatically redirected to the **Order Confirmation Screen**.
 
 ---
 
-## 6. Order Tracking & Management
+## 6. Order Tracking & Post-Purchase Services
 
-### Viewing Order History
-1. Click **My Account** > **Orders**.
-2. View a list of all your past and active orders with Order ID, Date, Total Amount, and current status.
+### 🚚 Order Status Lifecycle
 
-### Understanding Order Statuses
-| Order Status | Description |
+```
+┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐
+│  🟡 Pending  │ ───> │ 🔵 Processing│ ───> │  🚚 Shipped  │ ───> │ 📦 Out for   │ ───> │ ✅ Delivered │
+│ (Order Recd) │      │ (Pack & Prep)│      │(In Transit)  │      │  Delivery    │      │ (Completed)  │
+└──────────────┘      └──────────────┘      └──────────────┘      └──────────────┘      └──────────────┘
+```
+
+| Order Status Badge | Meaning & Next Step |
 | :--- | :--- |
-| **Pending** | Order placed; awaiting payment confirmation or seller acceptance. |
-| **Processing** | Seller is preparing, packing, and verifying items for shipment. |
-| **Shipped** | Package handed over to delivery courier with tracking number. |
-| **Delivered** | Order successfully delivered to your address. |
-| **Cancelled** | Order cancelled by user or seller. Refund initiated if prepaid. |
+| 🟡 **Pending** | Order received; awaiting seller confirmation or payment capture. |
+| 🔵 **Processing** | Seller is packing items and assigning package courier. |
+| 🚚 **Shipped** | Package handed to courier; tracking number assigned. |
+| 📦 **Out for Delivery** | Courier agent is delivering package to your doorstep today. |
+| ✅ **Delivered** | Order delivered successfully. You can now leave a product review! |
+| 🔴 **Cancelled** | Order cancelled. Prepaid orders are refunded within 5-7 business days. |
 
-### Cancelling an Order
-1. Go to **My Orders** and locate the order you wish to cancel.
-2. If the order status is **Pending** or **Processing**, click **Cancel Order**.
-3. Select a reason for cancellation and confirm.
-4. Prepaid orders via Razorpay will be refunded to your original payment method within 5–7 business days.
-
-### Downloading Invoices
-1. Open the specific order details page under **My Orders**.
-2. Click **Download Invoice (PDF)** to save an official invoice for accounting or tax purposes.
+### How to Track & Manage Orders
+1. Navigate to **My Account** > **Orders** (`/orders`).
+2. Locate your Order ID (e.g., `#ORD-98421`).
+3. Click **Track Package** to view live courier status updates and AWB tracking numbers.
+4. **Download Invoice**: Click **📄 Download PDF Invoice** for accounting/warranty records.
+5. **Cancel Order**: Click **Cancel Order** (Available only while status is *Pending* or *Processing*).
 
 ---
 
-## 7. Submitting Product Reviews
+## 7. Submitting Product Ratings & Reviews
 
-Share your experience to help other shoppers:
+> [!NOTE]
+> Only verified buyers who have received a **Delivered** order can submit product reviews.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ ✍️ Write a Customer Review for: Wireless Noise-Cancelling Headphones                            │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Overall Rating:   ⭐⭐⭐⭐⭐ (5 / 5 Stars)                                                         │
+│ Review Title:     [ Outstanding battery life and incredible sound quality!                    ] │
+│ Detailed Review:  [ I purchased these headphones two weeks ago. Battery lasts over 30 hours... ] │
+│                   [                                                                           ] │
+│                                                                        [ 📤 SUBMIT REVIEW ]     │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
 1. Go to **My Orders** > **Delivered Orders**.
-2. Click **Write a Review** next to a delivered item.
-3. Select a **Star Rating (1 to 5)**.
-4. Type a helpful **Review Title** and detailed **Review Comment**.
-5. Click **Submit Review**. Once approved by moderation, your review will be published live on the product page.
+2. Click **Write a Review** next to the delivered product.
+3. Select your **Star Rating (1 to 5)**.
+4. Type your **Review Title** and detailed feedback.
+5. Click **Submit Review**. Once verified by moderation, your review will be published on the product page.
 
 ---
 
-## 8. Frequently Asked Questions (FAQ)
+## 8. Customer Support & FAQ
 
-**Q: Can I change my delivery address after placing an order?**  
-A: If your order is still in **Pending** status, contact customer support or cancel and reorder with the correct address. Once status moves to **Shipped**, address changes are not possible.
+> [!TIP]
+> Need immediate assistance? Contact our 24/7 support line at `support@merxo.com` or live chat in the lower right corner of the website.
 
-**Q: How do refunds work for cancelled orders?**  
-A: For prepaid Razorpay orders, refunds are automatically triggered back to your bank account/card within 5–7 working days.
+**Q: How long does refund processing take for cancelled orders?**  
+A: For prepaid Razorpay orders (UPI, Card, NetBanking), refunds are credited back to your original source account within **5 to 7 business days**.
 
-**Q: What if I receive a damaged or wrong product?**  
-A: Navigate to **My Orders**, select the order, click **Report Issue / Request Return**, and submit photos of the item received.
+**Q: What if I receive a wrong or damaged item?**  
+A: Go to **My Orders** > **Order Details** > **Request Return / Replacement**. Upload a clear photo of the delivered item and box label within 7 days of delivery.
 
 ---
 

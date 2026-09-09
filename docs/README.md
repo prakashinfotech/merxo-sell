@@ -1,48 +1,73 @@
-# Merxo E-Commerce Documentation Hub
+# 📚 Merxo E-Commerce Platform — Documentation Hub
 
-Welcome to the official documentation directory for the **Merxo E-Commerce Platform** (Temu-Clone). This central directory contains complete, role-specific user manuals for platform shoppers, sellers, and administrators.
-
----
-
-## 📚 User Manual Directory
-
-Select the appropriate user manual based on your platform role:
-
-| Role | User Manual Document | Quick Description |
-| :--- | :--- | :--- |
-| 🛒 **Customer / Buyer** | [**Customer User Manual**](USER_MANUAL.md) | Guide for account creation, product search, cart management, Razorpay & COD payments, coupon redemption, order tracking, and reviews. |
-| 🏬 **Seller** | [**Seller Operations Manual**](SELLER_MANUAL.md) | Guide for seller registration, dashboard analytics, listing products & variants, inventory management, product moderation workflow, and order fulfillment. |
-| 🛡️ **System Administrator** | [**Admin & Moderation Manual**](ADMIN_MANUAL.md) | Guide for executive dashboard KPIs, user/seller onboarding approvals, catalog & review moderation, category & banner management, coupons, and currency configuration. |
+> **Welcome to the Central Documentation Hub for Merxo E-Commerce Platform (Temu-Clone).**  
+> This directory houses comprehensive, role-tailored visual user manuals, interactive workflows, screen wireframes, and operational guidelines.
 
 ---
 
-## 🚀 Quick Navigation & Key Features
+## 🗺️ Master User Manual Directory
 
-### For Customers (Buyers)
-- **Account & Profile**: [Register & Login](USER_MANUAL.md#1-account-management--security) \| [Address Book](USER_MANUAL.md#managing-profiles--delivery-addresses)
-- **Shopping**: [Category Search & Filters](USER_MANUAL.md#2-browsing--discovering-products) \| [Currency Switcher](USER_MANUAL.md#currency-switcher)
-- **Cart & Checkout**: [Coupons](USER_MANUAL.md#applying-coupon-codes) \| [Razorpay Payments](USER_MANUAL.md#5-checkout--secure-payments) \| [Order Tracking](USER_MANUAL.md#6-order-tracking--management)
+Select your target platform role below to access the complete visual user guide:
 
-### For Sellers
-- **Store Setup**: [Registration & Profile](SELLER_MANUAL.md#1-seller-onboarding--registration) \| [Payout Setup](SELLER_MANUAL.md#payout--financial-settings)
-- **Catalog Management**: [Add New Product](SELLER_MANUAL.md#creating-new-product-listings) \| [Variants (Color/Size)](SELLER_MANUAL.md#adding-product-variants-colors--sizes) \| [Moderation Flow](SELLER_MANUAL.md#4-product-moderation--approval-workflow)
-- **Orders & Shipping**: [Order Processing](SELLER_MANUAL.md#5-order-processing--fulfillment) \| [Courier Tracking Numbers](SELLER_MANUAL.md#assigning-courier-tracking-numbers)
-
-### For Administrators
-- **Executive Overview**: [Platform Analytics & GMV](ADMIN_MANUAL.md#2-executive-admin-dashboard)
-- **Approvals & Moderation**: [Seller Onboarding](ADMIN_MANUAL.md#4-seller-moderation--onboarding) \| [Product Queue](ADMIN_MANUAL.md#5-product-catalog--moderation-queue) \| [Review Moderation](ADMIN_MANUAL.md#10-review-moderation)
-- **Platform Management**: [Categories & Banners](ADMIN_MANUAL.md#6-category--banner-management) \| [Coupons](ADMIN_MANUAL.md#7-coupons--promotions) \| [Currency Exchange](ADMIN_MANUAL.md#8-currency--exchange-rates)
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 🛒 CUSTOMER USER GUIDE                                                                          │
+│ Complete manual for account setup, catalog browsing, currency conversion, cart management,     │
+│ Razorpay & COD payments, coupon redemption, live order tracking, and product reviews.          │
+│ ➔ Open Document: [Customer User Guide](USER_MANUAL.md)                                           │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 🏬 SELLER OPERATIONS & STORE MANAGER GUIDE                                                      │
+│ Comprehensive manual for seller onboarding, payout configuration, dashboard analytics,          │
+│ listing products with color/size variants, moderation approval workflow, and order shipping.    │
+│ ➔ Open Document: [Seller Operations Manual](SELLER_MANUAL.md)                                  │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 🛡️ SYSTEM ADMINISTRATOR & MODERATION MANUAL                                                     │
+│ Enterprise manual for executive GMV dashboard, seller verification queue, catalog moderation,    │
+│ category hierarchy, homepage banners, promotional coupons, currency rates, and Razorpay logs. │
+│ ➔ Open Document: [Admin Control Panel Manual](ADMIN_MANUAL.md)                                  │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 🛠️ System Architecture Stack
+## ⚡ Role-Based Quick Reference Cards
 
-- **Frontend**: Angular, RxJS, TypeScript, SCSS, HTML5
+### 🛒 Customer Quick Reference
+- 📱 **Account Setup**: [Register & Address Book](USER_MANUAL.md#1-account-setup--profile-security)
+- 🔍 **Discovery & Search**: [Filters & Currency Switcher](USER_MANUAL.md#2-product-discovery--shopping-experience)
+- 🛒 **Cart & Payments**: [Razorpay & COD Payments](USER_MANUAL.md#5-checkout--secure-payment-flow)
+- 🚚 **Order Management**: [Live Shipment Tracking](USER_MANUAL.md#6-order-tracking--post-purchase-services)
+
+### 🏬 Seller Quick Reference
+- 🚀 **Store Setup**: [Registration & Bank Details](SELLER_MANUAL.md#1-seller-registration--store-setup)
+- 📊 **Analytics**: [Dashboard & Low Stock Alerts](SELLER_MANUAL.md#2-seller-dashboard--revenue-analytics)
+- 📦 **Products**: [Color/Size Variant Matrix](SELLER_MANUAL.md#3-product-catalog-management--variant-matrix)
+- 🚚 **Fulfillment**: [Order Shipping & Tracking Numbers](SELLER_MANUAL.md#5-order-fulfillment--courier-logistics)
+
+### 🛡️ Admin Quick Reference
+- 📊 **Executive Overview**: [Platform GMV & Revenue Analytics](ADMIN_MANUAL.md#2-executive-admin-dashboard)
+- 🏬 **Seller Approvals**: [Application Verification Queue](ADMIN_MANUAL.md#4-seller-onboarding--moderation-queue)
+- 📦 **Moderation**: [Product Approval Queue](ADMIN_MANUAL.md#5-product-catalog-moderation)
+- 🎟️ **Promotions & Rates**: [Coupons Engine](ADMIN_MANUAL.md#7-coupons--promotional-discount-engine) \| [Exchange Rates](ADMIN_MANUAL.md#8-multi-currency--live-exchange-rates)
+
+---
+
+## 🏗️ Platform Technology Stack
+
+```mermaid
+graph TD
+    User([👤 Shopper / Seller / Admin]) -->|HTTP / REST API| Angular[🅰️ Angular Frontend]
+    Angular -->|JWT Auth & DTOs| Backend[⚙️ ASP.NET Core Web API]
+    Backend -->|Entity Framework Core| Database[(🗄️ SQL Server Database)]
+    Backend -->|REST Gateway API| Razorpay[💳 Razorpay Payment Gateway]
+```
+
+- **Frontend**: Angular, RxJS, TypeScript, SCSS, Responsive HTML5
 - **Backend**: ASP.NET Core Web API, C#, Entity Framework Core
 - **Database**: SQL Server
-- **Payments Integration**: Razorpay Payment Gateway (Cards, UPI, NetBanking, COD)
-- **Authentication**: JWT Bearer Tokens with Role-Based Access Control (`Buyer`, `Seller`, `Admin`)
+- **Payment Processing**: Razorpay (Credit/Debit Cards, UPI, NetBanking, COD)
+- **Security**: JWT Bearer Tokens, Role Guards (`BuyerGuard`, `SellerGuard`, `AdminGuard`)
 
 ---
 
-*For technical architecture or codebase contributions, refer to the root [README.md](../README.md) and [CONTRIBUTING.md](../CONTRIBUTING.md).*
+*For codebase repository overview and setup instructions, refer to the root [README.md](../README.md).*

@@ -1,209 +1,248 @@
-# System Administrator & Moderation User Manual
+# 🛡️ Merxo Admin Control Panel — Governance & Management Manual
 
-Welcome to the **Merxo E-Commerce Platform** Administrative Guide. This manual provides super-user instructions for platform control, seller onboarding, product moderation, financial oversight, promotional campaigns, and system settings.
+> **Welcome to the Merxo Platform Administration Manual!**  
+> This document provides super-user instructions for managing system security, user permissions, seller application approvals, catalog moderation, coupon campaigns, multi-currency settings, and financial oversight.
 
 ---
 
-## Table of Contents
+## 🎯 Quick Navigation & Role Overview
 
-1. [Administrator Authentication & Access Control](#1-administrator-authentication--access-control)
+| Attribute | Details |
+| :--- | :--- |
+| **User Role** | System Administrator / Platform Moderator |
+| **Admin Portal URL** | `https://merxo.com/admin` (or local `http://localhost:4200/admin`) |
+| **Security Guard** | `AdminGuard` (JWT Bearer Token with `Admin` claim) |
+| **Scope of Authority** | Global User Control, Product Takedowns, Seller Approvals, Financial Reconciliation |
+
+---
+
+## 🗺️ Administrative Governance Workflow
+
+```mermaid
+flowchart TD
+    A[🛡️ Admin Authentication] --> B[📊 Executive KPI Dashboard]
+    B --> C[👥 User & Role Administration]
+    B --> D[🏬 Seller Application Queue]
+    B --> E[📦 Product Moderation Queue]
+    B --> F[🎟️ Coupons & Banners Engine]
+    B --> G[🌐 Multi-Currency & Exchange Rates]
+    B --> H[💳 Order & Payment Reconciliation]
+
+    D -->|Verify Business & Bank| D1[🟢 Approve Seller / 🔴 Reject Seller]
+    E -->|Quality & Policy Check| E1[🟢 Approve & Publish / 🔴 Reject Listing]
+```
+
+---
+
+## 📌 Table of Contents
+
+1. [Admin Authentication & Access Control](#1-admin-authentication--access-control)
 2. [Executive Admin Dashboard](#2-executive-admin-dashboard)
-   - [Platform KPI Analytics](#platform-kpi-analytics)
-   - [Revenue & Commission Overview](#revenue--commission-overview)
-3. [User & Customer Management](#3-user--customer-management)
-   - [User Directory & Role Assignments](#user-directory--role-assignments)
-   - [Account Suspension & Reactivation](#account-suspension--reactivation)
-4. [Seller Moderation & Onboarding](#4-seller-moderation--onboarding)
-   - [Evaluating Seller Applications](#evaluating-seller-applications)
-   - [Approval / Rejection Workflow](#approval--rejection-workflow)
-5. [Product Catalog & Moderation Queue](#5-product-catalog--moderation-queue)
-   - [Reviewing Submitted Listings](#reviewing-submitted-listings)
-   - [Approving vs Rejecting Products](#approving-vs-rejecting-products)
-   - [Takedown of Policy Violations](#takedown-of-policy-violations)
-6. [Category & Banner Management](#6-category--banner-management)
-   - [Managing Categories & Subcategories](#managing-categories--subcategories)
-   - [Homepage Banner Campaigns](#homepage-banner-campaigns)
-7. [Coupons & Promotions](#7-coupons--promotions)
-   - [Creating Platform Coupon Codes](#creating-platform-coupon-codes)
-   - [Usage Limits & History](#usage-limits--history)
-8. [Currency & Exchange Rates](#8-currency--exchange-rates)
-9. [Global Order Oversight & Payments](#9-global-order-oversight--payments)
-   - [Platform Order Audit](#platform-order-audit)
-   - [Razorpay Payment Reconciliation](#razorpay-payment-reconciliation)
-10. [Review Moderation](#10-review-moderation)
-11. [Platform Security & Best Practices](#11-platform-security--best-practices)
+3. [User & Customer Directory Management](#3-user--customer-directory-management)
+4. [Seller Onboarding & Moderation Queue](#4-seller-onboarding--moderation-queue)
+5. [Product Catalog Moderation](#5-product-catalog-moderation)
+6. [Category Hierarchy & Banner Campaigns](#6-category-hierarchy--banner-campaigns)
+7. [Coupons & Promotional Discount Engine](#7-coupons--promotional-discount-engine)
+8. [Multi-Currency & Live Exchange Rates](#8-multi-currency--live-exchange-rates)
+9. [Platform Order Oversight & Razorpay Reconciliation](#9-platform-order-oversight--razorpay-reconciliation)
+10. [Content & Review Moderation](#10-content--review-moderation)
 
 ---
 
-## 1. Administrator Authentication & Access Control
+## 1. Admin Authentication & Access Control
 
-- **Admin Route**: `/admin` (Protected by `AdminGuard`).
-- Access is restricted exclusively to authorized accounts with the `Admin` role.
-- **Security Check**: Attempting to access `/admin` without admin privileges will automatically redirect to the login page or a 403 Forbidden page.
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 🛡️ MERXO ADMINISTRATIVE CONTROL PANEL                                                          │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Admin Email:     [ admin@merxo.com                            ]                                 │
+│ Admin Password:  [ •••••••••••••••••••••                      ]                                 │
+│ Security Token:  [ 2FA Authenticator Code                     ]                                 │
+│                                                                                                 │
+│                                                   [ 🔒 SECURE ADMIN LOGIN ]                     │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+> [!CAUTION]
+> The Admin Portal URL (`/admin`) is restricted exclusively to authenticated users with **Admin permissions**. Unauthorized attempts are logged and blocked automatically by `AdminGuard`.
 
 ---
 
 ## 2. Executive Admin Dashboard
 
-Navigate to `/admin/dashboard` to access real-time enterprise metrics:
+### 📊 System Executive Dashboard Wireframe
 
 ```
-┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
-│    Total GMV     │  │   Active Users   │  │  Active Sellers  │  │ Live Products    │
-│  ₹ 1,245,000.00  │  │      4,820       │  │       312        │  │     14,500       │
-└──────────────────┘  └──────────────────┘  └──────────────────┘  └──────────────────┘
-```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 📊 EXECUTIVE PLATFORM CONTROL CENTER                                      [ 🟢 System Status: OK ]│
+├──────────────────────────┬──────────────────────────┬──────────────────────────┬────────────────┤
+│ 💎 GROSS GMV             │ 👥 TOTAL USERS           │ 🏬 ACTIVE SELLERS        │ 📦 LIVE ITEMS   │
+│ $ 1,482,900.00           │ 14,250 Customers         │ 312 Approved Stores      │ 24,800 Items   │
+│ 📈 +18.5% YoY            │ 📈 +340 this week        │ 🟡 5 Pending Applications│ 🟡 14 Moderation│
+└──────────────────────────┴──────────────────────────┴──────────────────────────┴────────────────┘
 
-### Platform KPI Analytics
-- **Gross Merchandise Value (GMV)**: Total monetary value of orders processed across the entire marketplace.
-- **Net Platform Revenue**: Total platform commission collected from seller sales.
-- **User Growth Trends**: Daily/Monthly registration volume for Customers and Sellers.
-- **System Health**: Active API services, database status, and order processing rates.
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 📉 REAL-TIME PLATFORM METRICS & TRANSACTION VOLUME                                              │
+│  Orders/Min ┤       ╭─╮           ╭──╮                                                          │
+│        40   ┤      ╱   ╰╮        ╱    ╰╮   ╭──╮                                                 │
+│        20   ┤  ╭──╯     ╰───────╯      ╰──╯    ╰───                                             │
+│         0   └─┴─────────┴─────────┴─────────┴──────┴─────────────────────────────────────────  │
+│              08:00     10:00     12:00     14:00   16:00                                        │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 3. User & Customer Management
+## 3. User & Customer Directory Management
 
-### User Directory & Role Assignments
-1. Navigate to `/admin/users` or `/admin/customers`.
-2. View a comprehensive user directory containing:
-   - User ID, Name, Email, Phone, Role (`Buyer`, `Seller`, `Admin`), Registration Date, and Account Status (`Active` / `Disabled`).
-3. **Filter**: Filter users by Role or Account Status.
-4. **Edit Role**: Change a user's permission level (e.g., promote a User to Seller or Admin).
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 👥 USER MANAGEMENT DIRECTORY                                      [ 🔍 Search email/name...   ] │
+├──────┬────────────────────────┬─────────────────────┬──────────────┬──────────────┬─────────────┤
+│ ID   │ Name                   │ Email               │ Role         │ Status       │ Action      │
+├──────┼────────────────────────┼─────────────────────┼──────────────┼──────────────┼─────────────┤
+│ #101 │ Sarah Jenkins          │ sarah@gmail.com     │ 🛒 Buyer     │ 🟢 Active    │ [ ⚙️ Edit ] │
+│ #102 │ Apex Electronics       │ seller@apex.com     │ 🏬 Seller    │ 🟢 Active    │ [ ⚙️ Edit ] │
+│ #103 │ Robert Vance           │ rvance@outlook.com  │ 🛒 Buyer     │ 🔴 Suspended │ [ 🔓 Enable]│
+└──────┴────────────────────────┴─────────────────────┴──────────────┴──────────────┴─────────────┘
+```
 
-### Account Suspension & Reactivation
-1. Search for the target user email or username.
-2. Toggle the **Account Status** switch to **Disabled / Suspended**.
-3. Suspended users will immediately lose access to place orders or log into the Seller/Admin portals.
-4. To restore access, toggle status back to **Active**.
+### Key Administrative User Actions
+- **Filter Users by Role**: View Buyers, Sellers, or Admins.
+- **Account Suspension**: Disable accounts violating marketplace safety policies.
+- **Promote / Change Role**: Grant administrative or moderation rights to trusted staff accounts.
 
 ---
 
-## 4. Seller Moderation & Onboarding
+## 4. Seller Onboarding & Moderation Queue
 
-### Evaluating Seller Applications
+### 🏬 Seller Application Review Modal
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 🏬 SELLER APPLICATION REVIEW: Apex Electronics Ltd                                               │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Owner Name:       John Doe                   Contact Phone:     +1 (555) 234-5678               │
+│ Business Tax ID:  TAX-98421098               Bank Account:      **** **** 8842 (Verified)     │
+│ Address:          100 Market St, Suite 400, San Francisco, CA 94105                            │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                 │
+│  [ 🔴 REJECT WITH REASON ]                            [ 🟢 APPROVE & AUTHORIZE SELLER ]          │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
 1. Navigate to `/admin/sellers`.
-2. Select the **Pending Applications** tab to view new seller requests.
-3. Inspect seller application details:
-   - Business Legal Name & GST/Tax Number
-   - Contact Person Details
-   - Physical Address & Warehouse Information
-   - Payout Bank Details
-
-### Approval / Rejection Workflow
-- **To Approve**: Click **Approve Seller**. The seller status changes to `Active`, sending an automated welcome email with login authorization.
-- **To Reject**: Click **Reject Application**. Enter a clear **Rejection Reason** (e.g., *Invalid business documentation*). The applicant is notified to re-apply with correct documentation.
+2. Inspect pending seller verification documents, legal business registration, and bank details.
+3. Click **Approve & Authorize Seller** to send welcome credentials, or **Reject** with specific rejection feedback.
 
 ---
 
-## 5. Product Catalog & Moderation Queue
+## 5. Product Catalog Moderation
 
-Maintain store-wide quality standards and prevent fraudulent or inappropriate listings.
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 📦 PRODUCT MODERATION QUEUE (14 Items Pending Review)                                           │
+├──────┬───────────────────────────────┬───────────────────┬──────────┬───────────────────────────┤
+│ ID   │ Title & SKU                   │ Seller Name       │ Price    │ Moderation Action         │
+├──────┼───────────────────────────────┼───────────────────┼──────────┼───────────────────────────┤
+│ #401 │ Noise Cancelling Headset      │ Apex Electronics  │ $129.99  │ [ 🔍 Review ] [ 🟢 Approve]│
+│ #402 │ Smart Fitness Watch V2        │ TechWorld Store   │ $89.00   │ [ 🔍 Review ] [ 🔴 Reject ]│
+└──────┴───────────────────────────────┴───────────────────┴──────────┴───────────────────────────┘
+```
 
-### Reviewing Submitted Listings
-1. Navigate to `/admin/moderation/products`.
-2. The **Product Moderation Queue** lists all products submitted by sellers in `Pending Approval` status.
-3. Click **Review** on any product to view images, descriptions, pricing, attributes, and seller information.
-
-### Approving vs Rejecting Products
-- **Approve Listing**: Click **Approve & Publish**. The product status updates to `Approved` and becomes immediately visible to customers on the site.
-- **Reject Listing**: Click **Reject**. Select or type a specific rejection reason:
-  - *Copyright / Trademark infringement*
-  - *Inappropriate / Low-quality images*
-  - *Incorrect category assignment*
-  - *Prohibited item policy violation*
-- The rejection note is delivered to the seller's portal for remediation.
-
-### Takedown of Policy Violations
-- To unpublish an active live product:
-  1. Go to `/admin/products`.
-  2. Search for the product by ID or title.
-  3. Click **Unpublish / Delist**. The item is removed from search results.
+### Product Quality & Compliance Checklist
+- [x] Primary image is high quality and free of spam watermarks.
+- [x] Product description is accurate and categorized correctly.
+- [x] Pricing and stock levels comply with marketplace limits.
+- [x] No trademark infringement or counterfeit brand policy violations.
 
 ---
 
-## 6. Category & Banner Management
+## 6. Category Hierarchy & Banner Campaigns
 
-### Managing Categories & Subcategories
-1. Navigate to `/admin/categories`.
-2. **Add Main Category**: Click **+ Add Category**, enter Category Name, Slug, Icon Class, and Display Order.
-3. **Add Subcategory**: Select a parent category, click **+ Add Subcategory**, and enter subcategory details.
-4. **Edit / Delete**: Update category icons or delete obsolete categories.
+### 🏷️ Category & Homepage Banner Management Layout
 
-### Homepage Banner Campaigns
-1. Navigate to `/admin/banners`.
-2. Click **+ Create Banner**.
-3. Provide:
-   - **Banner Title**: e.g., *Summer Electronics Super Sale*
-   - **Image URL / Upload**: High-resolution wide hero banner image.
-   - **Target Link URL**: Target category or product link (e.g., `/products?category=electronics`).
-   - **Display Order**: Sequence on the home carousel (1, 2, 3...).
-   - **Status**: Set to `Active` or `Inactive`.
+```
+┌──────────────────────────────────────────────┬──────────────────────────────────────────────────┐
+│ 🏷️ CATEGORY MANAGEMENT                       │ 🖼️ HOMEPAGE PROMOTIONAL BANNERS                  │
+├──────────────────────────────────────────────┼──────────────────────────────────────────────────┤
+│ 📁 Electronics                               │ 1. [🖼️ Hero Summer Sale Banner.jpg]              │
+│    ├── 📂 Audio & Headphones                 │    Link: `/products?category=electronics`       │
+│    └── 📂 Smartphones & Tablets              │    Status: 🟢 Active | Order: 1                  │
+│ 📁 Fashion                                   │ 2. [🖼️ Flash Deals Promotion.jpg]                 │
+│    ├── 📂 Men's Apparel                      │    Link: `/coupons`                              │
+│    └── 📂 Women's Apparel                    │    Status: 🟢 Active | Order: 2                  │
+│                                              │                                                  │
+│ [ ➕ Add Category ] [ ➕ Add Subcategory ]   │ [ ➕ Create New Banner Campaign ]                │
+└──────────────────────────────────────────────┴──────────────────────────────────────────────────┘
+```
 
 ---
 
-## 7. Coupons & Promotions
+## 7. Coupons & Promotional Discount Engine
 
-### Creating Platform Coupon Codes
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 🎟️ PLATFORM COUPON MANAGEMENT                                                                    │
+├────────────┬──────────────┬───────────────┬────────────────┬──────────────┬─────────────────────┤
+│ Code       │ Type         │ Value         │ Min Spend      │ Expiry       │ Usage Count         │
+├────────────┼──────────────┼───────────────┼────────────────┼──────────────┼─────────────────────┤
+│ WELCOME10  │ Percentage   │ 10% OFF       │ $ 20.00        │ Dec 31, 2026 │ 1,240 / 5,000 Red.  │
+│ SAVE50     │ Flat Discount│ $ 50.00 OFF   │ $ 250.00       │ Nov 15, 2026 │   412 / 1,000 Red.  │
+└────────────┴──────────────┴───────────────┴────────────────┴──────────────┴─────────────────────┤
+│ [ ➕ CREATE NEW PROMOTIONAL COUPON ]                                                             │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
 1. Navigate to `/admin/coupons`.
-2. Click **+ Create Coupon**.
-3. Fill in coupon parameters:
-   - **Coupon Code**: Unique string (e.g., `SUMMER20`).
-   - **Discount Type**: `Percentage` (e.g., 20%) or `Flat Amount` (e.g., ₹500 off).
-   - **Discount Value**: Amount or percentage value.
-   - **Minimum Order Amount**: Minimum cart value required to redeem coupon.
-   - **Maximum Discount Limit**: Maximum cap for percentage-based discounts.
-   - **Expiry Date**: Date and time when coupon expires.
-   - **Total Usage Limit**: Maximum global redemptions across all users.
-
-### Usage Limits & History
-- Click **View Usage Logs** on any coupon to see which customers redeemed the code, associated order IDs, and total discount value disbursed.
+2. Configure **Coupon Code**, **Discount Type** (Percentage vs Flat Amount), **Minimum Order Threshold**, **Max Discount Limit**, and **Expiration Date**.
 
 ---
 
-## 8. Currency & Exchange Rates
+## 8. Multi-Currency & Live Exchange Rates
 
-1. Navigate to `/admin/currencies`.
-2. **Supported Currencies**: View active currencies (e.g., INR, USD, EUR, GBP).
-3. **Add Currency**: Enter Currency Code (e.g., `USD`), Symbol (`$`), and Exchange Rate relative to base currency.
-4. **Update Rates**: Update exchange rates manually or enable automated rate syncing to ensure accurate checkout pricing across international currencies.
-
----
-
-## 9. Global Order Oversight & Payments
-
-### Platform Order Audit
-1. Navigate to `/admin/orders`.
-2. Search across all platform orders by **Order ID**, **Customer Name**, **Seller Name**, or **Date Range**.
-3. View full item breakdowns, shipping addresses, fulfillment status, and payment logs.
-4. **Status Override**: Administrative power to override order status in customer dispute scenarios.
-
-### Razorpay Payment Reconciliation
-- Go to `/admin/orders` or Razorpay Settings.
-- Verify payment gateway transaction status against Razorpay Payment IDs (`pay_...`).
-- Inspect payment statuses (`Captured`, `Failed`, `Refunded`).
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 🌐 CURRENCY & EXCHANGE RATE CONFIGURATION                                                       │
+├──────────────┬────────┬──────────────┬───────────────────┬──────────────────────────────────────┤
+│ Currency     │ Code   │ Symbol       │ Rate (Base USD)   │ Action                               │
+├──────────────┼────────┼──────────────┼───────────────────┼──────────────────────────────────────┤
+│ US Dollar    │ USD    │ $            │ 1.0000 (Base)     │ Base Currency                        │
+│ Indian Rupee │ INR    │ ₹            │ 83.5000           │ [ 🔄 Update Rate ] [ ⚙️ Edit ]        │
+│ Euro         │ EUR    │ €            │ 0.9200            │ [ 🔄 Update Rate ] [ ⚙️ Edit ]        │
+│ British Pound│ GBP    │ £            │ 0.7800            │ [ 🔄 Update Rate ] [ ⚙️ Edit ]        │
+└──────────────┴────────┴──────────────┴───────────────────┴──────────────────────────────────────┘
+```
 
 ---
 
-## 10. Review Moderation
+## 9. Platform Order Oversight & Razorpay Reconciliation
 
-1. Navigate to `/admin/moderation/reviews` or `/admin/reviews`.
-2. Inspect customer reviews submitted across all products.
-3. Filter by **Flagged / Reported Reviews**.
-4. Action Options:
-   - **Approve**: Mark review as clean and published.
-   - **Delete Review**: Remove reviews containing abusive language, spam, or fake content.
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 💳 GLOBAL ORDER OVERSIGHT & PAYMENT RECONCILIATION                                               │
+├───────────┬──────────────────┬──────────────┬───────────────┬─────────────────┬─────────────────┤
+│ Order ID  │ Customer         │ Amount       │ Gateway ID    │ Payment Status  │ Order Status    │
+├───────────┼──────────────────┼──────────────┼───────────────┼─────────────────┼─────────────────┤
+│ #ORD-9842 │ Sarah Jenkins    │ $120.49      │ pay_N84210984 │ 🟢 Captured     │ 🚚 Shipped      │
+│ #ORD-9835 │ Michael Brown    │ $45.00       │ COD           │ 🟡 Pending COD  │ 🔵 Processing   │
+│ #ORD-9810 │ Emma Watson      │ $210.00      │ pay_N78410911 │ 🔴 Refunded     │ 🔴 Cancelled    │
+└───────────┴──────────────────┴──────────────┴───────────────┴─────────────────┴─────────────────┘
+```
+
+### Payment Reconciliation Procedure
+- Access global order records under `/admin/orders`.
+- Cross-reference Razorpay Gateway Payment IDs (`pay_...`) against database transaction logs.
+- Admin status overrides are enabled for dispute resolution and refund execution.
 
 ---
 
-## 11. Platform Security & Best Practices
+## 10. Content & Review Moderation
 
-> [!CAUTION]
-> Administrative actions such as deleting categories, disabling seller accounts, or overriding order statuses directly impact live business operations. Always verify records before executing permanent destructive commands.
-
-- Perform periodic reviews of active admin user accounts under `/admin/users`.
-- Ensure Razorpay API keys (`KeyId` and `KeySecret`) in `appsettings.json` are maintained securely and rotated periodically.
+- Access flagged reviews at `/admin/moderation/reviews`.
+- Inspect customer text and star ratings.
+- Approve valid feedback or delete spam, abusive, or fake review entries to preserve marketplace integrity.
 
 ---
 
-*Merxo E-Commerce Platform - System Administration Manual*
+*Merxo E-Commerce Platform — System Administrator Governance Guide*
