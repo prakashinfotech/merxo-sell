@@ -118,18 +118,33 @@ MerxoSell/
 └── README.md                 # Project Overview & Setup Instructions
 ```
 
----
-
 ## 🚀 Getting Started
 
-### Prerequisites
-- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+### 🐳 Option 1: Docker (Recommended)
+
+Run the entire application stack (MS SQL Server, .NET API, and Angular frontend) with a single command:
+
+```bash
+docker compose up -d --build
+```
+
+Access services at:
+- **Frontend**: `http://localhost:4200`
+- **Backend API**: `http://localhost:5000/api`
+- **SQL Server**: `localhost:1433` (`sa` / `YourStrongPass123!`)
+
+See [`DOCKER.md`](file:///f:/Yogesh/Temu-Clone/DOCKER.md) for full Docker configuration details.
+
+---
+
+### 💻 Option 2: Local Manual Setup
+
+#### Prerequisites
+- [.NET 8.0/9.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Node.js (v20+)](https://nodejs.org/) & `npm`
 - Microsoft SQL Server LocalDB (`(localdb)\MSSQLLocalDB`)
 
----
-
-### 1. Backend Setup
+#### 1. Backend Setup
 
 ```bash
 # Navigate to backend directory

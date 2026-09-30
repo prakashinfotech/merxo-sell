@@ -1,0 +1,8 @@
+.git
+.vs
+.vscode
+.claude
+automation
+docs
+project-root
+*.md

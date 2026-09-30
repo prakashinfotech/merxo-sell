@@ -211,6 +211,7 @@ using (var scope = app.Services.CreateScope())
     const string adminPassword = "Admin@123";
 
     var db        = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
     var superAdminRole = EnsureRole(db, AppRoles.SuperAdmin);
     var sellerRole     = EnsureRole(db, AppRoles.Seller);
     var buyerRole      = EnsureRole(db, AppRoles.Buyer);
