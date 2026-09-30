@@ -1,0 +1,62 @@
+name: merxosell
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: merxosell-db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrongPass123!
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YourStrongPass123!' -Q 'SELECT 1' -C || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: merxosell-backend
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=MerxoSellDb;User Id=sa;Password=YourStrongPass123!;TrustServerCertificate=True;
+      - Jwt__Secret=YOUR_SECURE_JWT_SECRET_KEY_MIN_32_CHARS_LONG
+      - Jwt__Issuer=MerxoSell
+      - Jwt__Audience=MerxoSellUsers
+      - Jwt__ExpiryMins=60
+      - AppBaseUrl=http://localhost:4200
+      - ApiBaseUrl=http://localhost:5000
+      - Razorpay__KeyId=YOUR_RAZORPAY_KEY_ID
+      - Razorpay__KeySecret=YOUR_RAZORPAY_KEY_SECRET
+      - Razorpay__AccountEmail=suthary980@gmail.com
+    ports:
+      - "5000:5000"
+    volumes:
+      - backend-uploads:/app/wwwroot/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: merxosell-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mssql-data:
+  backend-uploads:
